@@ -94,6 +94,7 @@ export default function Register() {
       setLoading(false);
       if (res.data.success) {
         setStep("verify");
+        setVerificationCode(res.data.code); // <-- Save the code for demo
         setError("");
       }
     } catch (err) {

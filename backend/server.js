@@ -16,7 +16,9 @@ const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASS = process.env.EMAIL_PASS;
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp-relay.brevo.com",
+  port: 587,
+  secure: false,
   auth: {
     user: EMAIL_USER,
     pass: EMAIL_PASS,
@@ -25,9 +27,9 @@ const transporter = nodemailer.createTransport({
 
 transporter.verify(function(error, success) {
   if (error) {
-    console.error("❌ Email transporter error:", error);
+    console.error("❌ Brevo transporter error:", error);
   } else {
-    console.log("✅ Email transporter is ready");
+    console.log("✅ Brevo transporter is ready");
   }
 });
 
@@ -43,17 +45,11 @@ app.post("/register", async (req, res) => {
   const passwordHash = bcrypt.hashSync(password, 10);
   pendingVerifications[email] = { code, username, passwordHash };
 
-  try {
-    await transporter.sendMail({
-      from: EMAIL_USER,
-      to: email,
-      subject: "Your Verification Code",
-      text: `Your verification code is: ${code}`,
-    });
-    res.json({ success: true, message: "Verification email sent" });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to send verification email" });
-  }
+  // Log the code to the console for demo
+  console.log(`🔑 Demo verification code for ${email}: ${code}`);
+
+  // DEMO: Return the code in the response instead of sending an email
+  res.json({ success: true, message: "Demo: Use this code to verify", code });
 });
 
 app.post("/verify", (req, res) => {
