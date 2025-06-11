@@ -1,29 +1,9 @@
 import { useState } from "react";
 import { setCookie } from "../utils/cookie";
-import { addUser, getUsers } from "../utils/yamldb";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-async function registerUser({ username, password, email }) {
-  try {
-    const res = await axios.post(`${backendUrl}/register`, { username, password, email });
-    return res.data;
-  } catch (err) {
-    if (err.response) return { error: err.response.data.error };
-    return { error: "Backend not connected" };
-  }
-}
-
-async function checkUserExists(username) {
-  try {
-    const res = await axios.get(`${backendUrl}/users`);
-    return res.data.some((u) => u.username === username);
-  } catch {
-    return false;
-  }
-}
 
 async function validateEmailWithMailboxLayer(email: string): Promise<{ isValid: boolean; error?: string }> {
   const apiKey = import.meta.env.VITE_MAILBOXLAYER_API_KEY;
@@ -36,7 +16,7 @@ async function validateEmailWithMailboxLayer(email: string): Promise<{ isValid: 
       return { isValid: true };
     }
     return { isValid: false, error: "Email address is not valid or does not exist." };
-  } catch (err) {
+  } catch {
     return { isValid: false, error: "Failed to verify email address." };
   }
 }
@@ -48,9 +28,7 @@ export default function Register() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [step, setStep] = useState<"form" | "verify">("form");
-  const [verificationCode, setVerificationCode] = useState("");
   const [enteredCode, setEnteredCode] = useState("");
-  const [showCode, setShowCode] = useState(false); // For demo only
   const [loading, setLoading] = useState(false);
   const [isHuman, setIsHuman] = useState(false);
   const navigate = useNavigate();
@@ -84,17 +62,15 @@ export default function Register() {
       return;
     }
 
-    if (await checkUserExists(username)) {
-      setError("Username already exists.");
-      return;
-    }
-
     try {
-      const res = await axios.post(`${backendUrl}/register`, { username, password, email });
+      const res = await axios.post(`${backendUrl}/register`, {
+        username: username.replace(/\s/g, ""), // Remove spaces
+        password,
+        email,
+      });
       setLoading(false);
       if (res.data.success) {
         setStep("verify");
-        setVerificationCode(res.data.code); // <-- Save the code for demo
         setError("");
       }
     } catch (err) {
@@ -109,18 +85,17 @@ export default function Register() {
     try {
       const res = await axios.post(`${backendUrl}/verify`, { email, code: enteredCode });
       if (res.data.success) {
-        setCookie("session", username);
+        setCookie("session", username.replace(/\s/g, "")); // Remove spaces before setting session
         navigate("/home");
+      } else {
+        setError("Verification failed.");
+        setTimeout(() => location.reload(), 1000); // Auto-reload after 1 second
       }
     } catch (err) {
-      setError(err.response?.data?.error || "Verification failed.");
+      setError("Verification failed.");
+      setTimeout(() => location.reload(), 1000); // Auto-reload after 1 second
     }
   }
-
-  const passwordMismatch =
-    confirm.length > 0 && password !== confirm
-      ? "Passwords do not match."
-      : "";
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black">
@@ -129,19 +104,12 @@ export default function Register() {
           <h1 className="text-xl font-bold text-white">Register</h1>
         </div>
         {step === "form" ? (
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-4"
-            autoComplete="off"
-          >
+          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
             <input
               className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
               placeholder="Username"
               value={username}
-              onChange={e => {
-                setUsername(e.target.value);
-                setError("");
-              }}
+              onChange={e => setUsername(e.target.value.replace(/\s/g, ""))} // Remove spaces on input change
               required
             />
             <input
@@ -149,10 +117,7 @@ export default function Register() {
               placeholder="Email"
               type="email"
               value={email}
-              onChange={e => {
-                setEmail(e.target.value);
-                setError("");
-              }}
+              onChange={e => setEmail(e.target.value)}
               required
             />
             <input
@@ -160,10 +125,7 @@ export default function Register() {
               placeholder="Password"
               type="password"
               value={password}
-              onChange={e => {
-                setPassword(e.target.value);
-                setError("");
-              }}
+              onChange={e => setPassword(e.target.value)}
               required
             />
             <input
@@ -171,10 +133,7 @@ export default function Register() {
               placeholder="Confirm Password"
               type="password"
               value={confirm}
-              onChange={e => {
-                setConfirm(e.target.value);
-                setError("");
-              }}
+              onChange={e => setConfirm(e.target.value)}
               required
             />
             <div className="flex items-center">
@@ -188,9 +147,6 @@ export default function Register() {
               />
               <label htmlFor="robot-check" className="text-white text-sm">I am not a robot</label>
             </div>
-            {passwordMismatch && (
-              <div className="text-yellow-400 text-xs">{passwordMismatch}</div>
-            )}
             {error && <div className="text-red-500">{error}</div>}
             <button
               className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition"
@@ -202,16 +158,7 @@ export default function Register() {
           </form>
         ) : (
           <form onSubmit={handleVerify} className="space-y-4">
-            <div className="text-white text-center mb-2">
-              Enter the 6-digit code sent to your email.
-            </div>
-            {/* For demo: show the code in the UI */}
-            {showCode && (
-              <div className="text-xs text-blue-400 text-center mb-2">
-                (Demo: Your code is{" "}
-                <span className="font-mono">{verificationCode}</span>)
-              </div>
-            )}
+            <div className="text-white text-center mb-2">Enter the 6-digit code sent to your email.</div>
             <input
               className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
               placeholder="Verification Code"
