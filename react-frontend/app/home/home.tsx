@@ -104,16 +104,16 @@ export default function Home() {
       <div className="flex flex-col items-center text-center">
         <p className="text-lg mb-4">Choose a subject:</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
-          <button className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg transition" onClick={() => navigateToSubject("Physics")}>
+          <button className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg transition" onClick={() => navigateToSubject("physics")}>
             Physics
           </button>
-          <button className="bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg transition" onClick={() => navigateToSubject("Chemistry")}>
+          <button className="bg-orange-600 hover:bg-orange-700 text-white py-3 px-6 rounded-lg transition" onClick={() => navigateToSubject("chemistry")}>
             Chemistry
           </button>
-          <button className="bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg transition" onClick={() => navigateToSubject("Higher Math")}>
+          <button className="bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg transition" onClick={() => navigateToSubject("highermath")}>
             Higher Math
           </button>
-          <button className="bg-orange-600 hover:bg-orange-700 text-white py-3 px-6 rounded-lg transition" onClick={() => navigateToSubject("Biology")}>
+          <button className="bg-green-600 hover:bg-green-700  text-white py-3 px-6 rounded-lg transition" onClick={() => navigateToSubject("biology")}>
             Biology
           </button>
         </div>

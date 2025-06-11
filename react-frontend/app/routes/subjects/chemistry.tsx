@@ -1,2 +1,2 @@
-import chemistrypage from "../subjects/chemistry";
-export default Chemistry;
+import chemistry from "../../subjects/chemistry";
+export default chemistry;

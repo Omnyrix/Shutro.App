@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaCog, FaSignOutAlt, FaHome, FaUser, FaArrowRight } from "react-icons/fa";
 import { getCookie, eraseCookie } from "../utils/cookie";
 
-export default function Physics() {
+export default function physics() {
   const navigate = useNavigate();
   const [username, setUsername] = useState<string | null>(null);
 

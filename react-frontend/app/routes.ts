@@ -7,7 +7,7 @@ export default [
   route("auth/register", "routes/auth/register.tsx"),
   route("home", "routes/home.tsx"),
   route("physics", "routes/subjects/physics.tsx"),
-  //route("chemistry", "routes/subjects/chemistry.ts"),
-  //route("higher-math", "routes/subjects/higher_math.ts"),
-  //route("biology", "routes/subjects/biology.ts"),
+  route("chemistry", "routes/subjects/chemistry.tsx"),
+  route("highermath", "routes/subjects/higher_math.tsx"),
+  route("biology", "routes/subjects/biology.tsx"),
 ] satisfies RouteConfig;

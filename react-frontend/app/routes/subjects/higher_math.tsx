@@ -1,2 +1,2 @@
-import  higher_mathpage from "../subjects/higher_math";
-export default  Higher_math;
+import  highermath from "../../subjects/higher_math";
+export default  highermath;
