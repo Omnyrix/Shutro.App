@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaCog, FaSignOutAlt, FaHome, FaUser, FaArrowRight } from "react-icons/fa";
 import { getCookie, eraseCookie } from "../utils/cookie";
 
-export default function Home() {
+export default function Physics() {
   const navigate = useNavigate();
   const [username, setUsername] = useState<string | null>(null);
 
@@ -24,7 +24,7 @@ export default function Home() {
     setUsername(session);
   }, [navigate]);
 
-  // Close desktop dropdown when clicking outside
+  // Desktop click outside detection
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (desktopDropdownRef.current && !desktopDropdownRef.current.contains(event.target as Node)) {
@@ -39,7 +39,7 @@ export default function Home() {
     };
   }, [desktopDropdownOpen]);
 
-  // Close mobile drawer when clicking outside
+  // Mobile drawer click outside detection
   useEffect(() => {
     function handleClickOutsideDrawer(event: MouseEvent) {
       if (mobileDrawerRef.current && !mobileDrawerRef.current.contains(event.target as Node)) {
@@ -59,8 +59,8 @@ export default function Home() {
     window.location.href = "/welcome";
   };
 
-  const navigateToSubject = (subject: string) => {
-    navigate(`/${subject.toLowerCase()}`);
+  const navigateToPaper = (paper: string) => {
+    navigate(`/physics/${paper}`);
   };
 
   // For mobile drawer, display name with first letter capitalized
@@ -68,7 +68,7 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen bg-gray-800 text-white p-6 flex flex-col items-center">
-      {/* Desktop Top Bar */}
+      {/* Desktop Top Bar (Profile Dropdown only) */}
       <div className="w-full hidden md:flex justify-end items-center mb-4">
         <div className="relative" ref={desktopDropdownRef}>
           <button
@@ -97,24 +97,22 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Main Centered Title */}
-      <h1 className="text-3xl font-bold text-center mb-6">Welcome {username} to Shutro.App</h1>
-
-      {/* Subject Section */}
+      {/* Main Centered Title and Content */}
+      <h1 className="text-3xl font-bold text-center mb-6">Physics Formulas</h1>
       <div className="flex flex-col items-center text-center">
-        <p className="text-lg mb-4">Choose a subject:</p>
+        <p className="text-lg mb-6">Choose a paper:</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
-          <button className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg transition" onClick={() => navigateToSubject("Physics")}>
-            Physics
+          <button
+            className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg transition"
+            onClick={() => navigateToPaper("1st-paper")}
+          >
+            1st Paper
           </button>
-          <button className="bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg transition" onClick={() => navigateToSubject("Chemistry")}>
-            Chemistry
-          </button>
-          <button className="bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg transition" onClick={() => navigateToSubject("Higher Math")}>
-            Higher Math
-          </button>
-          <button className="bg-orange-600 hover:bg-orange-700 text-white py-3 px-6 rounded-lg transition" onClick={() => navigateToSubject("Biology")}>
-            Biology
+          <button
+            className="bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded-lg transition"
+            onClick={() => navigateToPaper("2nd-paper")}
+          >
+            2nd Paper
           </button>
         </div>
       </div>
@@ -135,23 +133,16 @@ export default function Home() {
       {/* Mobile Profile Drawer */}
       {mobileDrawerOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-20 flex justify-end">
-          <div
-            ref={mobileDrawerRef}
-            className="w-64 bg-gray-900 h-full p-4 relative transform transition-transform duration-300"
-          >
-            {/* Close Drawer */}
+          <div ref={mobileDrawerRef} className="w-64 bg-gray-900 h-full p-4 relative transform transition-transform duration-300">
             <button className="absolute top-4 right-4 text-white" onClick={() => setMobileDrawerOpen(false)}>
               <FaArrowRight />
             </button>
             <div className="mt-8 flex flex-col items-center">
-              {/* Default Logo */}
+              {/* Default Logo in Drawer */}
               <FaUser className="text-6xl mb-2" />
               {/* Display Name */}
               <div className="mb-4 text-lg font-semibold">{displayName}</div>
-              <button
-                className="w-full text-left px-4 py-2 hover:bg-sky-700 transition"
-                onClick={handleLogout}
-              >
+              <button className="w-full text-left px-4 py-2 hover:bg-sky-700 transition" onClick={handleLogout}>
                 Logout
               </button>
             </div>

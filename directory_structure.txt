@@ -1,0 +1,34 @@
+app/
+├── app.css
+├── auth
+│   ├── login.tsx
+│   └── register.tsx
+├── home
+│   └── home.tsx
+├── root.tsx
+├── routes
+│   ├── auth
+│   │   ├── login.tsx
+│   │   └── register.tsx
+│   ├── home.tsx
+│   ├── index.tsx
+│   ├── subjects
+│   │   ├── biology.tsx
+│   │   ├── chemistry.tsx
+│   │   ├── higher_math.tsx
+│   │   └── physics.tsx
+│   └── welcome.tsx
+├── routes.ts
+├── subjects
+│   ├── biology.tsx
+│   ├── chemistry.tsx
+│   ├── higher_math.tsx
+│   └── physics.tsx
+├── users.yml
+├── utils
+│   ├── cookie.ts
+│   └── yamldb.ts
+└── welcome
+    └── welcome.tsx
+
+8 directories, 23 files

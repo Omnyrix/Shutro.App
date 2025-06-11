@@ -8,17 +8,14 @@ const https = require("https");
 
 const app = express();
 const USERS_DIR = path.join(__dirname, "users_info");
-const AVATAR_DIR = path.join(__dirname, "avatars");
 
 if (!fs.existsSync(USERS_DIR)) fs.mkdirSync(USERS_DIR);
-if (!fs.existsSync(AVATAR_DIR)) fs.mkdirSync(AVATAR_DIR);
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
-app.use("/avatars", express.static(AVATAR_DIR)); // Serve avatars
 
-// Get user data (username and avatar)
+// Get user data (username only, no avatar)
 app.get("/user/:email", (req, res) => {
   const email = req.params.email.toLowerCase();
   const userFile = path.join(USERS_DIR, `${email}.yml`);
@@ -26,19 +23,10 @@ app.get("/user/:email", (req, res) => {
 
   try {
     const userData = yaml.load(fs.readFileSync(userFile, "utf8"));
-    res.json({ username: userData.username, avatar: `/avatars/${userData.username}.png` });
+    res.json({ username: userData.username });
   } catch {
     res.status(500).json({ error: "Failed to read user data" });
   }
-});
-
-// Serve avatar image
-app.get("/user-icon/:username.png", (req, res) => {
-  const username = req.params.username.toLowerCase();
-  const avatarPath = path.join(AVATAR_DIR, `${username}.png`);
-
-  if (!fs.existsSync(avatarPath)) return res.status(404).send("Avatar not found");
-  res.sendFile(avatarPath);
 });
 
 // Register user
@@ -69,7 +57,7 @@ app.post("/register", async (req, res) => {
   res.json({ success: true, message: "Verification code sent", code });
 });
 
-// Verify user & download avatar
+// Verify user (no avatar download)
 app.post("/verify", async (req, res) => {
   const { email, code } = req.body;
   const userFile = path.join(USERS_DIR, `${email}.yml`);
@@ -83,28 +71,16 @@ app.post("/verify", async (req, res) => {
       return res.status(400).json({ error: "Invalid verification code" });
     }
 
-    // Download avatar
-    const avatarPath = path.join(AVATAR_DIR, `${tempUser.username}.png`);
-    https.get("https://picsum.photos/128/128", (response) => {
-      const avatarUrl = response.headers.location;
+    const passwordHash = bcrypt.hashSync(tempUser.password, 10);
+    const finalData = {
+      email: tempUser.email,
+      username: tempUser.username.toLowerCase(),
+      password: passwordHash,
+      verified: true,
+    };
 
-      https.get(avatarUrl, (imageRes) => {
-        const fileStream = fs.createWriteStream(avatarPath);
-        imageRes.pipe(fileStream);
-        fileStream.on("finish", () => {
-          const passwordHash = bcrypt.hashSync(tempUser.password, 10);
-          const finalData = {
-            email: tempUser.email,
-            username: tempUser.username.toLowerCase(),
-            password: passwordHash,
-            verified: true,
-          };
-          fs.writeFileSync(userFile, yaml.dump(finalData), "utf8");
-          console.log(`✅ Avatar saved for ${email} at /avatars/${tempUser.username}.png`);
-          res.json({ success: true });
-        });
-      });
-    });
+    fs.writeFileSync(userFile, yaml.dump(finalData), "utf8");
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: "Verification failed" });
   }

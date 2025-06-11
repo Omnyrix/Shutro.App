@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { setCookie } from "../utils/cookie";
-import { validateUser } from "../utils/yamldb";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -11,7 +10,9 @@ async function loginUser({ username, password }) {
     const res = await axios.post(`${backendUrl}/login`, { username, password });
     return res.data;
   } catch (err) {
-    if (err.response) return { error: err.response.data.error };
+    if (err.response) {
+      return { error: "Incorrect username or password." }; // Unified error message
+    }
     return { error: "Backend not connected" };
   }
 }
@@ -25,15 +26,20 @@ export default function Login() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
+
     if (!isHuman) {
       setError("Please confirm you are not a robot.");
       return;
     }
+
     const result = await loginUser({ username, password });
+
     if (result.error) {
       setError(result.error);
       return;
     }
+
     setCookie("session", username);
     navigate("/home");
   }
@@ -71,7 +77,7 @@ export default function Login() {
             />
             <label htmlFor="robot-check" className="text-white text-sm">I am not a robot</label>
           </div>
-          {error && <div className="text-red-500">{error}</div>}
+          {error && <div className="text-red-500 text-center">{error}</div>}
           <button className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition" type="submit">
             Login
           </button>
