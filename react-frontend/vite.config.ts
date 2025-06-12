@@ -5,4 +5,8 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
-});
+  server: {
+    host: true,              // bind to all IPs
+    allowedHosts: ['3314-103-111-120-249.ngrok-free.app', 'localhost:3001'], // allow ngrok and localhost
+}});
+
