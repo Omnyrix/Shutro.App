@@ -7,27 +7,28 @@ export default function Loading() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // Check for session cookie before loading
     const session = getCookie("session");
-    if (session) {
-      navigate("/home"); // Redirect to Home if logged in
-      return;
-    } else {
-      navigate("/auth/login"); // Redirect to Login if no session
-      return;
-    }
 
     // Simulated loading animation
     const interval = setInterval(() => {
       setProgress((prev) => Math.min(prev + (100 / 10), 100));
     }, 50);
 
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       clearInterval(interval);
+      if (session) {
+        navigate("/home"); // Redirect to Home if logged in
+      } else {
+        navigate("/auth/login"); // Redirect to Login if no session
+      }
     }, 500); // Ensures progress bar completes within 0.5s
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
   }, [navigate]);
+
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-gray-800 text-white z-50 transition-opacity duration-500">

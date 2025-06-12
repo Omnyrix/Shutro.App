@@ -1,9 +1,12 @@
+require("dotenv").config();
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const yaml = require("js-yaml");
 const bcrypt = require("bcrypt");
 const cors = require("cors");
+const axios = require("axios");
+const nodemailer = require("nodemailer");
 
 const app = express();
 const USERS_DIR = path.join(__dirname, "users_info");
@@ -14,6 +17,68 @@ if (!fs.existsSync(USERS_DIR)) fs.mkdirSync(USERS_DIR);
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
+
+// Logging middleware: Log every request to the console.
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
+// Create Nodemailer transporter for Gmail
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.GOOGLE_EMAIL_ADDRESS,
+    pass: process.env.GOOGLE_EMAIL_PASSWORD,
+  },
+});
+
+/**
+ * Helper function to verify the Turnstile token.
+ * Returns the response from Cloudflare.
+ */
+async function verifyTurnstileToken(token, remoteip) {
+  const secret = process.env.TURNSTILE_SECRET;
+  if (!secret) {
+    throw new Error("TURNSTILE_SECRET environment variable is not set.");
+  }
+  const verificationData = new URLSearchParams();
+  verificationData.append("secret", secret);
+  verificationData.append("response", token);
+  verificationData.append("remoteip", remoteip);
+
+  const cfRes = await axios.post(
+    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+    verificationData.toString(),
+    { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+  );
+  return cfRes.data;
+}
+
+// New route for Turnstile verification, used independently
+app.post("/verify-turnstile", async (req, res) => {
+  const { turnstileToken } = req.body;
+  if (!turnstileToken) {
+    return res.status(400).json({ error: "Missing turnstile token" });
+  }
+  try {
+    const result = await verifyTurnstileToken(turnstileToken, req.ip);
+    if (!result.success) {
+      console.error("Turnstile verification failed:", result);
+      return res.status(400).json({ error: "Turnstile verification failed", details: result });
+    }
+    res.json({ success: true, details: result });
+  } catch (err) {
+    console.error(
+      "Turnstile verification error:",
+      err.response ? err.response.data : err.message
+    );
+    return res.status(500).json({
+      error: "Turnstile verification error",
+      details: err.response ? err.response.data : err.message,
+    });
+  }
+});
 
 // GET user data (return username and email)
 app.get("/user/:identifier", (req, res) => {
@@ -36,7 +101,6 @@ app.get("/user/:identifier", (req, res) => {
           break;
         }
       } catch (err) {
-        // If error reading a file, skip to the next.
         continue;
       }
     }
@@ -44,10 +108,8 @@ app.get("/user/:identifier", (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
   }
-
   try {
     const userData = yaml.load(fs.readFileSync(userFile, "utf8"));
-    // Return the username and email (fallback to identifier if email is missing)
     return res.json({ username: userData.username, email: userData.email || identifier });
   } catch (e) {
     return res.status(500).json({ error: "Failed to read user data" });
@@ -56,10 +118,29 @@ app.get("/user/:identifier", (req, res) => {
 
 // Register user endpoint
 app.post("/register", async (req, res) => {
-  const { email, username, password } = req.body;
+  const { email, username, password, turnstileToken } = req.body;
   if (!email || !username || !password) {
     return res.status(400).json({ error: "Missing fields" });
   }
+  if (!turnstileToken) {
+    return res.status(400).json({ error: "Missing turnstile token" });
+  }
+  
+  // Verify Turnstile token using our helper function.
+  try {
+    const verificationResult = await verifyTurnstileToken(turnstileToken, req.ip);
+    if (!verificationResult.success) {
+      console.error("Turnstile verification failed:", verificationResult);
+      return res.status(400).json({ error: "Turnstile verification failed" });
+    }
+  } catch (err) {
+    console.error(
+      "Turnstile verification error:",
+      err.response ? err.response.data : err.message
+    );
+    return res.status(500).json({ error: "Turnstile verification error" });
+  }
+
   const lowerEmail = email.toLowerCase();
   const lowerUsername = username.toLowerCase();
   const userFile = path.join(USERS_DIR, `${lowerEmail}.yml`);
@@ -81,10 +162,34 @@ app.post("/register", async (req, res) => {
 
   // Generate verification code and store registration timestamp
   const code = Math.floor(100000 + Math.random() * 900000).toString();
-  const createdTime = Date.now(); // Store time of registration
+  const createdTime = Date.now();
 
-  fs.writeFileSync(userFile, yaml.dump({ email: lowerEmail, username: lowerUsername, password, code, createdTime }), "utf8");
+  // Save the temporary registration data
+  fs.writeFileSync(
+    userFile,
+    yaml.dump({ email: lowerEmail, username: lowerUsername, password, code, createdTime }),
+    "utf8"
+  );
   console.log(`🔑 Demo verification code for ${lowerEmail}: ${code}`);
+
+  // Send verification email using Gmail SMTP
+  const mailOptions = {
+    from: process.env.GOOGLE_EMAIL_ADDRESS,
+    to: lowerEmail,
+    subject: "Your Verification Code",
+    text: `Hello ${username},\n\nYour verification code is: ${code}\n\nThank you for registering!`,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error("Error sending verification email:", error);
+      // Optionally, delete the user file if required.
+      // fs.unlinkSync(userFile);
+    } else {
+      console.log("Verification email sent:", info.response);
+    }
+  });
+
   res.json({ success: true, message: "Verification code sent", code });
 });
 
@@ -98,23 +203,18 @@ app.post("/verify", async (req, res) => {
   }
   try {
     const tempUser = yaml.load(fs.readFileSync(userFile, "utf8"));
-
-    // Removed time check; immediately delete the file if code doesn't match.
     if (tempUser.code !== code) {
       fs.unlinkSync(userFile);
       return res.status(400).json({ error: "Invalid verification code" });
     }
-
-    // Hash the password and finalize account
     const passwordHash = bcrypt.hashSync(tempUser.password, 10);
     const finalData = {
       email: tempUser.email,
       username: tempUser.username.toLowerCase(),
       password: passwordHash,
       verified: true,
-      createdTime: tempUser.createdTime
+      createdTime: tempUser.createdTime,
     };
-
     fs.writeFileSync(userFile, yaml.dump(finalData), "utf8");
     res.json({ success: true });
   } catch (e) {

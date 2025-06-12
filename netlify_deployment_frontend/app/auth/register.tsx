@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { setCookie, eraseCookie } from "../utils/cookie";
+import { setCookie } from "../utils/cookie";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import icons for show/hide password toggle
-import Loading from "./auth_reg_loading"; // Import loading component
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // for show/hide password toggle
+import Loading from "./auth_reg_loading"; // loading component
+import Turnstile from "../components/Turnstile"; // Cloudflare Turnstile component
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -29,13 +30,22 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
+  // "form" shows the registration form; "verify" shows the verification code entry form.
   const [step, setStep] = useState<"form" | "verify">("form");
   const [enteredCode, setEnteredCode] = useState("");
-  const [loading, setLoading] = useState(true); // Loading state
-  const [isHuman, setIsHuman] = useState(false);
+  const [loading, setLoading] = useState(true);
+  // Instead of a boolean flag for human verification, we store the actual Turnstile token.
+  const [turnstileToken, setTurnstileToken] = useState("");
+  // Use a key state to force re-mounting the Turnstile widget when needed.
+  const [turnstileKey, setTurnstileKey] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
+
+  // Debug: Log whenever the Turnstile token updates.
+  useEffect(() => {
+    console.log("Turnstile token updated:", turnstileToken);
+  }, [turnstileToken]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -58,34 +68,58 @@ export default function Register() {
       setLoading(false);
       return;
     }
-    if (!isHuman) {
+    if (!turnstileToken) {
       setError("Please confirm you are not a robot.");
       setLoading(false);
       return;
     }
 
-    const { isValid, error: emailError } = await validateEmailWithMailboxLayer(email);
-    setLoading(false);
-
-    if (!isValid) {
-      setError(emailError || "Invalid email address.");
+    // First, pre-verify the Turnstile token.
+    try {
+      const verifyResponse = await axios.post(`${backendUrl}/verify-turnstile`, { turnstileToken });
+      if (!verifyResponse.data.success) {
+        const errors = verifyResponse.data.details?.["error-codes"];
+        if (errors && errors.includes("timeout-or-duplicate")) {
+          setError("Your challenge token has expired or was already used. Please complete the challenge again.");
+          setTurnstileToken("");
+          setTurnstileKey(prev => prev + 1); // force re-mount of Turnstile widget
+        } else {
+          setError("Turnstile verification failed. Please try again.");
+        }
+        setLoading(false);
+        return;
+      }
+    } catch (err: any) {
+      setError("Turnstile verification error. Please try again.");
+      setLoading(false);
       return;
     }
 
+    // Validate the email.
+    const { isValid, error: emailError } = await validateEmailWithMailboxLayer(email);
+    if (!isValid) {
+      setError(emailError || "Invalid email address.");
+      setLoading(false);
+      return;
+    }
+
+    // Now, send the registration request.
     try {
       const res = await axios.post(`${backendUrl}/register`, {
-        username: username.replace(/\s/g, ""), // Remove spaces
+        username: username.replace(/\s/g, ""),
         password,
         email,
+        turnstileToken, // Send the verified token.
       });
       setLoading(false);
       if (res.data.success) {
+        // Instead of immediate login, show the verification form.
         setStep("verify");
         setError("");
       }
     } catch (err: any) {
       setLoading(false);
-      setError(err.response?.data?.error || "Backend not connected");
+      setError(err.response?.data?.error || "Sorry, servers down. Please try again later.");
     }
   }
 
@@ -93,28 +127,26 @@ export default function Register() {
     e.preventDefault();
     setError("");
     try {
-      // Changed email to email.toLowerCase() here to avoid bad request from backend.
+      // Post the entered 6-digit code along with the email.
       const res = await axios.post(`${backendUrl}/verify`, { email: email.toLowerCase(), code: enteredCode });
       if (res.data.success) {
-        // Store email (lowercased) as session cookie
+        // On successful code verification, store the session cookie and navigate to home.
         setCookie("session", email.toLowerCase());
         navigate("/home");
       } else {
-        setError("Verification failed.");
-        setTimeout(() => location.reload(), 1000); // Auto-reload after 1 second
+        setError("Verification failed. Please check your code and try again.");
       }
-    } catch (err) {
-      setError("Verification failed.");
-      setTimeout(() => location.reload(), 1000); // Auto-reload after 1 second
+    } catch (err: any) {
+      setError("Verification failed. Please check your code and try again.");
     }
   }
 
-  // Live check: if confirm field is not empty and the passwords do not match.
+  // Live check: if the confirm field is not empty and passwords do not match.
   const showMismatch = confirm.length > 0 && password !== confirm;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-black">
-      {loading && <Loading />} {/* Show loading screen */}
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-800">
+      {loading && <Loading />}
       {!loading && (
         <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80">
           <div className="mb-6 text-center">
@@ -126,7 +158,7 @@ export default function Register() {
                 className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
                 placeholder="Username"
                 value={username}
-                onChange={e => setUsername(e.target.value.replace(/\s/g, ""))}
+                onChange={(e) => setUsername(e.target.value.replace(/\s/g, ""))}
                 required
               />
               <input
@@ -134,7 +166,7 @@ export default function Register() {
                 placeholder="Email"
                 type="email"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
               <div className="relative">
@@ -143,13 +175,13 @@ export default function Register() {
                   placeholder="Password"
                   type={showPassword ? "text" : "password"}
                   value={password}
-                  onChange={e => setPassword(e.target.value)}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 opacity-70 hover:opacity-100"
                   onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 opacity-70 hover:opacity-100"
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
@@ -160,13 +192,13 @@ export default function Register() {
                   placeholder="Confirm Password"
                   type={showConfirm ? "text" : "password"}
                   value={confirm}
-                  onChange={e => setConfirm(e.target.value)}
+                  onChange={(e) => setConfirm(e.target.value)}
                   required
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 opacity-70 hover:opacity-100"
                   onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 opacity-70 hover:opacity-100"
                 >
                   {showConfirm ? <FaEyeSlash /> : <FaEye />}
                 </button>
@@ -177,17 +209,16 @@ export default function Register() {
                 </div>
               )}
               <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="robot-check"
-                  checked={isHuman}
-                  onChange={e => setIsHuman(e.target.checked)}
-                  className="mr-2"
-                  required
+                <Turnstile
+                  key={turnstileKey}
+                  id="turnstile-widget"
+                  sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
+                  onVerify={(token) => {
+                    console.log("Turnstile onVerify callback fired. Token:", token);
+                    setTurnstileToken(token);
+                  }}
+                  scale={0.8}
                 />
-                <label htmlFor="robot-check" className="text-white text-sm">
-                  I am not a robot
-                </label>
               </div>
               {error && <div className="text-red-500">{error}</div>}
               <button
@@ -195,29 +226,32 @@ export default function Register() {
                 type="submit"
                 disabled={loading || (confirm.length > 0 && password !== confirm)}
               >
-                {loading ? "Checking Email..." : "Register"}
+                {loading ? "Processing..." : "Register"}
               </button>
             </form>
           ) : (
             <form onSubmit={handleVerify} className="space-y-4">
               <div className="text-white text-center mb-2">
-                Enter the 6-digit code sent to your email.
+                A verification code has been sent to your email. Please enter the 6-digit code below:
               </div>
               <input
                 className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
                 placeholder="Verification Code"
                 value={enteredCode}
-                onChange={e => setEnteredCode(e.target.value)}
+                onChange={(e) => setEnteredCode(e.target.value)}
                 required
               />
               {error && <div className="text-red-500">{error}</div>}
-              <button className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition" type="submit">
+              <button
+                className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition"
+                type="submit"
+              >
                 Verify & Complete Registration
               </button>
             </form>
           )}
           <div className="mt-4 text-center">
-            <a href="/auth/login" className="text-blue-400 underline">
+            <a href="/auth/login" className="text-blue-400 underline font-bold text-sm">
               Already have an account?
             </a>
           </div>

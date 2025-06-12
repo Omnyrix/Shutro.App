@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import icons for show/hide password toggle
 import Loading from "./auth_loading"; // Import loading component
+import Turnstile from "../components/Turnstile"; // Import Cloudflare Turnstile component
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -18,16 +19,16 @@ async function loginUser({ email, password }: { email: string; password: string 
     if (err.response) {
       return { error: err.response.data.error || "Incorrect email or password." };
     }
-    return { error: "Backend not connected." };
+    return { error: "Sorry servers down, please try again later." };
   }
 }
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
   const [showPassword, setShowPassword] = useState(false); // Toggle password visibility
   const [error, setError] = useState("");
-  const [isHuman, setIsHuman] = useState(false);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -41,8 +42,20 @@ export default function Login() {
     e.preventDefault();
     setError("");
 
-    if (!isHuman) {
+    if (!turnstileToken) {
       setError("Please confirm you are not a robot.");
+      return;
+    }
+
+    // Verify Turnstile token using the new /verify-turnstile endpoint.
+    try {
+      const verRes = await axios.post(`${backendUrl}/verify-turnstile`, { turnstileToken });
+      if (!verRes.data.success) {
+        setError("Turnstile verification failed. Please try again.");
+        return;
+      }
+    } catch (err: any) {
+      setError("Turnstile verification error. Please try again.");
       return;
     }
 
@@ -59,7 +72,7 @@ export default function Login() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-black">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-800">
       {loading && <Loading />} {/* Show loading screen */}
 
       {!loading && (
@@ -94,17 +107,14 @@ export default function Login() {
               </button>
             </div>
             <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="robot-check"
-                checked={isHuman}
-                onChange={e => setIsHuman(e.target.checked)}
-                className="mr-2"
-                required
+              <Turnstile
+                sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
+                onVerify={(token) => {
+                  console.log("Turnstile onVerify callback fired. Token:", token);
+                  setTurnstileToken(token);
+                }}
+                scale={0.8}
               />
-              <label htmlFor="robot-check" className="text-white text-sm">
-                I am not a robot
-              </label>
             </div>
 
             {error && <div className="text-red-500 text-center">{error}</div>}
@@ -114,7 +124,9 @@ export default function Login() {
             </button>
           </form>
           <div className="mt-4 text-center">
-            <a href="/auth/register" className="text-blue-400 underline">Create an account</a>
+            <a href="/auth/register" className="text-sm text-blue-400 underline font-bold items-center">
+              Join us today
+            </a>
           </div>
         </div>
       )}

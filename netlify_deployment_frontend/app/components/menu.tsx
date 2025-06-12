@@ -20,7 +20,8 @@ export default function ProfileMenu() {
     // Fetch user data from backend using email stored in session cookie
     axios.get(`${backendUrl}/user/${session}`)
       .then(res => {
-        setUsername(res.data.username);
+        const rawUsername = res.data.username;
+        setUsername(rawUsername.charAt(0).toUpperCase() + rawUsername.slice(1));
       })
       .catch(() => {
         setUsername("User"); // Fallback in case of error
