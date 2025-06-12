@@ -4,6 +4,9 @@ import { FaCog, FaHome, FaArrowRight } from "react-icons/fa";
 import { getCookie, eraseCookie } from "../utils/cookie";
 import Loading from "../components/loading"; // Import loading screen
 import ProfileMenu from "../components/menu"; // Import ProfileMenu component
+import axios from "axios"; // Import axios for API calls
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL; // Use environment variable for backend URL
 
 export default function Home() {
   const navigate = useNavigate();
@@ -16,11 +19,20 @@ export default function Home() {
       navigate("/welcome");
       return;
     }
-    setUsername(session);
 
-    setTimeout(() => {
-      setLoading(false); // Hide loading after full render
-    }, 500); // Adjust delay if needed
+    // Fetch user data from backend using email stored in session cookie
+    axios.get(`${backendUrl}/user/${session}`)
+      .then(res => {
+        setUsername(res.data.username);
+      })
+      .catch(() => {
+        setUsername("User"); // Fallback in case of error
+      })
+      .finally(() => {
+        setTimeout(() => {
+          setLoading(false); // Hide loading after full render
+        }, 500);
+      });
   }, [navigate]);
 
   const navigateToSubject = (subject: string) => {

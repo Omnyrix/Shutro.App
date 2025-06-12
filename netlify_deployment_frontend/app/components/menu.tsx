@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { FaUser, FaHome, FaCog } from "react-icons/fa";
 import { eraseCookie, getCookie } from "../utils/cookie";
+import axios from "axios"; // Import axios for API calls
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL; // Use environment variable for backend URL
 
 export default function ProfileMenu() {
   const [username, setUsername] = useState<string | null>(null);
@@ -8,7 +11,20 @@ export default function ProfileMenu() {
   const desktopDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setUsername(getCookie("session"));
+    const session = getCookie("session");
+    if (!session) {
+      setUsername("User"); // Fallback if session is missing
+      return;
+    }
+
+    // Fetch user data from backend using email stored in session cookie
+    axios.get(`${backendUrl}/user/${session}`)
+      .then(res => {
+        setUsername(res.data.username);
+      })
+      .catch(() => {
+        setUsername("User"); // Fallback in case of error
+      });
 
     function handleClickOutside(event: MouseEvent) {
       if (desktopDropdownRef.current && !desktopDropdownRef.current.contains(event.target as Node)) {

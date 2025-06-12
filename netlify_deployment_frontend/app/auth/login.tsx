@@ -1,34 +1,39 @@
-import { useState, useEffect } from "react"; // Added `useEffect` import
+import { useState, useEffect } from "react";
 import { setCookie } from "../utils/cookie";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import icons for show/hide password toggle
 import Loading from "./auth_loading"; // Import loading component
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-async function loginUser({ username, password }) {
+async function loginUser({ email, password }: { email: string; password: string }) {
   try {
-    const res = await axios.post(`${backendUrl}/login`, { username, password });
+    const res = await axios.post(`${backendUrl}/login`, {
+      email: email.toLowerCase(),
+      password,
+    });
     return res.data;
-  } catch (err) {
+  } catch (err: any) {
     if (err.response) {
-      return { error: "Incorrect username or password." }; // Unified error message
+      return { error: err.response.data.error || "Incorrect email or password." };
     }
-    return { error: "Backend not connected" };
+    return { error: "Backend not connected." };
   }
 }
 
 export default function Login() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // Toggle password visibility
   const [error, setError] = useState("");
   const [isHuman, setIsHuman] = useState(false);
-  const [loading, setLoading] = useState(true); // Loading state
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     setTimeout(() => {
-      setLoading(false); // Hide loading after 0.5s
+      setLoading(false);
     }, 500);
   }, []);
 
@@ -41,14 +46,15 @@ export default function Login() {
       return;
     }
 
-    const result = await loginUser({ username, password });
+    const sanitizedEmail = email.toLowerCase();
+    const result = await loginUser({ email: sanitizedEmail, password });
 
     if (result.error) {
       setError(result.error);
       return;
     }
 
-    setCookie("session", username);
+    setCookie("session", sanitizedEmail);
     navigate("/home");
   }
 
@@ -64,19 +70,29 @@ export default function Login() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
               className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
-              placeholder="Username"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
+              placeholder="Email"
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
               required
             />
-            <input
-              className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
-              placeholder="Password"
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-            />
+            <div className="relative w-full">
+              <input
+                className="w-full border border-gray-700 bg-gray-800 text-white p-2 pr-12 rounded focus:outline-none focus:border-blue-500"
+                placeholder="Password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 opacity-70 hover:opacity-100"
+                onClick={() => setShowPassword(prev => !prev)}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
             <div className="flex items-center">
               <input
                 type="checkbox"
@@ -86,9 +102,13 @@ export default function Login() {
                 className="mr-2"
                 required
               />
-              <label htmlFor="robot-check" className="text-white text-sm">I am not a robot</label>
+              <label htmlFor="robot-check" className="text-white text-sm">
+                I am not a robot
+              </label>
             </div>
+
             {error && <div className="text-red-500 text-center">{error}</div>}
+
             <button className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition" type="submit">
               Login
             </button>

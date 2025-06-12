@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { setCookie } from "../utils/cookie";
+import { setCookie, eraseCookie } from "../utils/cookie";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import icons for show/hide password toggle
 import Loading from "./auth_reg_loading"; // Import loading component
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -32,6 +33,8 @@ export default function Register() {
   const [enteredCode, setEnteredCode] = useState("");
   const [loading, setLoading] = useState(true); // Loading state
   const [isHuman, setIsHuman] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -80,7 +83,7 @@ export default function Register() {
         setStep("verify");
         setError("");
       }
-    } catch (err) {
+    } catch (err: any) {
       setLoading(false);
       setError(err.response?.data?.error || "Backend not connected");
     }
@@ -90,7 +93,8 @@ export default function Register() {
     e.preventDefault();
     setError("");
     try {
-      const res = await axios.post(`${backendUrl}/verify`, { email, code: enteredCode });
+      // Changed email to email.toLowerCase() here to avoid bad request from backend.
+      const res = await axios.post(`${backendUrl}/verify`, { email: email.toLowerCase(), code: enteredCode });
       if (res.data.success) {
         // Store email (lowercased) as session cookie
         setCookie("session", email.toLowerCase());
@@ -104,6 +108,9 @@ export default function Register() {
       setTimeout(() => location.reload(), 1000); // Auto-reload after 1 second
     }
   }
+
+  // Live check: if confirm field is not empty and the passwords do not match.
+  const showMismatch = confirm.length > 0 && password !== confirm;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black">
@@ -130,22 +137,45 @@ export default function Register() {
                 onChange={e => setEmail(e.target.value)}
                 required
               />
-              <input
-                className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
-                placeholder="Password"
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-              />
-              <input
-                className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
-                placeholder="Confirm Password"
-                type="password"
-                value={confirm}
-                onChange={e => setConfirm(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <input
+                  className="w-full border border-gray-700 bg-gray-800 text-white p-2 pr-10 rounded focus:outline-none focus:border-blue-500"
+                  placeholder="Password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 opacity-70 hover:opacity-100"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+              <div className="relative">
+                <input
+                  className="w-full border border-gray-700 bg-gray-800 text-white p-2 pr-10 rounded focus:outline-none focus:border-blue-500"
+                  placeholder="Confirm Password"
+                  type={showConfirm ? "text" : "password"}
+                  value={confirm}
+                  onChange={e => setConfirm(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 opacity-70 hover:opacity-100"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                >
+                  {showConfirm ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+              {showMismatch && (
+                <div className="text-yellow-500 text-center text-sm">
+                  Passwords do not match.
+                </div>
+              )}
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -155,20 +185,24 @@ export default function Register() {
                   className="mr-2"
                   required
                 />
-                <label htmlFor="robot-check" className="text-white text-sm">I am not a robot</label>
+                <label htmlFor="robot-check" className="text-white text-sm">
+                  I am not a robot
+                </label>
               </div>
               {error && <div className="text-red-500">{error}</div>}
               <button
                 className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition"
                 type="submit"
-                disabled={loading}
+                disabled={loading || (confirm.length > 0 && password !== confirm)}
               >
                 {loading ? "Checking Email..." : "Register"}
               </button>
             </form>
           ) : (
             <form onSubmit={handleVerify} className="space-y-4">
-              <div className="text-white text-center mb-2">Enter the 6-digit code sent to your email.</div>
+              <div className="text-white text-center mb-2">
+                Enter the 6-digit code sent to your email.
+              </div>
               <input
                 className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
                 placeholder="Verification Code"
@@ -183,7 +217,9 @@ export default function Register() {
             </form>
           )}
           <div className="mt-4 text-center">
-            <a href="/auth/login" className="text-blue-400 underline">Already have an account?</a>
+            <a href="/auth/login" className="text-blue-400 underline">
+              Already have an account?
+            </a>
           </div>
         </div>
       )}
