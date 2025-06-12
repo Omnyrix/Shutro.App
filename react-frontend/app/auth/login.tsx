@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Added `useEffect` import
 import { setCookie } from "../utils/cookie";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Loading from "./auth_loading"; // Import loading component
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -22,7 +23,14 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isHuman, setIsHuman] = useState(false);
+  const [loading, setLoading] = useState(true); // Loading state
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    setTimeout(() => {
+      setLoading(false); // Hide loading after 0.5s
+    }, 500);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -46,46 +54,50 @@ export default function Login() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black">
-      <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80">
-        <div className="mb-6 text-center">
-          <h1 className="text-xl font-bold text-white">Login</h1>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
-            placeholder="Username"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-            required
-          />
-          <input
-            className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
-            placeholder="Password"
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-          />
-          <div className="flex items-center">
+      {loading && <Loading />} {/* Show loading screen */}
+
+      {!loading && (
+        <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80">
+          <div className="mb-6 text-center">
+            <h1 className="text-xl font-bold text-white">Login</h1>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
             <input
-              type="checkbox"
-              id="robot-check"
-              checked={isHuman}
-              onChange={e => setIsHuman(e.target.checked)}
-              className="mr-2"
+              className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
+              placeholder="Username"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
               required
             />
-            <label htmlFor="robot-check" className="text-white text-sm">I am not a robot</label>
+            <input
+              className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
+              placeholder="Password"
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+            />
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="robot-check"
+                checked={isHuman}
+                onChange={e => setIsHuman(e.target.checked)}
+                className="mr-2"
+                required
+              />
+              <label htmlFor="robot-check" className="text-white text-sm">I am not a robot</label>
+            </div>
+            {error && <div className="text-red-500 text-center">{error}</div>}
+            <button className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition" type="submit">
+              Login
+            </button>
+          </form>
+          <div className="mt-4 text-center">
+            <a href="/auth/register" className="text-blue-400 underline">Create an account</a>
           </div>
-          {error && <div className="text-red-500 text-center">{error}</div>}
-          <button className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition" type="submit">
-            Login
-          </button>
-        </form>
-        <div className="mt-4 text-center">
-          <a href="/auth/register" className="text-blue-400 underline">Create an account</a>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -10,4 +10,6 @@ export default [
   route("chemistry", "routes/subjects/chemistry.tsx"),
   route("highermath", "routes/subjects/higher_math.tsx"),
   route("biology", "routes/subjects/biology.tsx"),
+  route("profile", "routes/profile.tsx"), // Added profile route
+  route("*", "routes/404.tsx"),
 ] satisfies RouteConfig;

@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { setCookie } from "../utils/cookie";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Loading from "./auth_loading"; // Import loading component
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -29,9 +30,15 @@ export default function Register() {
   const [error, setError] = useState("");
   const [step, setStep] = useState<"form" | "verify">("form");
   const [enteredCode, setEnteredCode] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Loading state
   const [isHuman, setIsHuman] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setTimeout(() => {
+      setLoading(false); // Hide loading after 0.5s
+    }, 500);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -99,83 +106,87 @@ export default function Register() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black">
-      <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80">
-        <div className="mb-6 text-center">
-          <h1 className="text-xl font-bold text-white">Register</h1>
-        </div>
-        {step === "form" ? (
-          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
-            <input
-              className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
-              placeholder="Username"
-              value={username}
-              onChange={e => setUsername(e.target.value.replace(/\s/g, ""))} // Remove spaces on input change
-              required
-            />
-            <input
-              className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
-              placeholder="Email"
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-            />
-            <input
-              className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
-              placeholder="Password"
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-            />
-            <input
-              className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
-              placeholder="Confirm Password"
-              type="password"
-              value={confirm}
-              onChange={e => setConfirm(e.target.value)}
-              required
-            />
-            <div className="flex items-center">
+      {loading && <Loading />} {/* Show loading screen */}
+
+      {!loading && (
+        <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80">
+          <div className="mb-6 text-center">
+            <h1 className="text-xl font-bold text-white">Register</h1>
+          </div>
+          {step === "form" ? (
+            <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
               <input
-                type="checkbox"
-                id="robot-check"
-                checked={isHuman}
-                onChange={e => setIsHuman(e.target.checked)}
-                className="mr-2"
+                className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
+                placeholder="Username"
+                value={username}
+                onChange={e => setUsername(e.target.value.replace(/\s/g, ""))} // Remove spaces on input change
                 required
               />
-              <label htmlFor="robot-check" className="text-white text-sm">I am not a robot</label>
-            </div>
-            {error && <div className="text-red-500">{error}</div>}
-            <button
-              className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition"
-              type="submit"
-              disabled={loading}
-            >
-              {loading ? "Checking Email..." : "Register"}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleVerify} className="space-y-4">
-            <div className="text-white text-center mb-2">Enter the 6-digit code sent to your email.</div>
-            <input
-              className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
-              placeholder="Verification Code"
-              value={enteredCode}
-              onChange={e => setEnteredCode(e.target.value)}
-              required
-            />
-            {error && <div className="text-red-500">{error}</div>}
-            <button className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition" type="submit">
-              Verify & Complete Registration
-            </button>
-          </form>
-        )}
-        <div className="mt-4 text-center">
-          <a href="/auth/login" className="text-blue-400 underline">Already have an account?</a>
+              <input
+                className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
+                placeholder="Email"
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+              />
+              <input
+                className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
+                placeholder="Password"
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+              />
+              <input
+                className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
+                placeholder="Confirm Password"
+                type="password"
+                value={confirm}
+                onChange={e => setConfirm(e.target.value)}
+                required
+              />
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="robot-check"
+                  checked={isHuman}
+                  onChange={e => setIsHuman(e.target.checked)}
+                  className="mr-2"
+                  required
+                />
+                <label htmlFor="robot-check" className="text-white text-sm">I am not a robot</label>
+              </div>
+              {error && <div className="text-red-500">{error}</div>}
+              <button
+                className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition"
+                type="submit"
+                disabled={loading}
+              >
+                {loading ? "Checking Email..." : "Register"}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerify} className="space-y-4">
+              <div className="text-white text-center mb-2">Enter the 6-digit code sent to your email.</div>
+              <input
+                className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
+                placeholder="Verification Code"
+                value={enteredCode}
+                onChange={e => setEnteredCode(e.target.value)}
+                required
+              />
+              {error && <div className="text-red-500">{error}</div>}
+              <button className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition" type="submit">
+                Verify & Complete Registration
+              </button>
+            </form>
+          )}
+          <div className="mt-4 text-center">
+            <a href="/auth/login" className="text-blue-400 underline">Already have an account?</a>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

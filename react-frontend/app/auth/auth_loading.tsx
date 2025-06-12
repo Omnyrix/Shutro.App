@@ -9,8 +9,11 @@ export default function Loading() {
   useEffect(() => {
     // Check for session cookie before loading
     const session = getCookie("session");
-    if (!session) {
-      navigate("/auth/login"); // Redirect if no session
+    if (session) {
+      navigate("/home"); // Redirect to Home if logged in
+      return;
+    } else {
+      navigate("/auth/login"); // Redirect to Login if no session
       return;
     }
 
