@@ -3,10 +3,9 @@ import { setCookie } from "../utils/cookie";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // for show/hide password toggle
-import Loading from "./auth_reg_loading"; // loading component for registration
 import Turnstile from "../components/Turnstile"; // Cloudflare Turnstile component
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL;
+const backendUrl = import.meta.env.VITE_BACKSTAGE_URL || import.meta.env.VITE_BACKEND_URL; // adjust if needed
 
 async function validateEmailWithMailboxLayer(email: string): Promise<{ isValid: boolean; error?: string }> {
   const apiKey = import.meta.env.VITE_MAILBOXLAYER_API_KEY;
@@ -30,7 +29,7 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
   // Used to force re-render of the Turnstile component when needed.
   const [turnstileKey, setTurnstileKey] = useState(0);
@@ -38,11 +37,7 @@ export default function Register() {
   const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
-  }, []);
+  // Removed full-screen loading; the form stays visible.
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -97,95 +92,96 @@ export default function Register() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-800">
-      {loading && <Loading />}
-      {!loading && (
-        <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80">
-          <div className="mb-6 text-center">
-            <h1 className="text-xl font-bold text-white">Register</h1>
-          </div>
-          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
-            <input
-              className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value.replace(/\s/g, ""))}
-              required
-            />
-            <input
-              className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
-              placeholder="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <div className="relative">
-              <input
-                className="w-full border border-gray-700 bg-gray-800 text-white p-2 pr-10 rounded focus:outline-none focus:border-blue-500"
-                placeholder="Password"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 opacity-70 hover:opacity-100"
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-            <div className="relative">
-              <input
-                className="w-full border border-gray-700 bg-gray-800 text-white p-2 pr-10 rounded focus:outline-none focus:border-blue-500"
-                placeholder="Confirm Password"
-                type={showConfirm ? "text" : "password"}
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 opacity-70 hover:opacity-100"
-              >
-                {showConfirm ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-            {showMismatch && (
-              <div className="text-yellow-500 text-center text-sm">
-                Passwords do not match.
-              </div>
-            )}
-            <div className="flex items-center">
-              <Turnstile
-                key={turnstileKey}
-                id="turnstile-widget"
-                sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
-                onVerify={(token) => {
-                  console.log("Turnstile onVerify callback fired. Token:", token);
-                  setTurnstileToken(token);
-                }}
-                scale={0.8}
-              />
-            </div>
-            {error && <div className="text-red-500">{error}</div>}
-            <button
-              className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition"
-              type="submit"
-              disabled={loading || (confirm.length > 0 && password !== confirm)}
-            >
-              {loading ? "Processing..." : "Register"}
-            </button>
-          </form>
-          <div className="mt-4 text-center">
-            <a href="/auth/login" className="text-blue-400 underline font-bold text-sm">
-              Already have an account?
-            </a>
-          </div>
+      <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80">
+        <div className="mb-6 text-center">
+          <h1 className="text-xl font-bold text-white">Register</h1>
         </div>
-      )}
+        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
+          <input
+            className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value.replace(/\s/g, ""))}
+            required
+          />
+          <input
+            className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
+            placeholder="Email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <div className="relative">
+            <input
+              className="w-full border border-gray-700 bg-gray-800 text-white p-2 pr-10 rounded focus:outline-none focus:border-blue-500"
+              placeholder="Password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 opacity-70 hover:opacity-100"
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
+          <div className="relative">
+            <input
+              className="w-full border border-gray-700 bg-gray-800 text-white p-2 pr-10 rounded focus:outline-none focus:border-blue-500"
+              placeholder="Confirm Password"
+              type={showConfirm ? "text" : "password"}
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirm(!showConfirm)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 opacity-70 hover:opacity-100"
+            >
+              {showConfirm ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
+          {showMismatch && (
+            <div className="text-yellow-500 text-center text-sm">
+              Passwords do not match.
+            </div>
+          )}
+          <div className="flex items-center">
+            <Turnstile
+              key={turnstileKey}
+              id="turnstile-widget"
+              sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
+              onVerify={(token) => {
+                console.log("Turnstile onVerify callback fired. Token:", token);
+                setTurnstileToken(token);
+              }}
+              scale={0.8}
+            />
+          </div>
+          <button
+            className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition"
+            type="submit"
+            disabled={loading || (confirm.length > 0 && password !== confirm)}
+          >
+            {loading ? "Creating account..." : "Register"}
+          </button>
+          {error && (
+            <div className="text-red-500 mt-4 text-center">
+              {error}
+            </div>
+          )}
+        </form>
+        <div className="mt-4 text-center">
+          <a href="/auth/login" className="text-blue-400 underline font-bold text-sm">
+            Already have an account?
+          </a>
+        </div>
+      </div>
     </div>
   );
 }

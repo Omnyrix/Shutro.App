@@ -3,21 +3,21 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { setCookie, eraseCookie } from "../utils/cookie";
 import Turnstile from "../components/Turnstile";
-import Loading from "./no-auth-loading"; // Reuse your loading screen component
-
-const backendUrl = import.meta.env.VITE_BACKEND_URL;
+// We no longer use Loading because the button now shows the loading state.
+const backendUrl = import.meta.env.VITE_BACKSTAGE_URL || import.meta.env.VITE_BACKEND_URL; // adjust if needed
 
 export default function WithoutAccount() {
   const [username, setUsername] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [longWait, setLongWait] = useState(false);
   const navigate = useNavigate();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    
+
     if (!username.trim()) {
       setError("Please enter your name.");
       return;
@@ -28,12 +28,20 @@ export default function WithoutAccount() {
     }
 
     setLoading(true);
+    setLongWait(false);
+
+    // Set a timer to show a long-wait message after 10 seconds.
+    const timer = setTimeout(() => {
+      setLongWait(true);
+    }, 10000);
+
     try {
-      // Send a single request: backend should validate the Turnstile token.
-      const res = await axios.post(`${backendUrl}/no-acc`, {
+      // Use the demo account endpoint instead of the no-acc endpoint.
+      const res = await axios.post(`${backendUrl}/demo`, {
         username: username.trim(),
-        turnstileToken,
       });
+
+      clearTimeout(timer);
 
       if (res.data.success) {
         // Clear any previous cookies.
@@ -43,10 +51,11 @@ export default function WithoutAccount() {
         setCookie("session", username.trim().toLowerCase());
         navigate("/home");
       } else {
-        setError(res.data.error || "Failed to continue without an account.");
+        setError(res.data.error || "Failed to create a demo account.");
         setLoading(false);
       }
     } catch (err: any) {
+      clearTimeout(timer);
       setError(err.response?.data?.error || "Server error, please try again later.");
       setLoading(false);
     }
@@ -54,41 +63,45 @@ export default function WithoutAccount() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-800">
-      {loading && <Loading />}
-      {!loading && (
-        <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80">
-          <h1 className="text-xl font-bold text-white text-center mb-4">
-            Continue Without an Account
-          </h1>
-          {error && <div className="text-red-500 mb-4 text-center">{error}</div>}
-          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
-            <input
-              type="text"
-              placeholder="Enter your name"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
-              required
+      <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80">
+        <h1 className="text-xl font-bold text-white text-center mb-4">
+          Continue Without an Account
+        </h1>
+        {error && <div className="text-red-500 mb-4 text-center">{error}</div>}
+        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
+          <input
+            type="text"
+            placeholder="Enter your name"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
+            required
+            disabled={loading}
+          />
+          <div className="flex items-center">
+            <Turnstile
+              sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
+              onVerify={(token) => {
+                console.log("Turnstile token received:", token);
+                setTurnstileToken(token);
+              }}
+              scale={0.8}
             />
-            <div className="flex items-center">
-              <Turnstile
-                sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
-                onVerify={(token) => {
-                  console.log("Turnstile token received:", token);
-                  setTurnstileToken(token);
-                }}
-                scale={0.8}
-              />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition"
+          >
+            {loading ? "Creating Account…" : "Use without an Account"}
+          </button>
+          {longWait && (
+            <div className="mt-4 text-yellow-400 text-center">
+              Taking too much time. Please refresh the page.
             </div>
-            <button
-              type="submit"
-              className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition"
-            >
-              Use without an Account
-            </button>
-          </form>
-        </div>
-      )}
+          )}
+        </form>
+      </div>
     </div>
   );
 }

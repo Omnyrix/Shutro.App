@@ -14,6 +14,8 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [isPanelOpen, setPanelOpen] = useState(false);
   const [aboutExpanded, setAboutExpanded] = useState(false);
+  const [isDemo, setIsDemo] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
 
   useEffect(() => {
     // Read identifier from cookie; here we use "session"
@@ -25,9 +27,15 @@ export default function Home() {
       .then((res) => {
         const rawUsername = res.data.username;
         setUsername(rawUsername.charAt(0).toUpperCase() + rawUsername.slice(1));
+        // Check if the account is a demo account.
+        if (res.data.demo === true) {
+          setIsDemo(true);
+        } else {
+          setIsDemo(false);
+        }
       })
       .catch(() => {
-        setUsername("Unknown");
+        navigate("/auth/login"); // Redirect to login if no user found
       })
       .finally(() => {
         setTimeout(() => {
@@ -69,6 +77,27 @@ export default function Home() {
     navigate(route);
   };
 
+  // Logout handler: Delete the demo account (if applicable) then log out.
+  async function handleLogout() {
+    console.log("handleLogout called. isDemo:", isDemo, "username:", username);
+    setLogoutLoading(true);
+    // If the account is a demo account, send a request to delete it.
+    if (isDemo) {
+      try {
+        const deleteUrl = `${backendUrl}/demo/${username.toLowerCase()}`;
+        console.log("Sending DELETE request to:", deleteUrl);
+        await axios.delete(deleteUrl);
+        console.log("DELETE request completed.");
+      } catch (err) {
+        console.error("Failed to delete demo account:", err);
+      }
+    }
+    eraseCookie("session");
+    setLogoutLoading(false);
+    navigate("/welcome");
+  }
+
+
   return (
     <div className="relative min-h-screen bg-gray-800 text-white">
       {loading && <Loading />}
@@ -79,7 +108,9 @@ export default function Home() {
           <header className="fixed top-0 left-0 right-0 bg-gray-900 shadow-md flex items-center justify-between px-4 py-2 z-50">
             <div className="flex items-center gap-2">
               <img src="/favicon.ico" alt="Logo" className="w-8 h-8" />
-              <span className="font-bold text-xl text-blue-400">Shutro.App</span>
+              <span className="font-bold text-xl text-blue-400">
+                Shutro.App
+              </span>
             </div>
             <button onClick={() => setPanelOpen(true)} className="rounded-md p-1">
               <FaBars className="text-2xl cursor-pointer" />
@@ -162,16 +193,18 @@ export default function Home() {
                     {username}
                   </span>
                 </div>
-                {/* Change Password Button */}
-                <button
-                  className="w-full py-2 px-3 bg-blue-600 rounded-md hover:bg-blue-700 mb-4"
-                  onClick={() => {
-                    setPanelOpen(false);
-                    navigate("/profile");
-                  }}
-                >
-                  Change Password
-                </button>
+                {/* Conditionally render the Change Password button if not a demo account */}
+                {!isDemo && (
+                  <button
+                    className="w-full py-2 px-3 bg-blue-600 rounded-md hover:bg-blue-700 mb-4"
+                    onClick={() => {
+                      setPanelOpen(false);
+                      navigate("/profile");
+                    }}
+                  >
+                    Change Password
+                  </button>
+                )}
                 {/* About Dropdown Section */}
                 <div>
                   <button
@@ -180,29 +213,19 @@ export default function Home() {
                   >
                     <span>About</span>
                     <svg
-                      className={`w-5 h-5 transform transition-transform duration-300 ${
-                        aboutExpanded ? "rotate-180" : ""
-                      }`}
+                      className={`w-5 h-5 transform transition-transform duration-300 ${aboutExpanded ? "rotate-180" : ""}`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
                       xmlns="http://www.w3.org/2000/svg"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M19 9l-7 7-7-7"
-                      ></path>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                   </button>
                   {aboutExpanded && (
                     <div className="mt-2 max-h-40 overflow-y-auto p-2 bg-gray-700 rounded-md border border-purple-500">
                       <p className="text-purple-200">
-                        Example about text goes here. Lorem ipsum dolor sit amet,
-                        consectetur adipiscing elit. Praesent vel ligula
-                        scelerisque, vehicula dui eu, fermentum velit. Phasellus
-                        ac ornare eros, quis malesuada augue.
+                        Example about text goes here. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vel ligula scelerisque, vehicula dui eu, fermentum velit. Phasellus ac ornare eros, quis malesuada augue.
                       </p>
                     </div>
                   )}
@@ -210,14 +233,11 @@ export default function Home() {
               </div>
               {/* Logout Button at the bottom */}
               <button
-                onClick={() => {
-                  setPanelOpen(false);
-                  eraseCookie("session");
-                  navigate("/auth/login");
-                }}
+                onClick={handleLogout}
                 className="w-full py-2 px-3 bg-red-600 rounded-md hover:bg-red-700"
+                disabled={logoutLoading}
               >
-                Logout
+                {logoutLoading ? "Logging out..." : "Logout"}
               </button>
             </div>
           </div>

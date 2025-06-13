@@ -55,7 +55,7 @@ export default function Login() {
         return;
       }
     } catch (err: any) {
-      setError("Turnstile verification error. Please try again.");
+      setError("Human varification failed. Please relaod the page");
       return;
     }
 

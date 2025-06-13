@@ -65,7 +65,7 @@ app.post("/verify-turnstile", async (req, res) => {
     const result = await verifyTurnstileToken(turnstileToken, req.ip);
     if (!result.success) {
       console.error("Turnstile verification failed:", result);
-      return res.status(400).json({ error: "Turnstile verification failed", details: result });
+      return res.status(400).json({ error: "Human varification failed. Please reload the page", details: result });
     }
     res.json({ success: true, details: result });
   } catch (err) {
@@ -74,7 +74,7 @@ app.post("/verify-turnstile", async (req, res) => {
       err.response ? err.response.data : err.message
     );
     return res.status(500).json({
-      error: "Turnstile verification error",
+      error: "Human varification failed. Please reload the page",
       details: err.response ? err.response.data : err.message,
     });
   }
@@ -110,11 +110,16 @@ app.get("/user/:identifier", (req, res) => {
   }
   try {
     const userData = yaml.load(fs.readFileSync(userFile, "utf8"));
-    return res.json({ username: userData.username, email: userData.email || identifier });
+    return res.json({ 
+      username: userData.username, 
+      email: userData.email || identifier,
+      demo: userData.demo || false
+    });
   } catch (e) {
     return res.status(500).json({ error: "Failed to read user data" });
   }
 });
+
 
 // Register user endpoint
 app.post("/register", async (req, res) => {
@@ -131,14 +136,14 @@ app.post("/register", async (req, res) => {
     const verificationResult = await verifyTurnstileToken(turnstileToken, req.ip);
     if (!verificationResult.success) {
       console.error("Turnstile verification failed:", verificationResult);
-      return res.status(400).json({ error: "Turnstile verification failed" });
+      return res.status(400).json({ error: "Human varification failed. Please reload the page" });
     }
   } catch (err) {
     console.error(
       "Turnstile verification error:",
       err.response ? err.response.data : err.message
     );
-    return res.status(500).json({ error: "Turnstile verification error" });
+    return res.status(500).json({ error: "Human varification failed. Please reload the page" });
   }
 
   const lowerEmail = email.toLowerCase();
@@ -228,7 +233,7 @@ app.post("/login", (req, res) => {
   const lowerEmail = email.toLowerCase();
   const userFile = path.join(USERS_DIR, `${lowerEmail}.yml`);
   if (!fs.existsSync(userFile)) {
-    return res.status(400).json({ error: "User not found" });
+    return res.status(400).json({ error: "Incorrect email or password." });
   }
   try {
     const user = yaml.load(fs.readFileSync(userFile, "utf8"));
@@ -236,7 +241,7 @@ app.post("/login", (req, res) => {
     if (bcrypt.compareSync(password, user.password)) {
       return res.json({ success: true });
     } else {
-      return res.status(401).json({ error: "Incorrect password" });
+      return res.status(401).json({ error: "Incorrect email or password." });
     }
   } catch (e) {
     return res.status(500).json({ error: "Login failed" });
@@ -262,6 +267,51 @@ app.post("/re-register", async (req, res) => {
     res.json({ success: true, message: "Password updated successfully" });
   } catch (e) {
     res.status(500).json({ error: "Failed to update password" });
+  }
+});
+
+// New route for creating a demo account.
+app.post("/demo", (req, res) => {
+  const { username } = req.body;
+  if (!username) {
+    return res.status(400).json({ error: "Missing username for demo account" });
+  }
+  const lowerUsername = username.toLowerCase();
+  const userFile = path.join(USERS_DIR, `${lowerUsername}.yml`);
+  if (fs.existsSync(userFile)) {
+    return res.status(400).json({ error: "An account with that name already exists" });
+  }
+  const demoData = {
+    username: lowerUsername,
+    email: `${lowerUsername}@demo.com`,
+    demo: true,
+    createdTime: Date.now(),
+  };
+
+  try {
+    fs.writeFileSync(userFile, yaml.dump(demoData), "utf8");
+    res.json({ success: true, message: "It's a demo account", account: demoData });
+  } catch (e) {
+    res.status(500).json({ error: "Failed to create demo account" });
+  }
+});
+
+// New DELETE route for deleting a demo account.
+app.delete("/demo/:identifier", (req, res) => {
+  const identifier = req.params.identifier.toLowerCase();
+  const userFile = path.join(USERS_DIR, `${identifier}.yml`);
+  if (!fs.existsSync(userFile)) {
+    return res.status(404).json({ error: "Demo account not found" });
+  }
+  try {
+    const userData = yaml.load(fs.readFileSync(userFile, "utf8"));
+    if (!userData.demo) {
+      return res.status(400).json({ error: "Not a demo account" });
+    }
+    fs.unlinkSync(userFile);
+    return res.json({ success: true, message: "Demo account deleted" });
+  } catch (e) {
+    return res.status(500).json({ error: "Failed to delete demo account" });
   }
 });
 
