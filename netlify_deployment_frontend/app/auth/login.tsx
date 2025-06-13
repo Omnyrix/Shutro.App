@@ -30,6 +30,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false); // Toggle password visibility
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [tsKey, setTsKey] = useState(0); // Added state for forcing Turnstile re-render
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,6 +42,9 @@ export default function Login() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    
+    // Force re-render of Turnstile widget when login is clicked.
+    setTsKey(prev => prev + 1);
 
     if (!turnstileToken) {
       setError("Please confirm you are not a robot.");
@@ -108,6 +112,7 @@ export default function Login() {
             </div>
             <div className="flex items-center">
               <Turnstile
+                key={tsKey}  // Added key to force re-render
                 sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
                 onVerify={(token) => {
                   console.log("Turnstile onVerify callback fired. Token:", token);

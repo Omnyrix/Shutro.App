@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
+import { setCookie, eraseCookie } from "../utils/cookie";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { setCookie, eraseCookie } from "../utils/cookie";
 import Turnstile from "../components/Turnstile";
 import Loading from "./no-auth-loading"; // Using the loading page component
 
@@ -14,11 +14,16 @@ export default function WithoutAccount() {
   const [loading, setLoading] = useState(false); // used only during form submission
   const [initialLoading, setInitialLoading] = useState(true); // used for initial page load
   const [longWait, setLongWait] = useState(false);
+  // Used to force re-render of the Turnstile component when needed.
+  const [turnstileKey, setTurnstileKey] = useState(0);
   const navigate = useNavigate();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+
+    // Force re-render of Turnstile component
+    setTurnstileKey((prev) => prev + 1);
 
     if (!username.trim()) {
       setError("Please enter your name.");
@@ -47,6 +52,7 @@ export default function WithoutAccount() {
 
       if (res.data.success) {
         // Clear any previous cookies.
+        // (Assuming any cookie logic is handled in these functions.)
         eraseCookie("session");
         eraseCookie("verification");
         // Set the session cookie with the entered username (lowercased).
@@ -65,7 +71,6 @@ export default function WithoutAccount() {
 
   useEffect(() => {
     // Simulate initial loading (e.g., reading any initial data if needed)
-    // Here you can add any initial fetching if required.
     // For our purposes, we simply wait for 500ms.
     const timer = setTimeout(() => {
       setInitialLoading(false);
@@ -97,6 +102,7 @@ export default function WithoutAccount() {
           />
           <div className="flex items-center">
             <Turnstile
+              key={turnstileKey}  // Force re-render via key update
               sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
               onVerify={(token) => {
                 console.log("Turnstile token received:", token);

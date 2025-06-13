@@ -43,7 +43,10 @@ export default function Register() {
     e.preventDefault();
     setError("");
     setLoading(true);
-
+    
+    // Force re-render of Turnstile widget when register is clicked.
+    setTurnstileKey(prev => prev + 1);
+    
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
       setLoading(false);
