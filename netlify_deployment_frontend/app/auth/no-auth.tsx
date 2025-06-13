@@ -1,16 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { setCookie, eraseCookie } from "../utils/cookie";
 import Turnstile from "../components/Turnstile";
-// We no longer use Loading because the button now shows the loading state.
-const backendUrl = import.meta.env.VITE_BACKSTAGE_URL || import.meta.env.VITE_BACKEND_URL; // adjust if needed
+import Loading from "./no-auth-loading"; // Using the loading page component
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_BACKEND_URL; // adjust if needed
 
 export default function WithoutAccount() {
   const [username, setUsername] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // used only during form submission
+  const [initialLoading, setInitialLoading] = useState(true); // used for initial page load
   const [longWait, setLongWait] = useState(false);
   const navigate = useNavigate();
 
@@ -36,7 +38,7 @@ export default function WithoutAccount() {
     }, 10000);
 
     try {
-      // Use the demo account endpoint instead of the no-acc endpoint.
+      // Use the demo account endpoint.
       const res = await axios.post(`${backendUrl}/demo`, {
         username: username.trim(),
       });
@@ -59,6 +61,21 @@ export default function WithoutAccount() {
       setError(err.response?.data?.error || "Server error, please try again later.");
       setLoading(false);
     }
+  }
+
+  useEffect(() => {
+    // Simulate initial loading (e.g., reading any initial data if needed)
+    // Here you can add any initial fetching if required.
+    // For our purposes, we simply wait for 500ms.
+    const timer = setTimeout(() => {
+      setInitialLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Show full-page loading only during the initial page load.
+  if (initialLoading) {
+    return <Loading />;
   }
 
   return (
