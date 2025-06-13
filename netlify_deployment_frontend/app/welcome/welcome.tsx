@@ -18,19 +18,36 @@ export default function Welcome() {
           Login or Sign Up to{" "}
           <span className="text-sky-400 font-semibold">Get Started</span>
         </p>
-        <div className="flex flex-col md:flex-row gap-4 w-full max-w-md">
+        <div className="w-full max-w-md flex flex-col items-center gap-4">
+          {/* New "Use without an account" button */}
           <a
-            href="/auth/login"
-            className="flex-1 bg-blue-800 text-white py-3 rounded-lg text-center font-semibold shadow-md hover:bg-sky-700 transition"
+            href="/auth/no-auth"
+            className="w-full bg-indigo-600 text-white py-3 rounded-lg text-center font-semibold shadow-md hover:bg-indigo-500 transition"
           >
-            Login
+            Use without an account
           </a>
-          <a
-            href="/auth/register"
-            className="flex-1 bg-sky-600 text-white py-3 rounded-lg text-center font-semibold shadow-md hover:bg-blue-700 transition"
-          >
-            Register
-          </a>
+          {/* Divider with centered "or" */}
+          <div className="relative w-full flex items-center">
+            <div className="w-full border-t-4 border-gray-300"></div>
+            <span className="absolute inset-0 flex justify-center">
+              <span className="bg-black px-2 text-gray-300 font-semibold">or</span>
+            </span>
+          </div>
+          {/* Login/Register buttons */}
+          <div className="flex flex-col md:flex-row gap-4 w-full">
+            <a
+              href="/auth/login"
+              className="flex-1 bg-blue-800 text-white py-3 rounded-lg text-center font-semibold shadow-md hover:bg-sky-700 transition"
+            >
+              Login
+            </a>
+            <a
+              href="/auth/register"
+              className="flex-1 bg-sky-600 text-white py-3 rounded-lg text-center font-semibold shadow-md hover:bg-blue-700 transition"
+            >
+              Register
+            </a>
+          </div>
         </div>
       </div>
       {/* Keyframes for gradient animation */}

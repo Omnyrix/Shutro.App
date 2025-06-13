@@ -1,39 +1,41 @@
-import { useState, useLayoutEffect, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCookie } from "../utils/cookie";
+import { getCookie, eraseCookie } from "../utils/cookie";
 
-export default function Loading() {
+interface VerificationLoaderProps {
+  onComplete: (verification: string) => void;
+}
+
+export default function VerificationLoader({ onComplete }: VerificationLoaderProps) {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
 
-  // Synchronous check: if a session exists, navigate immediately.
-  useLayoutEffect(() => {
-    const session = getCookie("session");
-    if (session) {
-      navigate("/home", { replace: true });
-    }
-  }, [navigate]);
-
-  // If no session, show a simulated loading animation and then redirect.
   useEffect(() => {
-    // Check again in case the session was not set.
-    const session = getCookie("session");
-    if (!session) {
-      const interval = setInterval(() => {
-        setProgress((prev) => Math.min(prev + 10, 100));
-      }, 50);
+    // Check for the "verification" cookie.
+    const verification = getCookie("verification");
 
-      const timeout = setTimeout(() => {
-        clearInterval(interval);
-        navigate("/auth/register", { replace: true });
-      }, 500);
+    // Simulated loading animation exactly like your provided Loading screen.
+    const interval = setInterval(() => {
+      setProgress((prev) => Math.min(prev + (100 / 10), 100));
+    }, 50);
 
-      return () => {
-        clearInterval(interval);
-        clearTimeout(timeout);
-      };
-    }
-  }, [navigate]);
+    const timeout = setTimeout(() => {
+      clearInterval(interval);
+      if (verification) {
+        // Erase the cookie immediately so it can't be reused.
+        eraseCookie("verification");
+        onComplete(verification);
+      } else {
+        // If no verification cookie found, redirect immediately.
+        navigate("/auth/register");
+      }
+    }, 500); // Ensures progress reaches 100% within 0.5s
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, [navigate, onComplete]);
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-gray-800 text-white z-50 transition-opacity duration-500">

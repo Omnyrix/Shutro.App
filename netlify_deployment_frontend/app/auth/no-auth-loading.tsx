@@ -25,7 +25,7 @@ export default function Loading() {
 
       const timeout = setTimeout(() => {
         clearInterval(interval);
-        navigate("/auth/register", { replace: true });
+        navigate("/auth/no-auth", { replace: true });
       }, 500);
 
       return () => {

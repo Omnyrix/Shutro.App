@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useLayoutEffect, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../utils/cookie";
 
@@ -6,29 +6,34 @@ export default function Loading() {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
 
-  useEffect(() => {
+  // Synchronous check: if a session exists, navigate immediately.
+  useLayoutEffect(() => {
     const session = getCookie("session");
-
-    // Simulated loading animation
-    const interval = setInterval(() => {
-      setProgress((prev) => Math.min(prev + (100 / 10), 100));
-    }, 50);
-
-    const timeout = setTimeout(() => {
-      clearInterval(interval);
-      if (session) {
-        navigate("/home"); // Redirect to Home if logged in
-      } else {
-        navigate("/auth/login"); // Redirect to Login if no session
-      }
-    }, 500); // Ensures progress bar completes within 0.5s
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
-    };
+    if (session) {
+      navigate("/home", { replace: true });
+    }
   }, [navigate]);
 
+  // If no session, show a simulated loading animation and then redirect.
+  useEffect(() => {
+    // Check again in case the session was not set.
+    const session = getCookie("session");
+    if (!session) {
+      const interval = setInterval(() => {
+        setProgress((prev) => Math.min(prev + 10, 100));
+      }, 50);
+
+      const timeout = setTimeout(() => {
+        clearInterval(interval);
+        navigate("/auth/login", { replace: true });
+      }, 500);
+
+      return () => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+      };
+    }
+  }, [navigate]);
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-gray-800 text-white z-50 transition-opacity duration-500">
