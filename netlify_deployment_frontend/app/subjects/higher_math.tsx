@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaCog, FaHome, FaArrowRight } from "react-icons/fa";
 import { getCookie } from "../utils/cookie";
 import Loading from "../components/loading"; // Import loading screen
 import ProfileMenu from "../components/menu"; // Import ProfileMenu component
@@ -11,7 +10,7 @@ export default function HigherMath() {
   const [loading, setLoading] = useState(true); // Loading state
   const [progress, setProgress] = useState(0); // Dynamic progress bar
 
-  const LOADING_TIME = 500; // Set loading duration to 0.5 sec
+  const LOADING_TIME = 0; // Set loading duration to 0.5 sec
 
   useEffect(() => {
     const session = getCookie("session");
@@ -49,12 +48,55 @@ export default function HigherMath() {
           <h1 className="text-3xl font-bold text-center mb-6">Higher Math Formulas</h1>
           <p className="text-lg mb-6 text-center">Choose a paper:</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
-            <button className="bg-blue-800 hover:bg-blue-900 text-white py-3 px-6 rounded-lg transition" onClick={() => navigate("/higher-math/1st-paper")}>
-              1st Paper
-            </button>
-            <button className="bg-[#df5d41] hover:bg-[#e86a5c] text-white py-3 px-6 rounded-lg transition" onClick={() => navigate("/higher-math/2nd-paper")}>
-              2nd Paper
-            </button>
+            {/* 1st Paper */}
+            <div
+              className="cursor-pointer"
+              onClick={() => navigate("/higher-math/1st-paper")}
+            >
+              {/* Top thin line */}
+              <hr
+                style={{ borderTop: "2px solid #9CA3AF", opacity: 0.6 }}
+                className="mb-1"
+              />
+              <div className="py-2 px-4">
+                <p
+                  className="text-lg font-semibold text-left"
+                  style={{ color: "#9CA3AF" }}
+                >
+                  1st Paper
+                </p>
+              </div>
+              {/* Bottom thin line */}
+              <hr
+                style={{ borderTop: "2px solid #9CA3AF", opacity: 0.6 }}
+                className="mt-1"
+              />
+            </div>
+
+            {/* 2nd Paper */}
+            <div
+              className="cursor-pointer"
+              onClick={() => navigate("/higher-math/2nd-paper")}
+            >
+              {/* Top thin line */}
+              <hr
+                style={{ borderTop: "2px solid #9CA3AF", opacity: 0.6 }}
+                className="mb-1"
+              />
+              <div className="py-2 px-4">
+                <p
+                  className="text-lg font-semibold text-left"
+                  style={{ color: "#9CA3AF" }}
+                >
+                  2nd Paper
+                </p>
+              </div>
+              {/* Bottom thin line */}
+              <hr
+                style={{ borderTop: "2px solid #9CA3AF", opacity: 0.6 }}
+                className="mt-1"
+              />
+            </div>
           </div>
         </>
       )}

@@ -10,7 +10,7 @@ export default function Chemistry() {
   const [loading, setLoading] = useState(true); // Loading state
   const [progress, setProgress] = useState(0); // Dynamic progress bar
 
-  const LOADING_TIME = 500; // Set loading duration to 0.5 sec
+  const LOADING_TIME = 0; // Set loading duration to 0.5 sec
 
   useEffect(() => {
     const session = getCookie("session");
@@ -48,12 +48,55 @@ export default function Chemistry() {
           <h1 className="text-3xl font-bold text-center mb-6">Chemistry Formulas</h1>
           <p className="text-lg mb-6 text-center">Choose a paper:</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
-            <button className="bg-green-400 hover:bg-green-500 text-white py-3 px-6 rounded-lg transition" onClick={() => navigate("/chemistry/1st-paper")}>
-              1st Paper
-            </button>
-            <button className="bg-green-400 hover:bg-green-500 text-white py-3 px-6 rounded-lg transition" onClick={() => navigate("/chemistry/2nd-paper")}>
-              2nd Paper
-            </button>
+            {/* 1st Paper */}
+            <div
+              className="cursor-pointer"
+              onClick={() => navigate("/chemistry/1st-paper")}
+            >
+              {/* Top thin line */}
+              <hr
+                style={{ borderTop: "2px solid #9CA3AF", opacity: 0.6 }}
+                className="mb-1"
+              />
+              <div className="py-2 px-4">
+                <p
+                  className="text-lg font-semibold text-left"
+                  style={{ color: "#9CA3AF" }}
+                >
+                  1st Paper
+                </p>
+              </div>
+              {/* Bottom thin line */}
+              <hr
+                style={{ borderTop: "2px solid #9CA3AF", opacity: 0.6 }}
+                className="mt-1"
+              />
+            </div>
+
+            {/* 2nd Paper */}
+            <div
+              className="cursor-pointer"
+              onClick={() => navigate("/chemistry/2nd-paper")}
+            >
+              {/* Top thin line */}
+              <hr
+                style={{ borderTop: "2px solid #9CA3AF", opacity: 0.6 }}
+                className="mb-1"
+              />
+              <div className="py-2 px-4">
+                <p
+                  className="text-lg font-semibold text-left"
+                  style={{ color: "#9CA3AF" }}
+                >
+                  2nd Paper
+                </p>
+              </div>
+              {/* Bottom thin line */}
+              <hr
+                style={{ borderTop: "2px solid #9CA3AF", opacity: 0.6 }}
+                className="mt-1"
+              />
+            </div>
           </div>
         </>
       )}

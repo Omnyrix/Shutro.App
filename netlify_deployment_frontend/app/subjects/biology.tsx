@@ -10,7 +10,7 @@ export default function Biology() {
   const [loading, setLoading] = useState(true); // Loading state
   const [progress, setProgress] = useState(0); // Dynamic progress bar
 
-  const LOADING_TIME = 500; // 0.5 sec loading time
+  const LOADING_TIME = 0; // 0.5 sec loading duration
 
   useEffect(() => {
     const session = getCookie("session");
@@ -24,7 +24,9 @@ export default function Biology() {
 
     // Simulated loading animation
     const interval = setInterval(() => {
-      setProgress((prev) => Math.min(prev + (100 / (LOADING_TIME / 50)), 100));
+      setProgress((prev) =>
+        Math.min(prev + (100 / (LOADING_TIME / 50)), 100)
+      );
     }, 50);
 
     setTimeout(() => {
@@ -52,12 +54,71 @@ export default function Biology() {
           <h1 className="text-3xl font-bold text-center mb-6">Biology Formulas</h1>
           <p className="text-lg mb-6 text-center">Choose a paper:</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
-            <button className="bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg transition" onClick={() => navigateToPaper("1st-paper")}>
-              1st Paper
-            </button>
-            <button className="bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg transition" onClick={() => navigateToPaper("2nd-paper")}>
-              2nd Paper
-            </button>
+            {/* 1st Paper */}
+            <div
+              className="cursor-pointer"
+              onClick={() => navigateToPaper("1st-paper")}
+            >
+              {/* Top horizontal line with downward pouring effect in gray */}
+              <hr
+                style={{
+                  border: 0,
+                  height: "2px",
+                  background: "linear-gradient(to bottom, #9CA3AF, transparent)",
+                }}
+                className="mb-1"
+              />
+              <div className="py-2 px-4">
+                <p
+                  className="text-lg font-semibold text-left"
+                  style={{ color: "#9CA3AF" }}
+                >
+                  1st Paper
+                </p>
+              </div>
+              {/* Bottom horizontal line with upward pouring effect in gray */}
+              <hr
+                style={{
+                  border: 0,
+                  height: "2px",
+                  background: "linear-gradient(to top, #9CA3AF, transparent)",
+                }}
+                className="mt-1"
+              />
+            </div>
+
+            {/* 2nd Paper */}
+            <div
+              className="cursor-pointer"
+              onClick={() => navigateToPaper("2nd-paper")}
+            >
+              {/* Top horizontal line with downward pouring effect in gray */}
+              <hr
+                style={{
+                  border: 0,
+                  height: "2px",
+                  background: "linear-gradient(to bottom, #9CA3AF, transparent)",
+                }}
+                className="mb-1"
+              />
+              <div className="py-2 px-4">
+                <p
+                  className="text-lg font-semibold text-left"
+                  style={{ color: "#9CA3AF" }}
+                >
+                  2nd Paper
+                </p>
+              </div>
+              {/* Bottom horizontal line with upward pouring effect in gray */}
+              <hr
+                style={{
+                  border: 0,
+                  height: "2px",
+                  background: "linear-gradient(to top, #9CA3AF, transparent)",
+                }}
+                className="mt-1"
+              />
+            </div>
           </div>
         </>
       )}
