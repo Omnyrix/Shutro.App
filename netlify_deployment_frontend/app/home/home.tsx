@@ -10,10 +10,10 @@ import { lazyWithPreload } from "../utils/lazyWithPreload";
 
 
 // Preload subject pages immediately
-const PhysicsPage = lazyWithPreload(() => import("../subjects/physics"));
-const ChemistryPage = lazyWithPreload(() => import("../subjects/chemistry"));
-const BiologyPage = lazyWithPreload(() => import("../subjects/biology"));
-const MathPage = lazyWithPreload(() => import("../subjects/higher_math"));
+const PhysicsPage = lazyWithPreload(() => import("../routes/subjects/physics"));
+const ChemistryPage = lazyWithPreload(() => import("../routes/subjects/chemistry"));
+const BiologyPage = lazyWithPreload(() => import("../routes/subjects/biology"));
+const MathPage = lazyWithPreload(() => import("../routes/subjects/higher_math"));
 const NotFoundPage = lazyWithPreload(() => import("../routes/404"));
 
 // Preload all routes once Home mounts

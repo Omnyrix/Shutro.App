@@ -5,12 +5,12 @@ import { getCookie, eraseCookie } from "../utils/cookie";
 import { lazyWithPreload } from "../utils/lazyWithPreload";
 
 // ✅ Preload the subject pages during loading
-const PhysicsPage = lazyWithPreload(() => import("../subjects/physics"));
-const ChemistryPage = lazyWithPreload(() => import("../subjects/chemistry"));
-const BiologyPage = lazyWithPreload(() => import("../subjects/biology"));
-const MathPage = lazyWithPreload(() => import("../subjects/higher_math"));
+const PhysicsPage = lazyWithPreload(() => import("../routes/subjects/physics"));
+const ChemistryPage = lazyWithPreload(() => import("../routes/subjects/chemistry"));
+const BiologyPage = lazyWithPreload(() => import("../routes/subjects/biology"));
+const MathPage = lazyWithPreload(() => import("../routes/subjects/higher_math"));
 const NotFoundPage = lazyWithPreload(() => import("../routes/404"));
-const HomePage = lazyWithPreload(() => import("../home/home"));
+const HomePage = lazyWithPreload(() => import("../routes/home"));
 
 export default function Loading() {
   const navigate = useNavigate();
