@@ -1,4 +1,4 @@
-import { useState, useEffect, startTransition } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Loading from "../components/loading";
 import axios from "axios";
@@ -79,10 +79,9 @@ export default function Home() {
     },
   ];
 
+  // *** THE ONLY CHANGE: use window.location.href instead of react-router navigate ***
   const handleSubjectClick = (route: string) => {
-    startTransition(() => {
-      navigate(route);
-    });
+    window.location.href = route;
   };
 
   async function handleLogout() {

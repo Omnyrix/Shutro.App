@@ -17,7 +17,6 @@ export default function HigherMath() {
       navigate("/auth/login");
       return;
     }
-    setUsername(session);
 
     const interval = setInterval(() => {
       setProgress((prev) => Math.min(prev + (100 / (LOADING_TIME / 50)), 100));
