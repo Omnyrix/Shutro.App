@@ -40,7 +40,7 @@ export default function Home() {
       .finally(() => {
         setTimeout(() => {
           setLoading(false);
-        }, 500);
+        }, 0);
       });
   }, [navigate]);
 

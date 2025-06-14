@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCookie } from "../utils/cookie";
+import { getCookie, eraseCookie } from "../utils/cookie";
 
 export default function Loading() {
   const navigate = useNavigate();
@@ -9,8 +9,11 @@ export default function Loading() {
   useEffect(() => {
     // Check for session cookie before loading
     const session = getCookie("session");
+    eraseCookie("verification");
     if (!session) {
-      navigate("/auth/login"); // Redirect if no session
+      eraseCookie("session");
+      eraseCookie("verification");
+      navigate("/auth/login"); // Redirect after clearing cookies
       return;
     }
 
@@ -20,8 +23,7 @@ export default function Loading() {
     import("../subjects/chemistry");
     import("../subjects/biology");
     import("../subjects/higher_math");
-    import("../routes/404"); 
-
+    import("../routes/404");
 
     // Simulated loading animation
     const interval = setInterval(() => {

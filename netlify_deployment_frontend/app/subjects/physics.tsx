@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../utils/cookie";
 import Loading from "../components/loading"; // Import loading screen
-import ProfileMenu from "../components/menu"; // Import ProfileMenu component
+import ProfileMenu from "../components/topbar"; // Import ProfileMenu component
 
 export default function Physics() {
   const navigate = useNavigate();

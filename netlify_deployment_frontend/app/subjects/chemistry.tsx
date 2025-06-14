@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../utils/cookie";
 import Loading from "../components/loading"; // Import loading screen
-import Menu from "../components/menu"; // Import Menu component
+import Menu from "../components/topbar"; // Import Menu component
 
 export default function Chemistry() {
   const navigate = useNavigate();

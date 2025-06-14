@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { getCookie, eraseCookie } from "../utils/cookie";
 import Loading from "../components/loading"; // Loading component
-import Menu from "../components/menu"; // Menu component
+import Menu from "../components/topbar"; // Menu component
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;

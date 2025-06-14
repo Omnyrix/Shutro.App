@@ -133,6 +133,11 @@ export default function Login() {
               Join us today
             </a>
           </div>
+          <div className="mt-2 text-center">
+            <a href="/auth/no-auth" className="text-sm text-blue-400 underline font-bold">
+              Continue without an account
+            </a>
+          </div>
         </div>
       )}
     </div>
