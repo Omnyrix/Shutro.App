@@ -1,26 +1,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCookie } from "../utils/cookie";
-import Loading from "../components/loading"; // Import loading screen
+import { eraseCookie, getCookie } from "../utils/cookie";
+import Loading from "../components/loading_not_lazy"; // Import loading screen
 import Menu from "../components/topbar"; // Import Menu component
 
 export default function Biology() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState<string | null>(null);
   const [loading, setLoading] = useState(true); // Loading state
   const [progress, setProgress] = useState(0); // Dynamic progress bar
 
   const LOADING_TIME = 0; // 0.5 sec loading duration (set to 0 means immediate)
 
   useEffect(() => {
-    const session = getCookie("session");
-
-    if (!session) {
-      navigate("/auth/login"); // Redirect if no session
-      return;
-    }
-
-    setUsername(session);
 
     // Simulated loading animation
     const interval = setInterval(() => {

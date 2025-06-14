@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCookie } from "../utils/cookie";
-import Loading from "../components/loading"; // Import loading screen
+import { eraseCookie, getCookie } from "../utils/cookie";
+import Loading from "../components/loading_not_lazy"; // Import loading screen
 import ProfileMenu from "../components/topbar"; // Import ProfileMenu component
 
 export default function Physics() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const LOADING_TIME = 0; // Loading time remains unchanged
@@ -14,6 +13,7 @@ export default function Physics() {
   useEffect(() => {
     const session = getCookie("session");
     if (!session) {
+      eraseCookie("session");
       navigate("/auth/login");
       return;
     }
