@@ -50,7 +50,7 @@ export default function Home() {
       .finally(() => {
         setTimeout(() => {
           setLoading(false);
-        }, 0);
+        }, 500);
       });
   }, [navigate]);
 
