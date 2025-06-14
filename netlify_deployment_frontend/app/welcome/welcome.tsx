@@ -15,7 +15,7 @@ export default function Welcome() {
           Welcome to Shutro.app
         </h1>
         <p className="text-gray-300 text-lg mb-8 text-center">
-          Login or Sign Up to{" "}
+          See bellow options to{" "}
           <span className="text-sky-400 font-semibold">Get Started</span>
         </p>
         <div className="w-full max-w-md flex flex-col items-center gap-4">

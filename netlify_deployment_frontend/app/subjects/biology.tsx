@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { getCookie } from "../utils/cookie";
 import Loading from "../components/loading"; // Import loading screen
 import Menu from "../components/topbar"; // Import Menu component
-import { motion } from "framer-motion";
 
 export default function Biology() {
   const navigate = useNavigate();
@@ -47,13 +46,7 @@ export default function Biology() {
       {loading && <Loading progress={progress} />} {/* Show loading screen */}
 
       {!loading && (
-        // Motion wrapper that slides the content up smoothly
-        <motion.div
-          initial={{ y: "100%", opacity: 0 }}
-          animate={{ y: "0%", opacity: 1 }}
-          transition={{ duration: 0.2, ease: "easeInOut" }}
-          className="w-full max-w-4xl px-4 mx-auto"
-        >
+        <div className="w-full max-w-4xl px-4 mx-auto">
           {/* Menu Component */}
           <Menu username={username} />
 
@@ -130,7 +123,7 @@ export default function Biology() {
               />
             </div>
           </div>
-        </motion.div>
+        </div>
       )}
     </div>
   );

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { getCookie } from "../utils/cookie";
 import Loading from "../components/loading"; // Import loading screen
 import ProfileMenu from "../components/topbar"; // Import ProfileMenu component
-import { motion } from "framer-motion";
 
 export default function Physics() {
   const navigate = useNavigate();
@@ -37,12 +36,7 @@ export default function Physics() {
       {loading && <Loading progress={progress} />}
 
       {!loading && (
-        <motion.div
-          initial={{ y: "50%", opacity: 0 }} // Starts halfway down instead of fully off-screen
-          animate={{ y: "0%", opacity: 1 }} // Moves smoothly into view
-          transition={{ duration: 0.2, ease: "easeInOut" }} // Adjusted timing for smoothness
-          className="absolute inset-0 bg-gray-800 text-white p-6 flex flex-col items-center"
-        >
+        <div className="absolute inset-0 bg-gray-800 text-white p-6 flex flex-col items-center">
           {/* Back button */}
           <button
             onClick={() => navigate("/home")}
@@ -92,7 +86,7 @@ export default function Physics() {
               />
             </div>
           </div>
-        </motion.div>
+        </div>
       )}
     </div>
   );
