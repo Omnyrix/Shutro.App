@@ -7,6 +7,14 @@ import { getCookie, eraseCookie } from "../utils/cookie";
 import { GiAtom, GiChemicalDrop, GiFrog } from "react-icons/gi";
 import { FaCalculator, FaBars, FaArrowLeft } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+// Lazy-load pages for /home, /physics, /chemistry, /biology, /highermath
+import("../home/home");
+import("../subjects/physics");
+import("../subjects/chemistry");
+import("../subjects/biology");
+import("../subjects/higher_math");
+import("../routes/404");
+
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 

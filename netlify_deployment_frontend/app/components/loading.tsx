@@ -17,14 +17,6 @@ export default function Loading() {
       return;
     }
 
-    // Lazy-load pages for /home, /physics, /chemistry, /biology, /highermath
-    import("../home/home");
-    import("../subjects/physics");
-    import("../subjects/chemistry");
-    import("../subjects/biology");
-    import("../subjects/higher_math");
-    import("../routes/404");
-
     // Simulated loading animation
     const interval = setInterval(() => {
       setProgress((prev) => Math.min(prev + (100 / 10), 100));
