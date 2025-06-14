@@ -29,12 +29,13 @@ export default function Home() {
         setIsDemo(res.data.demo === true);
       })
       .catch(() => {
+        eraseCookie("session");
         navigate("/auth/login");
       })
       .finally(() => {
         setTimeout(() => {
           setLoading(false);
-        }, 500);
+        }, 0);
       });
   }, [navigate]);
 
