@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getCookie } from "../utils/cookie";
 import Loading from "../components/loading"; // Import loading screen
 import Menu from "../components/topbar"; // Import Menu component
+import { motion } from "framer-motion";
 
 export default function Biology() {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ export default function Biology() {
   const [loading, setLoading] = useState(true); // Loading state
   const [progress, setProgress] = useState(0); // Dynamic progress bar
 
-  const LOADING_TIME = 0; // 0.5 sec loading duration
+  const LOADING_TIME = 0; // 0.5 sec loading duration (set to 0 means immediate)
 
   useEffect(() => {
     const session = getCookie("session");
@@ -32,7 +33,7 @@ export default function Biology() {
     setTimeout(() => {
       clearInterval(interval);
       setLoading(false); // Hide loading after full render
-    }, LOADING_TIME);
+    }, LOADING_TIME || 1); // if LOADING_TIME is 0, use fallback timeout of 1ms
 
     return () => clearInterval(interval);
   }, [navigate]);
@@ -42,18 +43,28 @@ export default function Biology() {
   };
 
   return (
-    <div className="relative min-h-screen bg-gray-800 text-white p-6 flex flex-col items-center">
+    <div className="relative min-h-screen bg-gray-800 text-white flex flex-col items-center">
       {loading && <Loading progress={progress} />} {/* Show loading screen */}
 
       {!loading && (
-        <>
+        // Motion wrapper that slides the content up smoothly
+        <motion.div
+          initial={{ y: "100%", opacity: 0 }}
+          animate={{ y: "0%", opacity: 1 }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}
+          className="w-full max-w-4xl px-4 mx-auto"
+        >
           {/* Menu Component */}
           <Menu username={username} />
 
           {/* Main Content */}
-          <h1 className="text-3xl font-bold text-center mb-6">Biology Formulas</h1>
-          <p className="text-lg mb-6 text-center">Choose a paper:</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
+          <h1 className="text-3xl md:text-4xl font-bold text-center mb-6">
+            Biology Formulas
+          </h1>
+          <p className="text-lg md:text-xl mb-6 text-center">
+            Choose a paper:
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md mx-auto">
             {/* 1st Paper */}
             <div
               className="cursor-pointer"
@@ -86,7 +97,6 @@ export default function Biology() {
                 className="mt-1"
               />
             </div>
-
             {/* 2nd Paper */}
             <div
               className="cursor-pointer"
@@ -120,7 +130,7 @@ export default function Biology() {
               />
             </div>
           </div>
-        </>
+        </motion.div>
       )}
     </div>
   );

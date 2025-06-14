@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { setCookie } from "../utils/cookie";
 import { useNavigate } from "react-router-dom";
+import { setCookie } from "../utils/cookie";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import icons for show/hide password toggle
 import Loading from "./auth_loading"; // Import loading component
 import Turnstile from "../components/Turnstile"; // Import Cloudflare Turnstile component
+import { AnimatePresence } from "framer-motion";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -59,7 +60,7 @@ export default function Login() {
         return;
       }
     } catch (err: any) {
-      setError("Human varification failed. Please relaod the page");
+      setError("Human verification failed. Please reload the page");
       return;
     }
 
@@ -77,7 +78,9 @@ export default function Login() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-800">
-      {loading && <Loading />} {/* Show loading screen */}
+      <AnimatePresence>
+        {loading && <Loading />} {/* Show loading screen with faster exit (0.1s) */}
+      </AnimatePresence>
 
       {!loading && (
         <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80">

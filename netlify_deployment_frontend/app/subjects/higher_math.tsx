@@ -3,102 +3,98 @@ import { useNavigate } from "react-router-dom";
 import { getCookie } from "../utils/cookie";
 import Loading from "../components/loading"; // Import loading screen
 import ProfileMenu from "../components/topbar"; // Import ProfileMenu component
+import { motion } from "framer-motion";
 
 export default function HigherMath() {
   const navigate = useNavigate();
   const [username, setUsername] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true); // Loading state
-  const [progress, setProgress] = useState(0); // Dynamic progress bar
-
-  const LOADING_TIME = 0; // Set loading duration to 0.5 sec
+  const [loading, setLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const LOADING_TIME = 0; // Loading duration remains unchanged
 
   useEffect(() => {
     const session = getCookie("session");
-
     if (!session) {
-      navigate("/auth/login"); // Redirect if no session
+      navigate("/auth/login");
       return;
     }
-
     setUsername(session);
 
-    // Simulated loading animation
     const interval = setInterval(() => {
       setProgress((prev) => Math.min(prev + (100 / (LOADING_TIME / 50)), 100));
     }, 50);
 
     setTimeout(() => {
       clearInterval(interval);
-      setLoading(false); // Hide loading after full render
-    }, LOADING_TIME);
+      setLoading(false);
+    }, LOADING_TIME || 1);
 
     return () => clearInterval(interval);
   }, [navigate]);
 
   return (
-    <div className="relative min-h-screen bg-gray-800 text-white p-6 flex flex-col items-center">
-      {loading && <Loading progress={progress} />} {/* Show loading screen */}
+    <div className="relative min-h-screen bg-gray-900">
+      {loading && <Loading progress={progress} />}
 
       {!loading && (
-        <>
-          {/* Profile Menu */}
-          <ProfileMenu />
+        <motion.div
+          initial={{ y: "50%", opacity: 0 }} // Starts halfway down instead of fully off-screen
+          animate={{ y: "0%", opacity: 1 }} // Moves smoothly into view
+          transition={{ duration: 0.2, ease: "easeInOut" }} // Adjusted timing for smoothness
+          className="absolute inset-0 bg-gray-800 text-white p-6 flex flex-col items-center"
+        >
+          {/* Back button */}
+          <button
+            onClick={() => navigate("/home")}
+            className="self-start mb-4 text-blue-400 underline font-bold"
+          >
+            Back
+          </button>
 
-          {/* Main Title and Content */}
-          <h1 className="text-3xl font-bold text-center mb-6">Higher Math Formulas</h1>
+          <ProfileMenu />
+          <h1 className="text-3xl font-bold text-center mb-6">
+            Higher Math Formulas
+          </h1>
           <p className="text-lg mb-6 text-center">Choose a paper:</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
-            {/* 1st Paper */}
             <div
               className="cursor-pointer"
               onClick={() => navigate("/higher-math/1st-paper")}
             >
-              {/* Top thin line */}
               <hr
                 style={{ borderTop: "2px solid #9CA3AF", opacity: 0.6 }}
                 className="mb-1"
               />
               <div className="py-2 px-4">
-                <p
-                  className="text-lg font-semibold text-left"
-                  style={{ color: "#9CA3AF" }}
-                >
+                <p style={{ color: "#9CA3AF" }} className="text-lg font-semibold text-left">
                   1st Paper
                 </p>
               </div>
-              {/* Bottom thin line */}
               <hr
                 style={{ borderTop: "2px solid #9CA3AF", opacity: 0.6 }}
                 className="mt-1"
               />
             </div>
-
-            {/* 2nd Paper */}
             <div
               className="cursor-pointer"
               onClick={() => navigate("/higher-math/2nd-paper")}
             >
-              {/* Top thin line */}
               <hr
                 style={{ borderTop: "2px solid #9CA3AF", opacity: 0.6 }}
                 className="mb-1"
               />
               <div className="py-2 px-4">
-                <p
-                  className="text-lg font-semibold text-left"
-                  style={{ color: "#9CA3AF" }}
-                >
+                <p style={{ color: "#9CA3AF" }} className="text-lg font-semibold text-left">
                   2nd Paper
                 </p>
               </div>
-              {/* Bottom thin line */}
               <hr
                 style={{ borderTop: "2px solid #9CA3AF", opacity: 0.6 }}
                 className="mt-1"
               />
             </div>
           </div>
-        </>
+        </motion.div>
       )}
     </div>
   );

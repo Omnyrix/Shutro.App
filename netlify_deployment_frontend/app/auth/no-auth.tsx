@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Turnstile from "../components/Turnstile";
 import Loading from "./no-auth-loading"; // Using the loading page component
+import { AnimatePresence } from "framer-motion";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_BACKEND_URL; // adjust if needed
 
@@ -52,7 +53,6 @@ export default function WithoutAccount() {
 
       if (res.data.success) {
         // Clear any previous cookies.
-        // (Assuming any cookie logic is handled in these functions.)
         eraseCookie("session");
         eraseCookie("verification");
         // Set the session cookie with the entered username (lowercased).
@@ -78,53 +78,53 @@ export default function WithoutAccount() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Show full-page loading only during the initial page load.
-  if (initialLoading) {
-    return <Loading />;
-  }
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-800">
-      <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80">
-        <h1 className="text-xl font-bold text-white text-center mb-4">
-          Continue Without an Account
-        </h1>
-        {error && <div className="text-red-500 mb-4 text-center">{error}</div>}
-        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
-          <input
-            type="text"
-            placeholder="Enter your name"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
-            required
-            disabled={loading}
-          />
-          <div className="flex items-center">
-            <Turnstile
-              key={turnstileKey}  // Force re-render via key update
-              sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
-              onVerify={(token) => {
-                console.log("Turnstile token received:", token);
-                setTurnstileToken(token);
-              }}
-              scale={0.8}
+      <AnimatePresence>
+        {initialLoading && <Loading />}
+      </AnimatePresence>
+      {!initialLoading && (
+        <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80">
+          <h1 className="text-xl font-bold text-white text-center mb-4">
+            Continue Without an Account
+          </h1>
+          {error && <div className="text-red-500 mb-4 text-center">{error}</div>}
+          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
+            <input
+              type="text"
+              placeholder="Enter your name"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
+              required
+              disabled={loading}
             />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition"
-          >
-            {loading ? "Creating Account…" : "Use without an Account"}
-          </button>
-          {longWait && (
-            <div className="mt-4 text-yellow-400 text-center">
-              Taking too much time. Please refresh the page.
+            <div className="flex items-center">
+              <Turnstile
+                key={turnstileKey}  // Force re-render via key update
+                sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
+                onVerify={(token) => {
+                  console.log("Turnstile token received:", token);
+                  setTurnstileToken(token);
+                }}
+                scale={0.8}
+              />
             </div>
-          )}
-        </form>
-      </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition"
+            >
+              {loading ? "Creating Account…" : "Use without an Account"}
+            </button>
+            {longWait && (
+              <div className="mt-4 text-yellow-400 text-center">
+                Taking too much time. Please refresh the page.
+              </div>
+            )}
+          </form>
+        </div>
+      )}
     </div>
   );
 }

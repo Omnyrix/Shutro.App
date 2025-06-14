@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getCookie } from "../utils/cookie";
 import Loading from "../components/loading"; // Import loading screen
 import Menu from "../components/topbar"; // Import Menu component
+import { motion } from "framer-motion";
 
 export default function Chemistry() {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ export default function Chemistry() {
   const [loading, setLoading] = useState(true); // Loading state
   const [progress, setProgress] = useState(0); // Dynamic progress bar
 
-  const LOADING_TIME = 0; // Set loading duration to 0.5 sec
+  const LOADING_TIME = 0; // Set loading duration (0 means minimal delay)
 
   useEffect(() => {
     const session = getCookie("session");
@@ -30,17 +31,24 @@ export default function Chemistry() {
     setTimeout(() => {
       clearInterval(interval);
       setLoading(false); // Hide loading screen after full render
-    }, LOADING_TIME);
+    }, LOADING_TIME || 1); // Use fallback timeout if LOADING_TIME is 0
 
     return () => clearInterval(interval);
   }, [navigate]);
 
   return (
-    <div className="relative min-h-screen bg-gray-800 text-white p-6 flex flex-col items-center">
+    <div className="relative min-h-screen bg-gray-800 text-white">
       {loading && <Loading progress={progress} />} {/* Show loading screen */}
 
       {!loading && (
-        <>
+        <motion.div
+          initial={{ y: "100%", opacity: 0 }}
+          animate={{ y: "0%", opacity: 1 }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}  // Smoother sliding effect
+          // Inline style backgroundColor matching Tailwind bg-gray-800 (#1F2937)
+          style={{ backgroundColor: "#1F2937" }}
+          className="p-6 flex flex-col items-center"
+        >
           {/* Menu Component */}
           <Menu username={username} />
 
@@ -98,7 +106,7 @@ export default function Chemistry() {
               />
             </div>
           </div>
-        </>
+        </motion.div>
       )}
     </div>
   );

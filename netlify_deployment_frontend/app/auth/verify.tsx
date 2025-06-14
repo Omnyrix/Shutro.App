@@ -12,7 +12,7 @@ export default function Verify() {
   const [enteredCode, setEnteredCode] = useState("");
   const [error, setError] = useState("");
 
-  // When not defined, the VerificationLoader will be shown (full-screen).
+  // When verificationEmail is not defined, show the full-screen loader.
   if (!verificationEmail) {
     return <VerificationLoader onComplete={setVerificationEmail} />;
   }
@@ -34,6 +34,24 @@ export default function Verify() {
       }
     } catch (err: any) {
       setError("Verification error. Please try registering again.");
+      setTimeout(() => navigate("/auth/register"), 1500);
+    }
+  }
+
+  // When the user clicks "Go back to Registration", send a verification
+  // request using a code of "000000" so that the server fails it automatically.
+  async function handleGoBack() {
+    setError("");
+    try {
+      const res = await axios.post(`${backendUrl}/verify`, {
+        email: verificationEmail.toLowerCase(),
+        code: "000000",
+      });
+      // Expected to fail. In either case, show error and redirect.
+      setError("Varification canceled. Redireceting to registration...");
+      setTimeout(() => navigate("/auth/register"), 1500);
+    } catch (err: any) {
+      setError("Varification canceled. Redireceting to registration...");
       setTimeout(() => navigate("/auth/register"), 1500);
     }
   }
@@ -66,9 +84,12 @@ export default function Verify() {
           </button>
         </form>
         <div className="mt-4 text-center">
-          <a href="/auth/register" className="text-blue-400 underline font-bold text-sm">
+          <button
+            onClick={handleGoBack}
+            className="text-blue-400 underline font-bold text-sm"
+          >
             Go back to Registration
-          </a>
+          </button>
         </div>
       </div>
     </div>

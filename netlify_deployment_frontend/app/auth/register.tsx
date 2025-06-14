@@ -4,26 +4,14 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // for show/hide password toggle
 import Turnstile from "../components/Turnstile"; // Cloudflare Turnstile component
+import Loading from "./auth_reg_loading"; // Loading component for registration
+import { AnimatePresence } from "framer-motion";
 
 const backendUrl = import.meta.env.VITE_BACKSTAGE_URL || import.meta.env.VITE_BACKEND_URL; // adjust if needed
 
-async function validateEmailWithMailboxLayer(email: string): Promise<{ isValid: boolean; error?: string }> {
-  const apiKey = import.meta.env.VITE_MAILBOXLAYER_API_KEY;
-  if (!apiKey) return { isValid: false, error: "Email verification API key not set." };
-  try {
-    const res = await axios.get(
-      `https://apilayer.net/api/check?access_key=${apiKey}&email=${encodeURIComponent(email)}`
-    );
-    if (res.data.format_valid && res.data.smtp_check) {
-      return { isValid: true };
-    }
-    return { isValid: false, error: "Email address is not valid or does not exist." };
-  } catch {
-    return { isValid: false, error: "Failed to verify email address." };
-  }
-}
 
 export default function Register() {
+  const [pageLoading, setPageLoading] = useState(true); // controls the initial loading overlay
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,7 +25,13 @@ export default function Register() {
   const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
 
-  // Removed full-screen loading; the form stays visible.
+  // Show the full-screen loading overlay on initial visit for 500ms.
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setPageLoading(false);
+    }, 500);
+    return () => clearTimeout(timeout);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -45,7 +39,7 @@ export default function Register() {
     setLoading(true);
     
     // Force re-render of Turnstile widget when register is clicked.
-    setTurnstileKey(prev => prev + 1);
+    setTurnstileKey((prev) => prev + 1);
     
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
@@ -64,13 +58,6 @@ export default function Register() {
     }
 
     // Validate the email.
-    const { isValid, error: emailError } = await validateEmailWithMailboxLayer(email);
-    if (!isValid) {
-      setError(emailError || "Invalid email address.");
-      setLoading(false);
-      return;
-    }
-
     try {
       // Submit registration—server validates Turnstile token.
       const res = await axios.post(`${backendUrl}/register`, {
@@ -95,6 +82,10 @@ export default function Register() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-800">
+      {/* AnimatePresence works with Framer Motion to trigger exit transitions */}
+      <AnimatePresence>
+        {pageLoading && <Loading />}
+      </AnimatePresence>
       <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80">
         <div className="mb-6 text-center">
           <h1 className="text-xl font-bold text-white">Register</h1>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie, eraseCookie } from "../utils/cookie";
+import { motion } from "framer-motion";
 
 interface VerificationLoaderProps {
   onComplete: (verification: string) => void;
@@ -38,7 +39,13 @@ export default function VerificationLoader({ onComplete }: VerificationLoaderPro
   }, [navigate, onComplete]);
 
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center bg-gray-800 text-white z-50 transition-opacity duration-500">
+    <motion.div
+      initial={{ opacity: 1 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, filter: "blur(10px)" }}
+      transition={{ duration: 0.5, ease: "easeInOut" }}
+      className="fixed inset-0 flex flex-col items-center justify-center bg-gray-800 text-white z-50 transition-opacity duration-500"
+    >
       {/* Flashing Math Symbols */}
       <div className="relative flex gap-4 mb-6">
         <p className="text-6xl font-bold text-gray-300 animate-fade-in-out1">Σ</p>
@@ -58,6 +65,6 @@ export default function VerificationLoader({ onComplete }: VerificationLoaderPro
 
       {/* Loading Progress */}
       <p className="mt-4 text-gray-300 text-lg">Loading... {progress}%</p>
-    </div>
+    </motion.div>
   );
 }
