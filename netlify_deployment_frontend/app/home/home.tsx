@@ -9,6 +9,17 @@ import { FaCalculator, FaBars, FaArrowLeft } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 
 
+// Preload subject pages immediately when this file is parsed
+Promise.all([
+  import("../subjects/physics"),
+  import("../subjects/chemistry"),
+  import("../subjects/biology"),
+  import("../subjects/higher_math"),
+  import("../routes/404"),
+]).catch(() => {
+  // Fail silently — this is just preloading
+});
+
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 export default function Home() {
@@ -39,12 +50,6 @@ export default function Home() {
         }, 0);
       });
 
-        // ✅ Preload subject pages in background
-    import("../subjects/physics");
-    import("../subjects/chemistry");
-    import("../subjects/biology");
-    import("../subjects/higher_math");
-    import("../routes/404");
   }, [navigate]);
 
   const subjectList = [
