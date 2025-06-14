@@ -1,4 +1,3 @@
-// pages/home.tsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Loading from "../components/loading";
@@ -7,18 +6,14 @@ import { getCookie, eraseCookie } from "../utils/cookie";
 import { GiAtom, GiChemicalDrop, GiFrog } from "react-icons/gi";
 import { FaCalculator, FaBars, FaArrowLeft } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import { lazyWithPreload } from "../utils/lazyWithPreload";
 
-
-// Preload subject pages immediately when this file is parsed
-Promise.all([
-  import("../subjects/physics"),
-  import("../subjects/chemistry"),
-  import("../subjects/biology"),
-  import("../subjects/higher_math"),
-  import("../routes/404"),
-]).catch(() => {
-  // Fail silently — this is just preloading
-});
+// Preload subject pages immediately
+const PhysicsPage = lazyWithPreload(() => import("../subjects/physics"));
+const ChemistryPage = lazyWithPreload(() => import("../subjects/chemistry"));
+const BiologyPage = lazyWithPreload(() => import("../subjects/biology"));
+const MathPage = lazyWithPreload(() => import("../subjects/higher_math"));
+const NotFoundPage = lazyWithPreload(() => import("../routes/404"));
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -32,6 +27,13 @@ export default function Home() {
   const [logoutLoading, setLogoutLoading] = useState(false);
 
   useEffect(() => {
+    // Preload all routes once Home mounts
+    PhysicsPage.preload();
+    ChemistryPage.preload();
+    BiologyPage.preload();
+    MathPage.preload();
+    NotFoundPage.preload();
+
     const email = getCookie("session");
     axios
       .get(`${backendUrl}/user/${email}`)
@@ -49,7 +51,6 @@ export default function Home() {
           setLoading(false);
         }, 0);
       });
-
   }, [navigate]);
 
   const subjectList = [
@@ -112,7 +113,6 @@ export default function Home() {
       {!loading && (
         <>
           <div className="absolute inset-0 z-10">
-            {/* Top Bar */}
             <header className="fixed top-0 left-0 right-0 bg-gray-900 shadow-md flex items-center justify-between px-4 py-2 z-50">
               <div className="flex items-center gap-2">
                 <img src="/favicon.ico" alt="Logo" className="w-8 h-8" />
@@ -123,7 +123,6 @@ export default function Home() {
               </button>
             </header>
 
-            {/* Main Content */}
             <main className="pt-16 p-6">
               <h1 className="text-3xl font-bold text-center mb-6">
                 Welcome {username} to Shutro.App
@@ -152,7 +151,6 @@ export default function Home() {
             </main>
           </div>
 
-          {/* Right Sliding Panel */}
           <div
             className={`fixed top-0 right-0 h-full z-50 bg-gray-800 shadow-2xl transform transition-transform duration-300 
               ${isPanelOpen ? "translate-x-0" : "translate-x-full"} md:w-1/3 w-full`}
