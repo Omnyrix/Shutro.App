@@ -1,30 +1,48 @@
+// components/home/home.tsx or wherever your Loading component is located
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie, eraseCookie } from "../utils/cookie";
+import { lazyWithPreload } from "../utils/lazyWithPreload";
+
+// ✅ Preload the subject pages during loading
+const PhysicsPage = lazyWithPreload(() => import("../subjects/physics"));
+const ChemistryPage = lazyWithPreload(() => import("../subjects/chemistry"));
+const BiologyPage = lazyWithPreload(() => import("../subjects/biology"));
+const MathPage = lazyWithPreload(() => import("../subjects/higher_math"));
+const NotFoundPage = lazyWithPreload(() => import("../routes/404"));
+const HomePage = lazyWithPreload(() => import("../home/home"));
 
 export default function Loading() {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // Check for session cookie before loading
+    // Preload all subject pages right away
+    PhysicsPage.preload();
+    ChemistryPage.preload();
+    BiologyPage.preload();
+    MathPage.preload();
+    NotFoundPage.preload();
+    HomePage.preload();
+
     const session = getCookie("session");
     eraseCookie("verification");
+
     if (!session) {
       eraseCookie("session");
       eraseCookie("verification");
-      navigate("/auth/login"); // Redirect after clearing cookies
+      navigate("/auth/login");
       return;
     }
 
-    // Simulated loading animation
+    // Simulated loading progress
     const interval = setInterval(() => {
       setProgress((prev) => Math.min(prev + (100 / 10), 100));
     }, 50);
 
     setTimeout(() => {
       clearInterval(interval);
-    }, 500); // Ensures progress bar completes within 0.5s
+    }, 500);
 
     return () => {
       clearInterval(interval);

@@ -8,12 +8,20 @@ import { FaCalculator, FaBars, FaArrowLeft } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { lazyWithPreload } from "../utils/lazyWithPreload";
 
+
 // Preload subject pages immediately
 const PhysicsPage = lazyWithPreload(() => import("../subjects/physics"));
 const ChemistryPage = lazyWithPreload(() => import("../subjects/chemistry"));
 const BiologyPage = lazyWithPreload(() => import("../subjects/biology"));
 const MathPage = lazyWithPreload(() => import("../subjects/higher_math"));
 const NotFoundPage = lazyWithPreload(() => import("../routes/404"));
+
+// Preload all routes once Home mounts
+PhysicsPage.preload();
+ChemistryPage.preload();
+BiologyPage.preload();
+MathPage.preload();
+NotFoundPage.preload();
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -27,13 +35,6 @@ export default function Home() {
   const [logoutLoading, setLogoutLoading] = useState(false);
 
   useEffect(() => {
-    // Preload all routes once Home mounts
-    PhysicsPage.preload();
-    ChemistryPage.preload();
-    BiologyPage.preload();
-    MathPage.preload();
-    NotFoundPage.preload();
-
     const email = getCookie("session");
     axios
       .get(`${backendUrl}/user/${email}`)
