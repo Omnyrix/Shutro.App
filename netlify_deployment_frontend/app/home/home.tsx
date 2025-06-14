@@ -1,6 +1,7 @@
+// pages/home.tsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Loading from "../components/loading"; // Imported loading screen component
+import Loading from "../components/loading";
 import axios from "axios";
 import { getCookie, eraseCookie } from "../utils/cookie";
 import { GiAtom, GiChemicalDrop, GiFrog } from "react-icons/gi";
@@ -11,8 +12,6 @@ const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 export default function Home() {
   const navigate = useNavigate();
-
-  // State declarations (all required states are defined)
   const [username, setUsername] = useState("Unknown");
   const [loading, setLoading] = useState(true);
   const [isPanelOpen, setPanelOpen] = useState(false);
@@ -21,20 +20,16 @@ export default function Home() {
   const [logoutLoading, setLogoutLoading] = useState(false);
 
   useEffect(() => {
-    // Read identifier from cookie (session)
     const email = getCookie("session");
-
-    // Call API using the email as identifier.
     axios
       .get(`${backendUrl}/user/${email}`)
       .then((res) => {
         const rawUsername = res.data.username;
         setUsername(rawUsername.charAt(0).toUpperCase() + rawUsername.slice(1));
-        // Check if the account is a demo account.
         setIsDemo(res.data.demo === true);
       })
       .catch(() => {
-        navigate("/auth/login"); // Redirect to login if no user found
+        navigate("/auth/login");
       })
       .finally(() => {
         setTimeout(() => {
@@ -43,7 +38,6 @@ export default function Home() {
       });
   }, [navigate]);
 
-  // List of subjects to display on the home page.
   const subjectList = [
     {
       route: "/physics",
@@ -53,16 +47,12 @@ export default function Home() {
     {
       route: "/chemistry",
       name: "Chemistry",
-      icon: (
-        <GiChemicalDrop className="text-2xl" style={{ color: "#EA580C" }} />
-      ),
+      icon: <GiChemicalDrop className="text-2xl" style={{ color: "#EA580C" }} />,
     },
     {
       route: "/highermath",
       name: "Higher Math",
-      icon: (
-        <FaCalculator className="text-2xl" style={{ color: "#8B5CF6" }} />
-      ),
+      icon: <FaCalculator className="text-2xl" style={{ color: "#8B5CF6" }} />,
     },
     {
       route: "/biology",
@@ -71,21 +61,16 @@ export default function Home() {
     },
   ];
 
-  // Function to handle subject clicks.
   const handleSubjectClick = (route: string) => {
     navigate(route);
   };
 
-  // Logout handler: deletes demo account (if applicable) then logs out.
   async function handleLogout() {
-    console.log("handleLogout called. isDemo:", isDemo, "username:", username);
     setLogoutLoading(true);
     if (isDemo) {
       try {
         const deleteUrl = `${backendUrl}/demo/${username.toLowerCase()}`;
-        console.log("Sending DELETE request to:", deleteUrl);
         await axios.delete(deleteUrl);
-        console.log("DELETE request completed.");
       } catch (err) {
         console.error("Failed to delete demo account:", err);
       }
@@ -112,15 +97,12 @@ export default function Home() {
 
       {!loading && (
         <>
-          {/* Home Page Content */}
           <div className="absolute inset-0 z-10">
-            {/* Fixed Top Bar */}
+            {/* Top Bar */}
             <header className="fixed top-0 left-0 right-0 bg-gray-900 shadow-md flex items-center justify-between px-4 py-2 z-50">
               <div className="flex items-center gap-2">
                 <img src="/favicon.ico" alt="Logo" className="w-8 h-8" />
-                <span className="font-bold text-xl text-blue-400">
-                  Shutro.App
-                </span>
+                <span className="font-bold text-xl text-blue-400">Shutro.App</span>
               </div>
               <button onClick={() => setPanelOpen(true)} className="rounded-md p-1">
                 <FaBars className="text-2xl cursor-pointer" />
@@ -132,7 +114,6 @@ export default function Home() {
               <h1 className="text-3xl font-bold text-center mb-6">
                 Welcome {username} to Shutro.App
               </h1>
-
               <div className="flex flex-col items-center text-center w-full">
                 <p className="text-lg mb-4">Choose a subject:</p>
                 <div className="flex flex-col gap-4 w-full max-w-md mx-auto">
@@ -142,29 +123,14 @@ export default function Home() {
                       className="cursor-pointer rounded-md overflow-hidden"
                       onClick={() => handleSubjectClick(subject.route)}
                     >
-                      <hr
-                        style={{
-                          borderTop: "2px solid #9CA3AF",
-                          opacity: 0.6,
-                        }}
-                        className="mb-1"
-                      />
+                      <hr className="mb-1 border-t-2 border-gray-400 opacity-60" />
                       <div className="flex items-center gap-3 py-2 px-4">
                         {subject.icon}
-                        <p
-                          className="text-lg font-semibold text-left"
-                          style={{ color: "#9CA3AF" }}
-                        >
+                        <p className="text-lg font-semibold text-left text-gray-400">
                           {subject.name}
                         </p>
                       </div>
-                      <hr
-                        style={{
-                          borderTop: "2px solid #9CA3AF",
-                          opacity: 0.6,
-                        }}
-                        className="mt-1"
-                      />
+                      <hr className="mt-1 border-t-2 border-gray-400 opacity-60" />
                     </div>
                   ))}
                 </div>
@@ -172,7 +138,7 @@ export default function Home() {
             </main>
           </div>
 
-          {/* Settings/ Profile Panel Sliding From Right */}
+          {/* Right Sliding Panel */}
           <div
             className={`fixed top-0 right-0 h-full z-50 bg-gray-800 shadow-2xl transform transition-transform duration-300 
               ${isPanelOpen ? "translate-x-0" : "translate-x-full"} md:w-1/3 w-full`}
@@ -180,23 +146,15 @@ export default function Home() {
           >
             <div className="p-4 flex flex-col h-full justify-between">
               <div>
-                {/* Back Arrow */}
-                <button
-                  onClick={() => setPanelOpen(false)}
-                  className="rounded-md p-1 mb-4"
-                >
+                <button onClick={() => setPanelOpen(false)} className="rounded-md p-1 mb-4">
                   <FaArrowLeft className="text-2xl cursor-pointer" />
                 </button>
-                {/* Profile Section */}
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-2xl font-bold">
                     {username.charAt(0)}
                   </div>
-                  <span className="text-xl font-semibold text-white">
-                    {username}
-                  </span>
+                  <span className="text-xl font-semibold text-white">{username}</span>
                 </div>
-                {/* Change Password button (if not a demo account) */}
                 {!isDemo && (
                   <button
                     className="w-full py-2 px-3 bg-blue-600 rounded-md hover:bg-blue-700 mb-4"
@@ -208,7 +166,6 @@ export default function Home() {
                     Change Password
                   </button>
                 )}
-                {/* About Dropdown Section with Motion */}
                 <div>
                   <button
                     onClick={() => setAboutExpanded(!aboutExpanded)}
@@ -252,25 +209,9 @@ export default function Home() {
                   </AnimatePresence>
                 </div>
               </div>
-              {/* Logout Button at the bottom */}
+
               <button
-                onClick={async () => {
-                  console.log("handleLogout called. isDemo:", isDemo, "username:", username);
-                  setLogoutLoading(true);
-                  if (isDemo) {
-                    try {
-                      const deleteUrl = `${backendUrl}/demo/${username.toLowerCase()}`;
-                      console.log("Sending DELETE request to:", deleteUrl);
-                      await axios.delete(deleteUrl);
-                      console.log("DELETE request completed.");
-                    } catch (err) {
-                      console.error("Failed to delete demo account:", err);
-                    }
-                  }
-                  eraseCookie("session");
-                  setLogoutLoading(false);
-                  navigate("/welcome");
-                }}
+                onClick={handleLogout}
                 className="w-full py-2 px-3 bg-red-600 rounded-md hover:bg-red-700"
                 disabled={logoutLoading}
               >

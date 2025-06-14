@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { setCookie } from "../utils/cookie";
 import axios from "axios";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import icons for show/hide password toggle
-import Loading from "./auth_loading"; // Import loading component
-import Turnstile from "../components/Turnstile"; // Import Cloudflare Turnstile component
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import Loading from "./auth_loading";
+import Turnstile from "../components/Turnstile";
 import { AnimatePresence } from "framer-motion";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -28,10 +28,12 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // Toggle password visibility
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [tsKey, setTsKey] = useState(0); // Added state for forcing Turnstile re-render
+  const [tsKey, setTsKey] = useState(0);
+  const [loggingIn, setLoggingIn] = useState(false); // ✅ NEW
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,24 +45,26 @@ export default function Login() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    
-    // Force re-render of Turnstile widget when login is clicked.
+    setLoggingIn(true); // ✅ Start loading
+
     setTsKey(prev => prev + 1);
 
     if (!turnstileToken) {
       setError("Please confirm you are not a robot.");
+      setLoggingIn(false); // ✅ Stop on error
       return;
     }
 
-    // Verify Turnstile token using the new /verify-turnstile endpoint.
     try {
       const verRes = await axios.post(`${backendUrl}/verify-turnstile`, { turnstileToken });
       if (!verRes.data.success) {
         setError("Turnstile verification failed. Please try again.");
+        setLoggingIn(false); // ✅ Stop on error
         return;
       }
-    } catch (err: any) {
+    } catch {
       setError("Human verification failed. Please reload the page");
+      setLoggingIn(false); // ✅ Stop on error
       return;
     }
 
@@ -69,6 +73,7 @@ export default function Login() {
 
     if (result.error) {
       setError(result.error);
+      setLoggingIn(false); // ✅ Stop on error
       return;
     }
 
@@ -79,7 +84,7 @@ export default function Login() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-800">
       <AnimatePresence>
-        {loading && <Loading />} {/* Show loading screen with faster exit (0.1s) */}
+        {loading && <Loading />}
       </AnimatePresence>
 
       {!loading && (
@@ -115,7 +120,7 @@ export default function Login() {
             </div>
             <div className="flex items-center">
               <Turnstile
-                key={tsKey}  // Added key to force re-render
+                key={tsKey}
                 sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
                 onVerify={(token) => {
                   console.log("Turnstile onVerify callback fired. Token:", token);
@@ -127,8 +132,12 @@ export default function Login() {
 
             {error && <div className="text-red-500 text-center">{error}</div>}
 
-            <button className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition" type="submit">
-              Login
+            <button
+              className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition"
+              type="submit"
+              disabled={loggingIn} // ✅ Prevent double click
+            >
+              {loggingIn ? "Logging in..." : "Login"} {/* ✅ Text change */}
             </button>
           </form>
           <div className="mt-4 text-center">
