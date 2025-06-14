@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, startTransition } from "react";
 import { useNavigate } from "react-router-dom";
 import Loading from "../components/loading";
 import axios from "axios";
@@ -8,20 +8,11 @@ import { FaCalculator, FaBars, FaArrowLeft } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { lazyWithPreload } from "../utils/lazyWithPreload";
 
-
-// Preload subject pages immediately
 const PhysicsPage = lazyWithPreload(() => import("../routes/subjects/physics"));
 const ChemistryPage = lazyWithPreload(() => import("../routes/subjects/chemistry"));
 const BiologyPage = lazyWithPreload(() => import("../routes/subjects/biology"));
 const MathPage = lazyWithPreload(() => import("../routes/subjects/higher_math"));
 const NotFoundPage = lazyWithPreload(() => import("../routes/404"));
-
-// Preload all routes once Home mounts
-PhysicsPage.preload();
-ChemistryPage.preload();
-BiologyPage.preload();
-MathPage.preload();
-NotFoundPage.preload();
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -35,6 +26,13 @@ export default function Home() {
   const [logoutLoading, setLogoutLoading] = useState(false);
 
   useEffect(() => {
+    // Preload subject pages in the background after mount
+    setTimeout(() => PhysicsPage.preload(), 50);
+    setTimeout(() => ChemistryPage.preload(), 100);
+    setTimeout(() => BiologyPage.preload(), 150);
+    setTimeout(() => MathPage.preload(), 200);
+    setTimeout(() => NotFoundPage.preload(), 300);
+
     const email = getCookie("session");
     axios
       .get(`${backendUrl}/user/${email}`)
@@ -50,7 +48,7 @@ export default function Home() {
       .finally(() => {
         setTimeout(() => {
           setLoading(false);
-        }, 500);
+        }, 100);
       });
   }, [navigate]);
 
@@ -59,26 +57,32 @@ export default function Home() {
       route: "/physics",
       name: "Physics",
       icon: <GiAtom className="text-2xl" style={{ color: "#1D4ED8" }} />,
+      preload: () => PhysicsPage.preload(),
     },
     {
       route: "/chemistry",
       name: "Chemistry",
       icon: <GiChemicalDrop className="text-2xl" style={{ color: "#EA580C" }} />,
+      preload: () => ChemistryPage.preload(),
     },
     {
       route: "/highermath",
       name: "Higher Math",
       icon: <FaCalculator className="text-2xl" style={{ color: "#8B5CF6" }} />,
+      preload: () => MathPage.preload(),
     },
     {
       route: "/biology",
       name: "Biology",
       icon: <GiFrog className="text-2xl" style={{ color: "#10B981" }} />,
+      preload: () => BiologyPage.preload(),
     },
   ];
 
   const handleSubjectClick = (route: string) => {
-    navigate(route);
+    startTransition(() => {
+      navigate(route);
+    });
   };
 
   async function handleLogout() {
@@ -136,6 +140,7 @@ export default function Home() {
                       key={index}
                       className="cursor-pointer rounded-md overflow-hidden"
                       onClick={() => handleSubjectClick(subject.route)}
+                      onMouseEnter={subject.preload}
                     >
                       <hr className="mb-1 border-t-2 border-gray-400 opacity-60" />
                       <div className="flex items-center gap-3 py-2 px-4">
