@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { eraseCookie, getCookie } from "../utils/cookie";
-import Loading from "../components/loading_not_lazy";
+import Loading from "../components/loading";
 import { motion, AnimatePresence } from "framer-motion";
 import { lazyWithPreload } from "../utils/lazyWithPreload";
 import { GiAtom, GiChemicalDrop, GiFrog } from "react-icons/gi";
@@ -24,7 +24,8 @@ export default function Home() {
   const [aboutExpanded, setAboutExpanded] = useState(false);
   const [isDemo, setIsDemo] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
-  const [clickedDemoButton, setClickedDemoButton] = useState<"login" | "register" | null>(null);
+  const [clickedDemoButton, setClickedDemoButton] = useState<"login" | "register" | "logout" | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<"login" | "register" | "logout" | null>(null);
 
   useEffect(() => {
     setTimeout(() => PhysicsPage.preload(), 50);
@@ -46,9 +47,7 @@ export default function Home() {
         navigate("/auth/login");
       })
       .finally(() => {
-        setTimeout(() => {
-          setLoading(false);
-        }, 100);
+        setTimeout(() => setLoading(false), 700);
       });
   }, [navigate]);
 
@@ -87,8 +86,7 @@ export default function Home() {
     setLogoutLoading(true);
     if (isDemo) {
       try {
-        const deleteUrl = `${backendUrl}/demo/${username.toLowerCase()}`;
-        await axios.delete(deleteUrl);
+        await axios.delete(`${backendUrl}/demo/${username.toLowerCase()}`);
       } catch (err) {
         console.error("Failed to delete demo account:", err);
       }
@@ -98,28 +96,32 @@ export default function Home() {
     navigate("/welcome");
   }
 
-  async function handleDemoLogout(destination: string, type: "login" | "register") {
-    setLogoutLoading(true);
-    setClickedDemoButton(type);
-    try {
-      const deleteUrl = `${backendUrl}/demo/${username.toLowerCase()}`;
-      await axios.delete(deleteUrl);
-    } catch (err) {
-      console.error("Failed to delete demo account:", err);
+  async function handleDemoLogout(destination: string, type: "login" | "register" | "logout") {
+    if (confirmDelete === type) {
+      setLogoutLoading(true);
+      setClickedDemoButton(type);
+      try {
+        await axios.delete(`${backendUrl}/demo/${username.toLowerCase()}`);
+      } catch (err) {
+        console.error("Failed to delete demo account:", err);
+      }
+      eraseCookie("session");
+      navigate(destination);
+    } else {
+      setConfirmDelete(type);
     }
-    eraseCookie("session");
-    navigate(destination);
   }
 
   return (
-    <div className="relative min-h-screen bg-gray-800 text-white">
+    <>
       <AnimatePresence>
         {loading && (
           <motion.div
+            key="loading"
             initial={{ opacity: 1 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, filter: "blur(10px)" }}
-            transition={{ duration: 0, ease: "easeInOut" }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] bg-gray-900 flex items-center justify-center"
           >
             <Loading />
           </motion.div>
@@ -127,55 +129,55 @@ export default function Home() {
       </AnimatePresence>
 
       {!loading && (
-        <>
-          <div className="absolute inset-0 z-10">
-            <header className="fixed top-0 left-0 right-0 bg-gray-900 shadow-md flex items-center justify-between px-4 py-2 z-50">
-              <div className="flex items-center gap-2">
-                <img src="/favicon.ico" alt="Logo" className="w-8 h-8" />
-                <span className="font-bold text-xl text-blue-400">Shutro.App</span>
-              </div>
-              <button onClick={() => setPanelOpen(true)} className="rounded-md p-1">
-                <FaBars className="text-2xl cursor-pointer" />
-              </button>
-            </header>
+        <div className="relative min-h-screen bg-gray-800 text-white">
+          {/* HEADER */}
+          <header className="fixed top-0 left-0 right-0 bg-gray-900 shadow-md flex items-center justify-between px-4 py-2 z-50">
+            <div className="flex items-center gap-2">
+              <img src="/favicon.ico" alt="Logo" className="w-8 h-8" />
+              <span className="font-bold text-xl text-blue-400">Shutro.App</span>
+            </div>
+            <button onClick={() => setPanelOpen(true)} className="rounded-md p-1">
+              <FaBars className="text-2xl cursor-pointer" />
+            </button>
+          </header>
 
-            <main className="pt-16 p-6">
-              <h1 className="text-3xl font-bold text-center mb-6">
-                <span className="text-white">Welcome</span>{" "}
-                <span style={{ color: "#1D4ED8" }}>{username}</span>{" "}
-                <span className="text-white">to</span>{" "}
-                <span className="text-blue-400">Shutro.App</span>
-              </h1>
+          {/* MAIN */}
+          <main className="pt-16 p-6">
+            <h1 className="text-3xl font-bold text-center mb-6">
+              <span className="text-white">Welcome</span>{" "}
+              <span style={{ color: "#1D4ED8" }}>{username}</span>{" "}
+              <span className="text-white">to</span>{" "}
+              <span className="text-blue-400">Shutro.App</span>
+            </h1>
 
-              <div className="flex flex-col items-center text-center w-full">
-                <p className="text-lg mb-4">Choose a subject:</p>
-                <div className="flex flex-col gap-4 w-full max-w-md mx-auto">
-                  {subjectList.map((subject, index) => (
-                    <div
-                      key={index}
-                      className="subject-button cursor-pointer"
-                      onClick={() => handleSubjectClick(subject.route)}
-                      onMouseEnter={subject.preload}
-                    >
-                      <hr className="mb-1 border-t-2 border-gray-400 opacity-60" />
-                      <div className="flex items-center gap-4 py-4 px-5">
-                        {subject.icon}
-                        <p className="text-lg font-semibold text-left text-gray-400">
-                          {subject.name}
-                        </p>
-                      </div>
-                      <hr className="mt-1 border-t-2 border-gray-400 opacity-60" />
+            <div className="flex flex-col items-center text-center w-full">
+              <p className="text-lg mb-4">Choose a subject:</p>
+              <div className="flex flex-col gap-4 w-full max-w-md mx-auto">
+                {subjectList.map((subject, index) => (
+                  <div
+                    key={index}
+                    className="subject-button cursor-pointer"
+                    onClick={() => handleSubjectClick(subject.route)}
+                    onMouseEnter={subject.preload}
+                  >
+                    <hr className="mb-1 border-t-2 border-gray-400 opacity-60" />
+                    <div className="flex items-center gap-4 py-4 px-5">
+                      {subject.icon}
+                      <p className="text-lg font-semibold text-left text-gray-400">
+                        {subject.name}
+                      </p>
                     </div>
-                  ))}
-                </div>
+                    <hr className="mt-1 border-t-2 border-gray-400 opacity-60" />
+                  </div>
+                ))}
               </div>
-            </main>
-          </div>
+            </div>
+          </main>
 
+          {/* PANEL */}
           <div
             className={`fixed top-0 right-0 h-full z-50 bg-gray-800 shadow-2xl transform transition-transform duration-300 
-              ${isPanelOpen ? "translate-x-0" : "translate-x-full"} md:w-1/3 w-full`}
-            onClick={(e) => e.stopPropagation()}
+            ${isPanelOpen ? "translate-x-0" : "translate-x-full"} md:w-1/3 w-full`}
           >
             <div className="p-4 flex flex-col h-full justify-between">
               <div>
@@ -190,22 +192,33 @@ export default function Home() {
                 </div>
                 {isDemo ? (
                   <div className="flex flex-col gap-2 mb-4">
+                    {confirmDelete === "login" && (
+                      <p className="text-red-500 text-sm text-center">
+                        This action will delete your demo account. Click again to confirm deletion.
+                      </p>
+                    )}
                     <button
                       className="w-full py-2 px-3 bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
                       onClick={() => handleDemoLogout("/auth/login", "login")}
                       disabled={logoutLoading && clickedDemoButton !== "login"}
                     >
                       {logoutLoading && clickedDemoButton === "login"
-                        ? "Deleting demo account..."
+                        ? "Deleting demo account and Redirecting to Login..."
                         : "Login"}
                     </button>
+
+                    {confirmDelete === "register" && (
+                      <p className="text-red-500 text-sm text-center">
+                        This action will delete your demo account. Click again to confirm deletion.
+                      </p>
+                    )}
                     <button
                       className="w-full py-2 px-3 bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
                       onClick={() => handleDemoLogout("/auth/register", "register")}
                       disabled={logoutLoading && clickedDemoButton !== "register"}
                     >
                       {logoutLoading && clickedDemoButton === "register"
-                        ? "Deleting demo account..."
+                        ? "Deleting demo account and Redirecting to Register..."
                         : "Register"}
                     </button>
                   </div>
@@ -221,10 +234,12 @@ export default function Home() {
                   </button>
                 )}
 
+                {/* ABOUT DROPDOWN */}
                 <div>
+                  <hr className="border-t border-gray-600 opacity-40 mb-2" />
                   <button
                     onClick={() => setAboutExpanded(!aboutExpanded)}
-                    className="w-full flex items-center justify-between py-2 px-3 bg-gray-700 rounded-md border border-purple-500 text-purple-500 hover:bg-purple-600 hover:text-white transition-colors duration-300"
+                    className="w-full flex items-center justify-between py-2 px-3 bg-gray-800 rounded-none text-gray-300"
                   >
                     <span>About</span>
                     <svg
@@ -244,41 +259,54 @@ export default function Home() {
                       ></path>
                     </svg>
                   </button>
+                  <hr className="border-t border-gray-600 opacity-40 mt-2" />
+
                   <AnimatePresence>
                     {aboutExpanded && (
                       <motion.div
                         key="aboutDropdown"
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                        className="mt-2 overflow-hidden p-2 bg-gray-700 rounded-md border border-purple-500"
+                        initial={{ opacity: 0, height: 0, y: -10 }}
+                        animate={{ opacity: 1, height: "auto", y: 0 }}
+                        exit={{ opacity: 0, height: 0, y: -10 }}
+                        transition={{ duration: 0.5, ease: [0.25, 0.8, 0.25, 1] }}
+                        className="mt-2 overflow-hidden px-2"
                       >
-                        <p className="text-purple-200">
-                          Example about text goes here. Lorem ipsum dolor sit amet,
-                          consectetur adipiscing elit. Praesent vel ligula scelerisque,
-                          vehicula dui eu, fermentum velit.
-                        </p>
+                        <div className="bg-gray-700 text-sm text-gray-200 rounded-xl px-4 py-3 shadow-inner">
+                          <p>
+                            Example about text goes here. Lorem ipsum dolor sit amet,
+                            consectetur adipiscing elit. Praesent vel ligula scelerisque,
+                            vehicula dui eu, fermentum velit.
+                          </p>
+                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
                 </div>
               </div>
+
+              {/* Move the demo logout confirmation message just above the logout button */}
+              {isDemo && confirmDelete === "logout" && (
+                <p className="text-red-500 text-sm text-center mb-1">
+                  This action will delete your demo account. Click again to confirm deletion.
+                </p>
+              )}
               <button
-                onClick={handleLogout}
+                onClick={() =>
+                  isDemo
+                    ? handleDemoLogout("/welcome", "logout")
+                    : handleLogout()
+                }
                 className="w-full py-2 px-3 bg-red-600 rounded-md hover:bg-red-700"
                 disabled={logoutLoading}
               >
-                {logoutLoading
-                  ? isDemo
-                    ? "Deleting demo account..."
-                    : "Logging out..."
+                {logoutLoading && clickedDemoButton === "logout"
+                  ? "Deleting demo account and Logging out..."
                   : "Logout"}
               </button>
             </div>
           </div>
-        </>
+        </div>
       )}
-    </div>
+    </>
   );
 }
