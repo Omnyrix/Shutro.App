@@ -26,12 +26,11 @@ export default function Home() {
   const [logoutLoading, setLogoutLoading] = useState(false);
 
   useEffect(() => {
-    // Preload all subjects at load time for instant navigation
-    PhysicsPage.preload();
-    ChemistryPage.preload();
-    BiologyPage.preload();
-    MathPage.preload();
-    NotFoundPage.preload();
+    setTimeout(() => PhysicsPage.preload(), 50);
+    setTimeout(() => ChemistryPage.preload(), 100);
+    setTimeout(() => BiologyPage.preload(), 150);
+    setTimeout(() => MathPage.preload(), 200);
+    setTimeout(() => NotFoundPage.preload(), 300);
 
     const email = getCookie("session");
     axios
@@ -79,11 +78,9 @@ export default function Home() {
     },
   ];
 
-  const handleSubjectClick = (route: string, preload: () => void) => {
-    preload(); // Trigger chunk loading
-    setTimeout(() => {
-      navigate(route);
-    }, 50); // Give preload a head start
+  // ✅ FIX: Use navigate instead of window.location.href
+  const handleSubjectClick = (route: string) => {
+    navigate(route);
   };
 
   async function handleLogout() {
@@ -144,7 +141,7 @@ export default function Home() {
                     <div
                       key={index}
                       className="subject-button cursor-pointer"
-                      onClick={() => handleSubjectClick(subject.route, subject.preload)}
+                      onClick={() => handleSubjectClick(subject.route)}
                       onMouseEnter={subject.preload}
                     >
                       <hr className="mb-1 border-t-2 border-gray-400 opacity-60" />
