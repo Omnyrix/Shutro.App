@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 
 export default function TopBarLayout({ children }: { children: React.ReactNode }) {
@@ -14,10 +14,10 @@ export default function TopBarLayout({ children }: { children: React.ReactNode }
         >
           <FaArrowLeft className="text-2xl text-white" />
         </button>
-        <div className="flex items-center gap-2 ml-4">
+        <Link to="/home" className="flex items-center gap-2 ml-4">
           <img src="/favicon.ico" alt="Logo" className="w-8 h-8" />
           <span className="font-bold text-xl text-blue-400">Shutro.App</span>
-        </div>
+        </Link>
       </header>
 
       {/* Main Content (offset by the header height) */}

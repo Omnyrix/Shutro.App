@@ -9,7 +9,6 @@ import { AnimatePresence } from "framer-motion";
 
 const backendUrl = import.meta.env.VITE_BACKSTAGE_URL || import.meta.env.VITE_BACKEND_URL; // adjust if needed
 
-
 export default function Register() {
   const [pageLoading, setPageLoading] = useState(true); // controls the initial loading overlay
   const [username, setUsername] = useState("");
@@ -86,96 +85,104 @@ export default function Register() {
       <AnimatePresence>
         {pageLoading && <Loading />}
       </AnimatePresence>
-      <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80">
-        <div className="mb-6 text-center">
-          <h1 className="text-xl font-bold text-white">Register</h1>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
-          <input
-            className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value.replace(/\s/g, ""))}
-            required
-          />
-          <input
-            className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
-            placeholder="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <div className="relative">
+      {!pageLoading && (
+        <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80">
+          <div className="mb-6 text-center">
+            <h1 className="text-xl font-bold text-white">Register</h1>
+          </div>
+          {error && <div className="text-red-500 mb-4 text-center">{error}</div>}
+          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
             <input
-              className="w-full border border-gray-700 bg-gray-800 text-white p-2 pr-10 rounded focus:outline-none focus:border-blue-500"
-              placeholder="Password"
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
+              placeholder="Username"
+              value={username}
+              onChange={(e) =>
+                // Automatically remove spaces from the input
+                setUsername(e.target.value.replace(/\s/g, ""))
+              }
+              required
+              // Enforce only letters and numbers, no spaces, and minimum 3 letters (via regex)
+              pattern="(?=.*[A-Za-z].*[A-Za-z].*[A-Za-z])[A-Za-z0-9]+"
+              title="Username must contain only letters and numbers with no spaces and at least 3 letters."
+            />
+            <input
+              className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
+              placeholder="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 opacity-70 hover:opacity-100"
-            >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </button>
-          </div>
-          <div className="relative">
-            <input
-              className="w-full border border-gray-700 bg-gray-800 text-white p-2 pr-10 rounded focus:outline-none focus:border-blue-500"
-              placeholder="Confirm Password"
-              type={showConfirm ? "text" : "password"}
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirm(!showConfirm)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 opacity-70 hover:opacity-100"
-            >
-              {showConfirm ? <FaEyeSlash /> : <FaEye />}
-            </button>
-          </div>
-          {showMismatch && (
-            <div className="text-yellow-500 text-center text-sm">
-              Passwords do not match.
+            <div className="relative">
+              <input
+                className="w-full border border-gray-700 bg-gray-800 text-white p-2 pr-10 rounded focus:outline-none focus:border-blue-500"
+                placeholder="Password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 opacity-70 hover:opacity-100"
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
             </div>
-          )}
-          <div className="flex items-center">
-            <Turnstile
-              key={turnstileKey}
-              id="turnstile-widget"
-              sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
-              onVerify={(token) => {
-                console.log("Turnstile onVerify callback fired. Token:", token);
-                setTurnstileToken(token);
-              }}
-              scale={0.8}
-            />
-          </div>
-          <button
-            className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition"
-            type="submit"
-            disabled={loading || (confirm.length > 0 && password !== confirm)}
-          >
-            {loading ? "Creating account..." : "Register"}
-          </button>
-          {error && (
-            <div className="text-red-500 mt-4 text-center">
-              {error}
+            <div className="relative">
+              <input
+                className="w-full border border-gray-700 bg-gray-800 text-white p-2 pr-10 rounded focus:outline-none focus:border-blue-500"
+                placeholder="Confirm Password"
+                type={showConfirm ? "text" : "password"}
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 opacity-70 hover:opacity-100"
+              >
+                {showConfirm ? <FaEyeSlash /> : <FaEye />}
+              </button>
             </div>
-          )}
-        </form>
-        <div className="mt-4 text-center">
-          <a href="/auth/login" className="text-blue-400 underline font-bold text-sm">
-            Already have an account?
-          </a>
+            {showMismatch && (
+              <div className="text-yellow-500 text-center text-sm">
+                Passwords do not match.
+              </div>
+            )}
+            <div className="flex items-center">
+              <Turnstile
+                key={turnstileKey} // Force re-render via key update
+                sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
+                onVerify={(token) => {
+                  console.log("Turnstile token received:", token);
+                  setTurnstileToken(token);
+                }}
+                scale={0.8}
+              />
+            </div>
+            <button
+              className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition"
+              type="submit"
+              disabled={loading || (confirm.length > 0 && password !== confirm)}
+            >
+              {loading ? "Creating account..." : "Register"}
+            </button>
+            {error && (
+              <div className="text-red-500 mt-4 text-center">
+                {error}
+              </div>
+            )}
+          </form>
+          <div className="mt-4 text-center">
+            <a href="/auth/login" className="text-blue-400 underline font-bold text-sm">
+              Already have an account?
+            </a>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

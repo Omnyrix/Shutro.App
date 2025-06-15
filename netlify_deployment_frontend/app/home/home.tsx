@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Loading from "../components/loading";
-import axios from "axios";
-import { getCookie, eraseCookie } from "../utils/cookie";
-import { GiAtom, GiChemicalDrop, GiFrog } from "react-icons/gi";
-import { FaCalculator, FaBars, FaArrowLeft } from "react-icons/fa";
+import { eraseCookie, getCookie } from "../utils/cookie";
+import Loading from "../components/loading_not_lazy";
 import { motion, AnimatePresence } from "framer-motion";
 import { lazyWithPreload } from "../utils/lazyWithPreload";
+import { GiAtom, GiChemicalDrop, GiFrog } from "react-icons/gi";
+import { FaCalculator, FaBars, FaArrowLeft } from "react-icons/fa";
+import axios from "axios";
 
 const PhysicsPage = lazyWithPreload(() => import("../routes/subjects/physics"));
 const ChemistryPage = lazyWithPreload(() => import("../routes/subjects/chemistry"));
@@ -24,6 +24,7 @@ export default function Home() {
   const [aboutExpanded, setAboutExpanded] = useState(false);
   const [isDemo, setIsDemo] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
+  const [clickedDemoButton, setClickedDemoButton] = useState<"login" | "register" | null>(null);
 
   useEffect(() => {
     setTimeout(() => PhysicsPage.preload(), 50);
@@ -78,7 +79,6 @@ export default function Home() {
     },
   ];
 
-  // ✅ FIX: Use navigate instead of window.location.href
   const handleSubjectClick = (route: string) => {
     navigate(route);
   };
@@ -98,6 +98,19 @@ export default function Home() {
     navigate("/welcome");
   }
 
+  async function handleDemoLogout(destination: string, type: "login" | "register") {
+    setLogoutLoading(true);
+    setClickedDemoButton(type);
+    try {
+      const deleteUrl = `${backendUrl}/demo/${username.toLowerCase()}`;
+      await axios.delete(deleteUrl);
+    } catch (err) {
+      console.error("Failed to delete demo account:", err);
+    }
+    eraseCookie("session");
+    navigate(destination);
+  }
+
   return (
     <div className="relative min-h-screen bg-gray-800 text-white">
       <AnimatePresence>
@@ -106,7 +119,7 @@ export default function Home() {
             initial={{ opacity: 1 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, filter: "blur(10px)" }}
-            transition={{ duration: 0.1, ease: "easeInOut" }}
+            transition={{ duration: 0, ease: "easeInOut" }}
           >
             <Loading />
           </motion.div>
@@ -175,7 +188,28 @@ export default function Home() {
                   </div>
                   <span className="text-xl font-semibold text-white">{username}</span>
                 </div>
-                {!isDemo && (
+                {isDemo ? (
+                  <div className="flex flex-col gap-2 mb-4">
+                    <button
+                      className="w-full py-2 px-3 bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                      onClick={() => handleDemoLogout("/auth/login", "login")}
+                      disabled={logoutLoading && clickedDemoButton !== "login"}
+                    >
+                      {logoutLoading && clickedDemoButton === "login"
+                        ? "Deleting demo account..."
+                        : "Login"}
+                    </button>
+                    <button
+                      className="w-full py-2 px-3 bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                      onClick={() => handleDemoLogout("/auth/register", "register")}
+                      disabled={logoutLoading && clickedDemoButton !== "register"}
+                    >
+                      {logoutLoading && clickedDemoButton === "register"
+                        ? "Deleting demo account..."
+                        : "Register"}
+                    </button>
+                  </div>
+                ) : (
                   <button
                     className="w-full py-2 px-3 bg-blue-600 rounded-md hover:bg-blue-700 mb-4 transition-colors"
                     onClick={() => {
@@ -186,6 +220,7 @@ export default function Home() {
                     Change Password
                   </button>
                 )}
+
                 <div>
                   <button
                     onClick={() => setAboutExpanded(!aboutExpanded)}
@@ -229,13 +264,16 @@ export default function Home() {
                   </AnimatePresence>
                 </div>
               </div>
-
               <button
                 onClick={handleLogout}
                 className="w-full py-2 px-3 bg-red-600 rounded-md hover:bg-red-700"
                 disabled={logoutLoading}
               >
-                {logoutLoading ? "Logging out..." : "Logout"}
+                {logoutLoading
+                  ? isDemo
+                    ? "Deleting demo account..."
+                    : "Logging out..."
+                  : "Logout"}
               </button>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { setCookie, eraseCookie } from "../utils/cookie";
+import { setCookie, eraseCookie, getCookie } from "../utils/cookie";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Turnstile from "../components/Turnstile";
@@ -26,10 +26,24 @@ export default function WithoutAccount() {
     // Force re-render of Turnstile component
     setTurnstileKey((prev) => prev + 1);
 
-    if (!username.trim()) {
+    const trimmed = username.trim();
+    if (!trimmed) {
       setError("Please enter your name.");
       return;
     }
+    // Input now never contains spaces (they have been stripped in onChange),
+    // but we keep a regex check to enforce only alphanumerics.
+    if (!/^[A-Za-z0-9]+$/.test(trimmed)) {
+      setError("Name must contain only letters and numbers; spaces are not allowed.");
+      return;
+    }
+    // Ensure that the name has at least 3 letters.
+    const letterCount = (trimmed.match(/[A-Za-z]/g) || []).length;
+    if (letterCount < 3) {
+      setError("Name must contain at least 3 letters.");
+      return;
+    }
+
     if (!turnstileToken) {
       setError("Please confirm you are not a robot.");
       return;
@@ -46,7 +60,7 @@ export default function WithoutAccount() {
     try {
       // Use the demo account endpoint.
       const res = await axios.post(`${backendUrl}/demo`, {
-        username: username.trim(),
+        username: trimmed,
       });
 
       clearTimeout(timer);
@@ -56,7 +70,7 @@ export default function WithoutAccount() {
         eraseCookie("session");
         eraseCookie("verification");
         // Set the session cookie with the entered username (lowercased).
-        setCookie("session", username.trim().toLowerCase());
+        setCookie("session", trimmed.toLowerCase());
         navigate("/home");
       } else {
         setError(res.data.error || "Failed to create a demo account.");
@@ -70,8 +84,7 @@ export default function WithoutAccount() {
   }
 
   useEffect(() => {
-    // Simulate initial loading (e.g., reading any initial data if needed)
-    // For our purposes, we simply wait for 500ms.
+    // Simulate initial loading delay of 500ms.
     const timer = setTimeout(() => {
       setInitialLoading(false);
     }, 500);
@@ -80,11 +93,9 @@ export default function WithoutAccount() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-800">
-      <AnimatePresence>
-        {initialLoading && <Loading />}
-      </AnimatePresence>
+      <AnimatePresence>{initialLoading && <Loading />}</AnimatePresence>
       {!initialLoading && (
-        <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80">
+        <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80 mx-4">
           <h1 className="text-xl font-bold text-white text-center mb-4">
             Continue Without an Account
           </h1>
@@ -94,14 +105,17 @@ export default function WithoutAccount() {
               type="text"
               placeholder="Enter your name"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) =>
+                // Automatically remove spaces from the input
+                setUsername(e.target.value.replace(/\s/g, ""))
+              }
               className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
               required
               disabled={loading}
             />
             <div className="flex items-center">
               <Turnstile
-                key={turnstileKey}  // Force re-render via key update
+                key={turnstileKey} // Force re-render via key update
                 sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
                 onVerify={(token) => {
                   console.log("Turnstile token received:", token);
