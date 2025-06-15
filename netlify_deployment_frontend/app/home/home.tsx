@@ -26,7 +26,6 @@ export default function Home() {
   const [logoutLoading, setLogoutLoading] = useState(false);
 
   useEffect(() => {
-    // Preload subject pages in the background after mount
     setTimeout(() => PhysicsPage.preload(), 50);
     setTimeout(() => ChemistryPage.preload(), 100);
     setTimeout(() => BiologyPage.preload(), 150);
@@ -79,7 +78,6 @@ export default function Home() {
     },
   ];
 
-  // *** THE ONLY CHANGE: use window.location.href instead of react-router navigate ***
   const handleSubjectClick = (route: string) => {
     window.location.href = route;
   };
@@ -129,20 +127,24 @@ export default function Home() {
 
             <main className="pt-16 p-6">
               <h1 className="text-3xl font-bold text-center mb-6">
-                Welcome {username} to Shutro.App
+                <span className="text-white">Welcome</span>{" "}
+                <span style={{ color: "#1D4ED8" }}>{username}</span>{" "}
+                <span className="text-white">to</span>{" "}
+                <span className="text-blue-400">Shutro.App</span>
               </h1>
+
               <div className="flex flex-col items-center text-center w-full">
                 <p className="text-lg mb-4">Choose a subject:</p>
                 <div className="flex flex-col gap-4 w-full max-w-md mx-auto">
                   {subjectList.map((subject, index) => (
                     <div
                       key={index}
-                      className="cursor-pointer rounded-md overflow-hidden"
+                      className="subject-button"
                       onClick={() => handleSubjectClick(subject.route)}
                       onMouseEnter={subject.preload}
                     >
                       <hr className="mb-1 border-t-2 border-gray-400 opacity-60" />
-                      <div className="flex items-center gap-3 py-2 px-4">
+                      <div className="flex items-center gap-4 py-4 px-5">
                         {subject.icon}
                         <p className="text-lg font-semibold text-left text-gray-400">
                           {subject.name}
@@ -174,7 +176,7 @@ export default function Home() {
                 </div>
                 {!isDemo && (
                   <button
-                    className="w-full py-2 px-3 bg-blue-600 rounded-md hover:bg-blue-700 mb-4"
+                    className="w-full py-2 px-3 bg-blue-600 rounded-md hover:bg-blue-700 mb-4 transition-colors"
                     onClick={() => {
                       setPanelOpen(false);
                       navigate("/profile");

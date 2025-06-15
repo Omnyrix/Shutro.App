@@ -55,3 +55,11 @@ body {
 .animate-fade-in-out3 { animation: fade-in-out3 3.5s infinite ease-in-out; }
 .animate-fade-in-out4 { animation: fade-in-out4 4.5s infinite ease-in-out; }
 .animate-fade-in-out5 { animation: fade-in-out5 3.2s infinite ease-in-out; }
+
+.subject-button {
+  @apply cursor-pointer 
+         rounded-md 
+         overflow-hidden 
+         transform -translate-y-1 
+         shadow-xl shadow-black/30;
+}

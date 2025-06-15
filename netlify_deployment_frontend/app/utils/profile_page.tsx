@@ -49,7 +49,7 @@ export default function ProfilePage() {
         setEmail(emailFromSession);
       })
       .finally(() => {
-        setTimeout(() => setLoading(false), 500);
+        setTimeout(() => setLoading(false), 100);
       });
   }, [navigate]);
 

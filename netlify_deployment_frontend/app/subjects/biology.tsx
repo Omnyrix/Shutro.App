@@ -8,7 +8,7 @@ export default function Biology() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
-  const LOADING_TIME = 0; // Loading time remains unchanged
+  const LOADING_TIME = 0;
 
   useEffect(() => {
     const session = getCookie("session");
@@ -18,25 +18,33 @@ export default function Biology() {
       return;
     }
 
+    if (!LOADING_TIME) {
+      setLoading(false);
+      setProgress(100);
+      return;
+    }
+
     const interval = setInterval(() => {
       setProgress((prev) => Math.min(prev + (100 / (LOADING_TIME / 50)), 100));
     }, 50);
 
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       clearInterval(interval);
       setLoading(false);
-    }, LOADING_TIME || 1);
+    }, LOADING_TIME);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
   }, [navigate]);
 
   return (
-    <div className="relative min-h-screen bg-gray-900"> {/* Prevents white flash */}
+    <div className="relative min-h-screen bg-gray-900">
       {loading && <Loading progress={progress} />}
 
       {!loading && (
         <div className="absolute inset-0 bg-gray-800 text-white p-6 flex flex-col items-center">
-          {/* Back button */}
           <button
             onClick={() => navigate("/home")}
             className="self-start mb-4 text-blue-400 underline font-bold"
@@ -45,44 +53,40 @@ export default function Biology() {
           </button>
 
           <ProfileMenu />
-          <h1 className="text-3xl font-bold text-center mb-6">Biology Formulas</h1>
+          <h1 className="text-3xl font-bold text-center mb-6">
+            <span style={{ color: "#10B981" }}>Biology</span>{" "}
+            <span className="text-white">Formulas</span>
+          </h1>
+
           <p className="text-lg mb-6 text-center">Choose a paper:</p>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
+            {/* 1st Paper */}
             <div
-              className="cursor-pointer"
+              className="subject-button"
               onClick={() => navigate("/Biology/1st-paper")}
             >
-              <hr
-                style={{ borderTop: "2px solid #9CA3AF", opacity: 0.6 }}
-                className="mb-1"
-              />
-              <div className="py-2 px-4">
-                <p style={{ color: "#9CA3AF" }} className="text-lg font-semibold text-left">
+              <hr className="mb-1 border-t-2 border-gray-400 opacity-60" />
+              <div className="py-4 px-5">
+                <p className="text-lg font-semibold text-left text-gray-400">
                   1st Paper
                 </p>
               </div>
-              <hr
-                style={{ borderTop: "2px solid #9CA3AF", opacity: 0.6 }}
-                className="mt-1"
-              />
+              <hr className="mt-1 border-t-2 border-gray-400 opacity-60" />
             </div>
+
+            {/* 2nd Paper */}
             <div
-              className="cursor-pointer"
+              className="subject-button"
               onClick={() => navigate("/Biology/2nd-paper")}
             >
-              <hr
-                style={{ borderTop: "2px solid #9CA3AF", opacity: 0.6 }}
-                className="mb-1"
-              />
-              <div className="py-2 px-4">
-                <p style={{ color: "#9CA3AF" }} className="text-lg font-semibold text-left">
+              <hr className="mb-1 border-t-2 border-gray-400 opacity-60" />
+              <div className="py-4 px-5">
+                <p className="text-lg font-semibold text-left text-gray-400">
                   2nd Paper
                 </p>
               </div>
-              <hr
-                style={{ borderTop: "2px solid #9CA3AF", opacity: 0.6 }}
-                className="mt-1"
-              />
+              <hr className="mt-1 border-t-2 border-gray-400 opacity-60" />
             </div>
           </div>
         </div>
