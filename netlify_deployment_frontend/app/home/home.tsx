@@ -78,8 +78,9 @@ export default function Home() {
     },
   ];
 
+  // *** ONLY THIS FUNCTION CHANGED: use immediate full page redirect ***
   const handleSubjectClick = (route: string) => {
-    navigate(route);
+    window.location.href = route; // Immediate redirect, no delay
   };
 
   async function handleLogout() {
@@ -158,7 +159,7 @@ export default function Home() {
                     key={index}
                     className="subject-button cursor-pointer"
                     onClick={() => handleSubjectClick(subject.route)}
-                    onMouseEnter={subject.preload}
+                    /* REMOVED onMouseEnter to prevent preload and delay */
                   >
                     <hr className="mb-1 border-t-2 border-gray-400 opacity-60" />
                     <div className="flex items-center gap-4 py-4 px-5">
