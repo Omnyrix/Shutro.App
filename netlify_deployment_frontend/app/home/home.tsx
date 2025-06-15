@@ -26,11 +26,12 @@ export default function Home() {
   const [logoutLoading, setLogoutLoading] = useState(false);
 
   useEffect(() => {
-    setTimeout(() => PhysicsPage.preload(), 50);
-    setTimeout(() => ChemistryPage.preload(), 100);
-    setTimeout(() => BiologyPage.preload(), 150);
-    setTimeout(() => MathPage.preload(), 200);
-    setTimeout(() => NotFoundPage.preload(), 300);
+    // Preload all subjects at load time for instant navigation
+    PhysicsPage.preload();
+    ChemistryPage.preload();
+    BiologyPage.preload();
+    MathPage.preload();
+    NotFoundPage.preload();
 
     const email = getCookie("session");
     axios
@@ -78,8 +79,11 @@ export default function Home() {
     },
   ];
 
-  const handleSubjectClick = (route: string) => {
-    window.location.href = route;
+  const handleSubjectClick = (route: string, preload: () => void) => {
+    preload(); // Trigger chunk loading
+    setTimeout(() => {
+      navigate(route);
+    }, 50); // Give preload a head start
   };
 
   async function handleLogout() {
@@ -139,8 +143,8 @@ export default function Home() {
                   {subjectList.map((subject, index) => (
                     <div
                       key={index}
-                      className="subject-button"
-                      onClick={() => handleSubjectClick(subject.route)}
+                      className="subject-button cursor-pointer"
+                      onClick={() => handleSubjectClick(subject.route, subject.preload)}
                       onMouseEnter={subject.preload}
                     >
                       <hr className="mb-1 border-t-2 border-gray-400 opacity-60" />
