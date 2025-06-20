@@ -1,0 +1,304 @@
+Directory structure for: /root/Shutro.app/netlify_deployment_frontend
+========================================
+├── .
+│   ├── README.md
+│   ├── android
+│   ├── android
+│   │   ├── app
+│   │   ├── android/app
+│   │   │   ├── build
+│   │   │   ├── android/app/build
+│   │   │   ├── build.gradle
+│   │   │   ├── proguard-rules.pro
+│   │   │   ├── src
+│   │   │   ├── android/app/src
+│   │   │   │   ├── androidTest
+│   │   │   │   ├── android/app/src/androidTest
+│   │   │   │   │   └── java
+│   │   │   │       ├── android/app/src/androidTest/java
+│   │   │   │       │   └── com
+│   │   │   │           ├── android/app/src/androidTest/java/com
+│   │   │   │           │   └── getcapacitor
+│   │   │   │               ├── android/app/src/androidTest/java/com/getcapacitor
+│   │   │   │               │   └── myapp
+│   │   │   │                   ├── android/app/src/androidTest/java/com/getcapacitor/myapp
+│   │   │   │                   │   └── ExampleInstrumentedTest.java
+│   │   │   │   ├── main
+│   │   │   │   ├── android/app/src/main
+│   │   │   │   │   ├── AndroidManifest.xml
+│   │   │   │   │   ├── java
+│   │   │   │   │   ├── android/app/src/main/java
+│   │   │   │   │   │   └── com
+│   │   │   │   │       ├── android/app/src/main/java/com
+│   │   │   │   │       │   └── shutro
+│   │   │   │   │           ├── android/app/src/main/java/com/shutro
+│   │   │   │   │           │   └── app
+│   │   │   │   │               ├── android/app/src/main/java/com/shutro/app
+│   │   │   │   │               │   └── MainActivity.java
+│   │   │   │   │   └── res
+│   │   │   │       ├── android/app/src/main/res
+│   │   │   │       │   ├── drawable
+│   │   │   │       │   ├── android/app/src/main/res/drawable
+│   │   │   │       │   │   ├── ic_launcher_background.xml
+│   │   │   │       │   │   └── splash.png
+│   │   │   │       │   ├── drawable-land-hdpi
+│   │   │   │       │   ├── android/app/src/main/res/drawable-land-hdpi
+│   │   │   │       │   │   └── splash.png
+│   │   │   │       │   ├── drawable-land-mdpi
+│   │   │   │       │   ├── android/app/src/main/res/drawable-land-mdpi
+│   │   │   │       │   │   └── splash.png
+│   │   │   │       │   ├── drawable-land-xhdpi
+│   │   │   │       │   ├── android/app/src/main/res/drawable-land-xhdpi
+│   │   │   │       │   │   └── splash.png
+│   │   │   │       │   ├── drawable-land-xxhdpi
+│   │   │   │       │   ├── android/app/src/main/res/drawable-land-xxhdpi
+│   │   │   │       │   │   └── splash.png
+│   │   │   │       │   ├── drawable-land-xxxhdpi
+│   │   │   │       │   ├── android/app/src/main/res/drawable-land-xxxhdpi
+│   │   │   │       │   │   └── splash.png
+│   │   │   │       │   ├── drawable-port-hdpi
+│   │   │   │       │   ├── android/app/src/main/res/drawable-port-hdpi
+│   │   │   │       │   │   └── splash.png
+│   │   │   │       │   ├── drawable-port-mdpi
+│   │   │   │       │   ├── android/app/src/main/res/drawable-port-mdpi
+│   │   │   │       │   │   └── splash.png
+│   │   │   │       │   ├── drawable-port-xhdpi
+│   │   │   │       │   ├── android/app/src/main/res/drawable-port-xhdpi
+│   │   │   │       │   │   └── splash.png
+│   │   │   │       │   ├── drawable-port-xxhdpi
+│   │   │   │       │   ├── android/app/src/main/res/drawable-port-xxhdpi
+│   │   │   │       │   │   └── splash.png
+│   │   │   │       │   ├── drawable-port-xxxhdpi
+│   │   │   │       │   ├── android/app/src/main/res/drawable-port-xxxhdpi
+│   │   │   │       │   │   └── splash.png
+│   │   │   │       │   ├── drawable-v24
+│   │   │   │       │   ├── android/app/src/main/res/drawable-v24
+│   │   │   │       │   │   └── ic_launcher_foreground.xml
+│   │   │   │       │   ├── layout
+│   │   │   │       │   ├── android/app/src/main/res/layout
+│   │   │   │       │   │   └── activity_main.xml
+│   │   │   │       │   ├── mipmap-anydpi-v26
+│   │   │   │       │   ├── android/app/src/main/res/mipmap-anydpi-v26
+│   │   │   │       │   │   ├── ic_launcher.xml
+│   │   │   │       │   │   └── ic_launcher_round.xml
+│   │   │   │       │   ├── mipmap-hdpi
+│   │   │   │       │   ├── android/app/src/main/res/mipmap-hdpi
+│   │   │   │       │   │   ├── ic_launcher.png
+│   │   │   │       │   │   ├── ic_launcher_foreground.png
+│   │   │   │       │   │   └── ic_launcher_round.png
+│   │   │   │       │   ├── mipmap-mdpi
+│   │   │   │       │   ├── android/app/src/main/res/mipmap-mdpi
+│   │   │   │       │   │   ├── ic_launcher.png
+│   │   │   │       │   │   ├── ic_launcher_foreground.png
+│   │   │   │       │   │   └── ic_launcher_round.png
+│   │   │   │       │   ├── mipmap-xhdpi
+│   │   │   │       │   ├── android/app/src/main/res/mipmap-xhdpi
+│   │   │   │       │   │   ├── ic_launcher.png
+│   │   │   │       │   │   ├── ic_launcher_foreground.png
+│   │   │   │       │   │   └── ic_launcher_round.png
+│   │   │   │       │   ├── mipmap-xxhdpi
+│   │   │   │       │   ├── android/app/src/main/res/mipmap-xxhdpi
+│   │   │   │       │   │   ├── ic_launcher.png
+│   │   │   │       │   │   ├── ic_launcher_foreground.png
+│   │   │   │       │   │   └── ic_launcher_round.png
+│   │   │   │       │   ├── mipmap-xxxhdpi
+│   │   │   │       │   ├── android/app/src/main/res/mipmap-xxxhdpi
+│   │   │   │       │   │   ├── ic_launcher.png
+│   │   │   │       │   │   ├── ic_launcher_foreground.png
+│   │   │   │       │   │   └── ic_launcher_round.png
+│   │   │   │       │   ├── values
+│   │   │   │       │   ├── android/app/src/main/res/values
+│   │   │   │       │   │   ├── ic_launcher_background.xml
+│   │   │   │       │   │   ├── strings.xml
+│   │   │   │       │   │   └── styles.xml
+│   │   │   │       │   └── xml
+│   │   │   │           ├── android/app/src/main/res/xml
+│   │   │   │           │   └── file_paths.xml
+│   │   │   │   └── test
+│   │   │       ├── android/app/src/test
+│   │   │       │   └── java
+│   │   │           ├── android/app/src/test/java
+│   │   │           │   └── com
+│   │   │               ├── android/app/src/test/java/com
+│   │   │               │   └── getcapacitor
+│   │   │                   ├── android/app/src/test/java/com/getcapacitor
+│   │   │                   │   └── myapp
+│   │   │                       ├── android/app/src/test/java/com/getcapacitor/myapp
+│   │   │                       │   └── ExampleUnitTest.java
+│   │   ├── build.gradle
+│   │   ├── gradle
+│   │   ├── android/gradle
+│   │   │   └── wrapper
+│   │       ├── android/gradle/wrapper
+│   │       │   ├── gradle-wrapper.jar
+│   │       │   └── gradle-wrapper.properties
+│   │   ├── gradle.properties
+│   │   ├── gradlew
+│   │   ├── gradlew.bat
+│   │   ├── settings.gradle
+│   │   ├── variables.gradle
+│   ├── app
+│   ├── app
+│   │   ├── app.css
+│   │   ├── app.css:Zone.Identifier
+│   │   ├── auth
+│   │   ├── app/auth
+│   │   │   ├── auth_loading.tsx
+│   │   │   ├── auth_loading.tsx:Zone.Identifier
+│   │   │   ├── auth_reg_loading.tsx
+│   │   │   ├── auth_reg_loading.tsx:Zone.Identifier
+│   │   │   ├── auth_ver_loading.tsx
+│   │   │   ├── login.tsx
+│   │   │   ├── login.tsx:Zone.Identifier
+│   │   │   ├── no-auth-loading.tsx
+│   │   │   ├── no-auth.tsx
+│   │   │   ├── register.tsx
+│   │   │   ├── register.tsx:Zone.Identifier
+│   │   │   └── verify.tsx
+│   │   ├── components
+│   │   ├── app/components
+│   │   │   ├── 404_loading.tsx
+│   │   │   ├── Turnstile.tsx
+│   │   │   ├── layout.tsx
+│   │   │   ├── layout.tsx:Zone.Identifier
+│   │   │   ├── loading.tsx
+│   │   │   ├── loading.tsx:Zone.Identifier
+│   │   │   ├── loading_not_lazy.tsx
+│   │   │   ├── menu.tsx:Zone.Identifier
+│   │   │   ├── slide_animation.tsx
+│   │   │   └── topbar.tsx
+│   │   ├── home
+│   │   ├── app/home
+│   │   │   ├── home.tsx
+│   │   │   └── home.tsx:Zone.Identifier
+│   │   ├── root.tsx
+│   │   ├── root.tsx:Zone.Identifier
+│   │   ├── routes
+│   │   ├── app/routes
+│   │   │   ├── 404.tsx
+│   │   │   ├── 404.tsx:Zone.Identifier
+│   │   │   ├── auth
+│   │   │   ├── app/routes/auth
+│   │   │   │   ├── login.tsx
+│   │   │   │   ├── login.tsx:Zone.Identifier
+│   │   │   │   ├── no-auth.tsx
+│   │   │   │   ├── register.tsx
+│   │   │   │   ├── register.tsx:Zone.Identifier
+│   │   │   │   └── verify.tsx
+│   │   │   ├── home.tsx
+│   │   │   ├── home.tsx:Zone.Identifier
+│   │   │   ├── index.tsx
+│   │   │   ├── index.tsx:Zone.Identifier
+│   │   │   ├── profile.tsx
+│   │   │   ├── profile.tsx:Zone.Identifier
+│   │   │   ├── subjects
+│   │   │   ├── app/routes/subjects
+│   │   │   │   ├── biology.tsx
+│   │   │   │   ├── biology.tsx:Zone.Identifier
+│   │   │   │   ├── chemistry.tsx
+│   │   │   │   ├── chemistry.tsx:Zone.Identifier
+│   │   │   │   ├── higher_math.tsx
+│   │   │   │   ├── higher_math.tsx:Zone.Identifier
+│   │   │   │   ├── physics.tsx
+│   │   │   │   └── physics.tsx:Zone.Identifier
+│   │   │   ├── welcome.tsx
+│   │   │   └── welcome.tsx:Zone.Identifier
+│   │   ├── routes.ts
+│   │   ├── routes.ts:Zone.Identifier
+│   │   ├── subjects
+│   │   ├── app/subjects
+│   │   │   ├── biology.tsx
+│   │   │   ├── biology.tsx:Zone.Identifier
+│   │   │   ├── chemistry.tsx
+│   │   │   ├── chemistry.tsx:Zone.Identifier
+│   │   │   ├── higher_math.tsx
+│   │   │   ├── higher_math.tsx:Zone.Identifier
+│   │   │   ├── papers
+│   │   │   ├── app/subjects/papers
+│   │   │   │   └── physics_1st
+│   │   │       ├── app/subjects/papers/physics_1st
+│   │   │       │   ├── chapter2-vector.tsx
+│   │   │       │   └── chapter2-vector.tsx:Zone.Identifier
+│   │   │   ├── physics.tsx
+│   │   │   └── physics.tsx:Zone.Identifier
+│   │   ├── utils
+│   │   ├── app/utils
+│   │   │   ├── MotionWrapper.tsx
+│   │   │   ├── cookie.ts
+│   │   │   ├── cookie.ts:Zone.Identifier
+│   │   │   ├── lazyWithPreload.ts
+│   │   │   ├── profile_page.tsx
+│   │   │   ├── profile_page.tsx:Zone.Identifier
+│   │   │   ├── yamldb.ts
+│   │   │   └── yamldb.ts:Zone.Identifier
+│   │   └── welcome
+│       ├── app/welcome
+│       │   ├── welcome.tsx
+│       │   └── welcome.tsx:Zone.Identifier
+│   ├── build
+│   ├── build
+│   │   ├── client
+│   │   ├── build/client
+│   │   │   ├── assets
+│   │   │   ├── build/client/assets
+│   │   │   │   ├── 404-B4JbomNv.js
+│   │   │   │   ├── 404-B_e1coa_.js
+│   │   │   │   ├── Turnstile-BPpfsyOY.js
+│   │   │   │   ├── biology-Cc3F_H9L.js
+│   │   │   │   ├── biology-bqXohBzv.js
+│   │   │   │   ├── chemistry-BIVwyCHw.js
+│   │   │   │   ├── chemistry-DbEo33F7.js
+│   │   │   │   ├── chunk-NL6KNZEE-B8ihR-ei.js
+│   │   │   │   ├── client-CcFoL_PO.js
+│   │   │   │   ├── cookie-C91xfE2C.js
+│   │   │   │   ├── entry.client-D75GHmWS.js
+│   │   │   │   ├── higher_math-DwCdcKaN.js
+│   │   │   │   ├── higher_math-Yn9mOl9y.js
+│   │   │   │   ├── home-CUfflFm9.js
+│   │   │   │   ├── home-DdCcfwV4.js
+│   │   │   │   ├── home-Dk51bkQ1.js
+│   │   │   │   ├── index-BDRcP5rY.js
+│   │   │   │   ├── index-CS0VG_lv.js
+│   │   │   │   ├── index-D-8rp9ax.js
+│   │   │   │   ├── index-xsH4HHeE.js
+│   │   │   │   ├── loading-D3yY_g0I.js
+│   │   │   │   ├── loading_not_lazy-DQ1jchaJ.js
+│   │   │   │   ├── login-B607lMLs.js
+│   │   │   │   ├── manifest-edbf7935.js
+│   │   │   │   ├── no-auth-DK_97lsH.js
+│   │   │   │   ├── physics-BE-NJHgh.js
+│   │   │   │   ├── physics-D_-n_LYH.js
+│   │   │   │   ├── profile-6uTGlWZh.js
+│   │   │   │   ├── proxy-C4k_oALc.js
+│   │   │   │   ├── register-BrGFKOXq.js
+│   │   │   │   ├── root-qu1PcbAR.js
+│   │   │   │   ├── topbar-DlmETrIc.js
+│   │   │   │   ├── use-presence-1P4-txpv.js
+│   │   │   │   ├── verify-CzZ2NfhJ.js
+│   │   │   │   ├── welcome-CLvbiVdo.js
+│   │   │   │   └── welcome-Dglmnp6J.js
+│   │   │   └── favicon.ico
+│   │   └── server
+│       ├── build/server
+│       │   ├── assets
+│       │   ├── build/server/assets
+│       │   │   └── server-build-De-zjtnr.js
+│       │   └── index.js
+│   ├── capacitor.config.ts
+│   ├── dev-server.js
+│   ├── netlify
+│   ├── netlify
+│   │   └── prepare.js
+│   ├── netlify.toml
+│   ├── node_modules
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── public
+│   ├── public
+│   │   └── favicon.ico
+│   ├── react-router.config.ts
+│   ├── server
+│   ├── server
+│   │   └── app.ts
+│   ├── tsconfig.json
+│   ├── vite.config.ts
