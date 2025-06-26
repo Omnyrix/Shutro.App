@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@remix-run/router": "^1.23.0"
+  }
+}
