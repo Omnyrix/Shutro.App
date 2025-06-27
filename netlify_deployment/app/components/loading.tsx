@@ -31,7 +31,7 @@ export default function Loading() {
     if (!session) {
       eraseCookie("session");
       eraseCookie("verification");
-      navigate("/auth/login");
+      navigate("/welcome");
       return;
     }
 

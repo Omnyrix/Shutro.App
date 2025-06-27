@@ -2,15 +2,15 @@ import { useState, useEffect } from "react";
 import { setCookie } from "../utils/cookie";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // for show/hide password toggle
-import Turnstile from "../components/Turnstile"; // Cloudflare Turnstile component
-import Loading from "./auth_reg_loading"; // Loading component for registration
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import Turnstile from "../components/Turnstile";
+import Loading from "./auth_reg_loading";
 import { AnimatePresence } from "framer-motion";
 
-const backendUrl = import.meta.env.VITE_BACKSTAGE_URL || import.meta.env.VITE_BACKEND_URL; // adjust if needed
+const backendUrl = import.meta.env.VITE_BACKSTAGE_URL || import.meta.env.VITE_BACKEND_URL;
 
 export default function Register() {
-  const [pageLoading, setPageLoading] = useState(true); // controls the initial loading overlay
+  const [pageLoading, setPageLoading] = useState(true);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,13 +18,11 @@ export default function Register() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
-  // Used to force re-render of the Turnstile component when needed.
   const [turnstileKey, setTurnstileKey] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
 
-  // Show the full-screen loading overlay on initial visit for 500ms.
   useEffect(() => {
     const timeout = setTimeout(() => {
       setPageLoading(false);
@@ -36,10 +34,8 @@ export default function Register() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    
-    // Force re-render of Turnstile widget when register is clicked.
     setTurnstileKey((prev) => prev + 1);
-    
+
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
       setLoading(false);
@@ -56,9 +52,7 @@ export default function Register() {
       return;
     }
 
-    // Validate the email.
     try {
-      // Submit registration—server validates Turnstile token.
       const res = await axios.post(`${backendUrl}/register`, {
         username: username.replace(/\s/g, ""),
         password,
@@ -67,7 +61,6 @@ export default function Register() {
       });
       setLoading(false);
       if (res.data.success) {
-        // On success, set a "verification" cookie (holding the email) and navigate to Verify.
         setCookie("verification", email.toLowerCase());
         navigate("/auth/verify");
       }
@@ -81,27 +74,25 @@ export default function Register() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-800">
-      {/* AnimatePresence works with Framer Motion to trigger exit transitions */}
       <AnimatePresence>
         {pageLoading && <Loading />}
       </AnimatePresence>
+
       {!pageLoading && (
         <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80">
           <div className="mb-6 text-center">
             <h1 className="text-xl font-bold text-white">Register</h1>
           </div>
-          {error && <div className="text-red-500 mb-4 text-center">{error}</div>}
+
           <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
             <input
               className="w-full border border-gray-700 bg-gray-800 text-white p-2 rounded focus:outline-none focus:border-blue-500"
               placeholder="Username"
               value={username}
               onChange={(e) =>
-                // Automatically remove spaces from the input
                 setUsername(e.target.value.replace(/\s/g, ""))
               }
               required
-              // Enforce only letters and numbers, no spaces, and minimum 3 letters (via regex)
               pattern="(?=.*[A-Za-z].*[A-Za-z].*[A-Za-z])[A-Za-z0-9]+"
               title="Username must contain only letters and numbers with no spaces and at least 3 letters."
             />
@@ -154,7 +145,7 @@ export default function Register() {
             )}
             <div className="flex items-center">
               <Turnstile
-                key={turnstileKey} // Force re-render via key update
+                key={turnstileKey}
                 sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
                 onVerify={(token) => {
                   console.log("Turnstile token received:", token);
@@ -170,12 +161,15 @@ export default function Register() {
             >
               {loading ? "Creating account..." : "Register"}
             </button>
+
+            {/* ✅ Bottom error message only */}
             {error && (
               <div className="text-red-500 mt-4 text-center">
                 {error}
               </div>
             )}
           </form>
+
           <div className="mt-4 text-center">
             <a href="/auth/login" className="text-blue-400 underline font-bold text-sm">
               Already have an account?

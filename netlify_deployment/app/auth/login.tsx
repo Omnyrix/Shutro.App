@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { setCookie } from "../utils/cookie";
+import { eraseCookie, setCookie } from "../utils/cookie";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Loading from "./auth_loading";
@@ -32,7 +32,8 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [tsKey, setTsKey] = useState(0);
-  const [loggingIn, setLoggingIn] = useState(false); // ✅ NEW
+  const [loggingIn, setLoggingIn] = useState(false);
+  const [redirectingToVerify, setRedirectingToVerify] = useState(false);
 
   const navigate = useNavigate();
 
@@ -45,13 +46,12 @@ export default function Login() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    setLoggingIn(true); // ✅ Start loading
-
+    setLoggingIn(true);
     setTsKey(prev => prev + 1);
 
     if (!turnstileToken) {
       setError("Please confirm you are not a robot.");
-      setLoggingIn(false); // ✅ Stop on error
+      setLoggingIn(false);
       return;
     }
 
@@ -59,21 +59,30 @@ export default function Login() {
       const verRes = await axios.post(`${backendUrl}/verify-turnstile`, { turnstileToken });
       if (!verRes.data.success) {
         setError("Turnstile verification failed. Please try again.");
-        setLoggingIn(false); // ✅ Stop on error
+        setLoggingIn(false);
         return;
       }
     } catch {
       setError("Human verification failed. Please reload the page");
-      setLoggingIn(false); // ✅ Stop on error
+      setLoggingIn(false);
       return;
     }
 
     const sanitizedEmail = email.toLowerCase();
     const result = await loginUser({ email: sanitizedEmail, password });
 
+    if (result.error === "Account not verified") {
+      setRedirectingToVerify(true);
+      setCookie("verification", sanitizedEmail);
+      setTimeout(() => {
+        navigate("/auth/verify");
+      }, 1000); // slight delay for UX
+      return;
+    }
+
     if (result.error) {
       setError(result.error);
-      setLoggingIn(false); // ✅ Stop on error
+      setLoggingIn(false);
       return;
     }
 
@@ -83,9 +92,7 @@ export default function Login() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-800">
-      <AnimatePresence>
-        {loading && <Loading />}
-      </AnimatePresence>
+      <AnimatePresence>{loading && <Loading />}</AnimatePresence>
 
       {!loading && (
         <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80">
@@ -123,7 +130,6 @@ export default function Login() {
                 key={tsKey}
                 sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
                 onVerify={(token) => {
-                  console.log("Turnstile onVerify callback fired. Token:", token);
                   setTurnstileToken(token);
                 }}
                 scale={0.8}
@@ -135,9 +141,13 @@ export default function Login() {
             <button
               className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition"
               type="submit"
-              disabled={loggingIn} // ✅ Prevent double click
+              disabled={loggingIn || redirectingToVerify}
             >
-              {loggingIn ? "Logging in..." : "Login"} {/* ✅ Text change */}
+              {redirectingToVerify
+                ? "Redirecting to Verify page..."
+                : loggingIn
+                ? "Logging in..."
+                : "Login"}
             </button>
           </form>
           <div className="mt-4 text-center">

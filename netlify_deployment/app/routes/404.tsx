@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import Loading from "../components/404_loading";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getCookie, eraseCookie } from "../utils/cookie";
 
 // Array of alternative 404 pages
 const errorMessages = [
@@ -10,63 +11,49 @@ const errorMessages = [
       "Our calculations seem to have hit an unsolvable limit. The formula for this page’s existence is ",
     joke: "undefined",
     hint: "Maybe try integrating a known function?",
-    formula: "∫ e^x dx = e^x + C"
+    formula: "∫ e^x dx = e^x + C",
   },
   {
     title: "404",
     subtitle: "Oops!",
-    message: "Looks like this path was asymptotic to reality. The limit doesn't exist:",
+    message: "Looks like this path was asymptotic to reality. The limit doesn't exist: ",
     joke: "limₙ→∞ (1/n) = 0",
     hint: "Check your domain or try a substitution.",
-    formula: "f(x) = ln(x), x > 0"
+    formula: "f(x) = ln(x), x > 0",
   },
   {
     title: "404",
     subtitle: "Calculation Error",
     message: "This formula produced an imaginary result: ",
-    joke: "i^2 = -1",
+    joke: "i² = -1",
     hint: "Try graphing your thoughts on the real axis.",
-    formula: "z = a + bi"
+    formula: "z = a + bi",
   },
   {
     title: "404",
     subtitle: "Oops!",
-    message: "The integral of your query diverged. That page went to infinity:",
+    message: "The integral of your query diverged. That page went to infinity: ",
     joke: "∫ 1/x dx = ∞",
     hint: "Try evaluating within bounds.",
-    formula: "∫_1^∞ 1/x dx = ∞"
-  }
+    formula: "∫₁^∞ 1/x dx = ∞",
+  },
 ];
 
 export default function NotFoundPage() {
-  const [loading, setLoading] = useState(true);
-  const [progress, setProgress] = useState(0);
   const [errorContent, setErrorContent] = useState(errorMessages[0]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Pick random error message
+    const session = getCookie("session");
+    if (!session) {
+      eraseCookie("session");
+      navigate("/auth/login");
+      return;
+    }
+
     const randomIndex = Math.floor(Math.random() * errorMessages.length);
     setErrorContent(errorMessages[randomIndex]);
-
-    // Simulate progress
-    const interval = setInterval(() => {
-      setProgress((prev) => Math.min(prev + (100 / 2), 100));
-    }, 50);
-
-    const timer = setTimeout(() => {
-      clearInterval(interval);
-      setLoading(false);
-    }, 100);
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timer);
-    };
-  }, []);
-
-  if (loading) {
-    return <Loading progress={progress} />;
-  }
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-gray-800 text-white flex flex-col items-center justify-center p-4">
@@ -81,10 +68,10 @@ export default function NotFoundPage() {
         <p className="text-xl font-bold">{errorContent.formula}</p>
       </div>
       <button
-        onClick={() => window.history.back()}
+        onClick={() => navigate("/home")}
         className="mt-8 bg-blue-600 hover:bg-blue-500 transition py-2 px-4 rounded"
       >
-        Go Back
+        Go Back to Home Page
       </button>
     </div>
   );
