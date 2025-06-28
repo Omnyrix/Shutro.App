@@ -11,6 +11,11 @@ function getSessionFromRequest(request: Request) {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  // Skip loader logic when running on client (e.g. Capacitor offline)
+  if (typeof window !== "undefined") {
+    return null;
+  }
+
   if (!getSessionFromRequest(request)) {
     throw redirect("/welcome");
   }
