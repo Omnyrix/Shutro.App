@@ -171,7 +171,7 @@ export default function Register() {
           </form>
 
           <div className="mt-4 text-center">
-            <a href="/auth/login" className="text-blue-400 underline font-bold text-sm">
+            <a href="#/auth/login" className="text-blue-400 underline font-bold text-sm">
               Already have an account?
             </a>
           </div>

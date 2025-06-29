@@ -34,10 +34,10 @@ export default function Home() {
   }, [navigate]);
 
   const subjectList = [
-    { route: "/physics", name: "Physics", icon: <GiAtom className="text-2xl" style={{ color: "#1D4ED8" }} /> },
-    { route: "/chemistry", name: "Chemistry", icon: <GiChemicalDrop className="text-2xl" style={{ color: "#EA580C" }} /> },
-    { route: "/highermath", name: "Higher Math", icon: <FaCalculator className="text-2xl" style={{ color: "#8B5CF6" }} /> },
-    { route: "/biology", name: "Biology", icon: <GiFrog className="text-2xl" style={{ color: "#10B981" }} /> },
+    { route: "#/physics", name: "Physics", icon: <GiAtom className="text-2xl" style={{ color: "#1D4ED8" }} /> },
+    { route: "#/chemistry", name: "Chemistry", icon: <GiChemicalDrop className="text-2xl" style={{ color: "#EA580C" }} /> },
+    { route: "#/highermath", name: "Higher Math", icon: <FaCalculator className="text-2xl" style={{ color: "#8B5CF6" }} /> },
+    { route: "#/biology", name: "Biology", icon: <GiFrog className="text-2xl" style={{ color: "#10B981" }} /> },
   ];
 
   const handleSubjectClick = (route: string) => {

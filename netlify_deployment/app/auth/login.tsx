@@ -151,12 +151,12 @@ export default function Login() {
             </button>
           </form>
           <div className="mt-4 text-center">
-            <a href="/auth/register" className="text-sm text-blue-400 underline font-bold items-center">
+            <a href="#/auth/register" className="text-sm text-blue-400 underline font-bold items-center">
               Join us today
             </a>
           </div>
           <div className="mt-2 text-center">
-            <a href="/auth/no-auth" className="text-sm text-blue-400 underline font-bold">
+            <a href="#/auth/no-auth" className="text-sm text-blue-400 underline font-bold">
               Continue without an account
             </a>
           </div>

@@ -1,3 +1,6 @@
+// app/routes/welcome.tsx
+import React from "react";
+
 export default function Welcome() {
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden bg-black">
@@ -15,13 +18,13 @@ export default function Welcome() {
           Welcome to Shutro.app
         </h1>
         <p className="text-gray-300 text-lg mb-8 text-center">
-          See bellow options to{" "}
+          See below options to{" "}
           <span className="text-sky-400 font-semibold">Get Started</span>
         </p>
         <div className="w-full max-w-md flex flex-col items-center gap-4">
-          {/* New "Use without an account" button */}
+          {/* Use without an account */}
           <a
-            href="/auth/no-auth"
+            href="#/auth/no-auth"
             className="w-full bg-indigo-600 text-white py-3 rounded-lg text-center font-semibold shadow-md hover:bg-indigo-500 transition"
           >
             Use without an account
@@ -36,13 +39,13 @@ export default function Welcome() {
           {/* Login/Register buttons */}
           <div className="flex flex-col md:flex-row gap-4 w-full">
             <a
-              href="/auth/login"
+              href="#/auth/login"
               className="flex-1 bg-blue-800 text-white py-3 rounded-lg text-center font-semibold shadow-md hover:bg-sky-700 transition"
             >
               Login
             </a>
             <a
-              href="/auth/register"
+              href="#/auth/register"
               className="flex-1 bg-sky-600 text-white py-3 rounded-lg text-center font-semibold shadow-md hover:bg-blue-700 transition"
             >
               Register
