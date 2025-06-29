@@ -1,20 +1,30 @@
-import { reactRouter } from "@react-router/dev/vite"; // Or @vitejs/plugin-react, depending on your choice
-import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
 
-export default defineConfig(({ isSsrBuild }) => ({
+export default defineConfig({
+  root: ".",
+  publicDir: "public",
+  base: "./",
+
   server: {
-    watch: {
-      usePolling: true, // <-- Add this line
-    },
+    watch: { usePolling: true },
   },
+
+  resolve: {
+    alias: [{ find: "@", replacement: "/app" }],
+  },
+
   build: {
-    rollupOptions: isSsrBuild
-      ? {
-          input: "./server/app.ts",
-        }
-      : undefined,
+    outDir: "build",
+    emptyOutDir: true,
   },
-  plugins: [tailwindcss(), reactRouter(), tsconfigPaths()], // Keep your current plugins
-}));
+
+  plugins: [
+    // Official Vite React plugin
+    react(),
+
+    // TSConfig path alias support (@ → app/)
+    tsconfigPaths(),
+  ],
+});

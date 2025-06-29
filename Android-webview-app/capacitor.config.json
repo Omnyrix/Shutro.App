@@ -1,7 +1,6 @@
 {
   "appId": "com.shutro.app",
   "appName": "Shutro.App",
-  "webDir": "../netlify_deployment/build/client",
-  "server": { "url": "https://shutro.netlify.app", "cleartext": true },
-  "bundledWebRuntime": true
+  "webDir": "../netlify_deployment/build",
+  "bundledWebRuntime": false
 }
