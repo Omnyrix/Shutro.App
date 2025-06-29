@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev":   "vite",
     "build": "vite build",
-    "start": "netlify serve",
+    "start": "vite preview",
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@mjackson/node-fetch-server": "0.6.1",
+    "@react-router/dev": "^7.5.3",
     "@tailwindcss/vite": "^4.1.4",
     "@types/express": "^5.0.1",
     "@types/react": "^19.1.2",
