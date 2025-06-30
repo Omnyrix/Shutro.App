@@ -81,7 +81,7 @@ export default function Home() {
       {/* HEADER */}
       <header className="fixed top-0 left-0 right-0 bg-gray-900 shadow-md flex items-center justify-between px-4 py-2 z-50">
         <div className="flex items-center gap-2">
-          <img src="/favicon.ico" alt="Logo" className="w-8 h-8" />
+          <img src="favicon.ico" alt="Logo" className="w-8 h-8" />
           <span className="font-bold text-xl text-blue-400">Shutro.App</span>
         </div>
         <button onClick={() => setPanelOpen(true)} className="rounded-md p-1">
