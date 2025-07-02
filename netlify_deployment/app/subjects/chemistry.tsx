@@ -1,9 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import ProfileMenu from "../components/topbar";
+import TopBar from "../components/topbar";
 import { motion } from "framer-motion";
 
 export default function Chemistry() {
   const navigate = useNavigate();
+
+  // Session/profile logic placeholder for future use
+  const isLoggedIn = false; // Set to true if user is logged in, false otherwise
 
   const papers = [
     { route: "/Chemistry/1st-paper", name: "1st Paper" },
@@ -32,7 +35,7 @@ export default function Chemistry() {
           Back
         </motion.button>
 
-        <ProfileMenu />
+        <TopBar />
 
         <motion.h1
           className="text-3xl font-bold text-center mb-6"

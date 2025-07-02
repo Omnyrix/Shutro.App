@@ -1,19 +1,12 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { eraseCookie, getCookie } from "../utils/cookie";
-import ProfileMenu from "../components/topbar";
+import TopBar from "../components/topbar";
 import { motion } from "framer-motion";
 
 export default function Physics() {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const session = getCookie("session");
-    if (!session) {
-      eraseCookie("session");
-      navigate("/auth/login");
-    }
-  }, [navigate]);
+  // Session/profile logic placeholder for future use
+  const isLoggedIn = false; // Set to true if user is logged in, false otherwise
 
   const papers = [
     { route: "/physics/1st-paper", name: "1st Paper" },
@@ -21,7 +14,6 @@ export default function Physics() {
   ];
 
   const handlePaperClick = (route: string) => {
-    // Slight delay to allow animation feedback (if needed)
     setTimeout(() => {
       navigate(route);
     }, 150);
@@ -43,7 +35,7 @@ export default function Physics() {
           Back
         </motion.button>
 
-        <ProfileMenu />
+        <TopBar />
 
         <motion.h1
           className="text-3xl font-bold text-center mb-6"

@@ -1,42 +1,46 @@
-import { useState, useLayoutEffect, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../utils/cookie";
 
 export default function Loading() {
-  const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
+  const [hasSession, setHasSession] = useState<null | boolean>(null);
+  const navigate = useNavigate();
 
-  // Synchronous check: if a session exists, navigate immediately.
-  useLayoutEffect(() => {
-    const session = getCookie("session");
-    if (session) {
-      navigate("/home", { replace: true });
-    }
-  }, [navigate]);
-
-  // If no session, show a simulated loading animation and then redirect.
   useEffect(() => {
-    // Check again in case the session was not set.
-    const session = getCookie("session");
-    if (!session) {
-      const interval = setInterval(() => {
-        setProgress((prev) => Math.min(prev + 10, 100));
-      }, 50);
-
-      const timeout = setTimeout(() => {
-        clearInterval(interval);
-        navigate("/auth/no-auth", { replace: true });
-      }, 500);
-
-      return () => {
-        clearInterval(interval);
-        clearTimeout(timeout);
-      };
+    async function checkSession() {
+      const session = await getCookie("session");
+      setHasSession(!!session);
     }
-  }, [navigate]);
+    checkSession();
+
+    // Animate the loading bar to 100% over 500ms
+    const steps = 10;
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return Math.min(prev + 100 / steps, 100);
+      });
+    }, 50);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-gray-800 text-white z-50 transition-opacity duration-500">
+      {/* Debug message */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-gray-900 px-4 py-2 rounded shadow text-sm text-yellow-300">
+        {hasSession === null
+          ? "Detecting session cookie..."
+          : hasSession
+          ? "Session cookie detected (logged in mode)"
+          : "No session cookie detected (demo mode)"}
+      </div>
       {/* Flashing Math Symbols */}
       <div className="relative flex gap-4 mb-6">
         <p className="text-6xl font-bold text-gray-300 animate-fade-in-out1">Σ</p>
@@ -45,7 +49,6 @@ export default function Loading() {
         <p className="text-6xl font-bold text-gray-300 animate-fade-in-out4">√</p>
         <p className="text-5xl font-bold text-gray-400 animate-fade-in-out5">∫</p>
       </div>
-
       {/* Dynamic Loading Bar */}
       <div className="w-64 bg-gray-700 rounded-full h-3 relative overflow-hidden">
         <div
@@ -53,9 +56,8 @@ export default function Loading() {
           style={{ width: `${progress}%` }}
         ></div>
       </div>
-
       {/* Loading Progress */}
-      <p className="mt-4 text-gray-300 text-lg">Loading... {progress}%</p>
+      <p className="mt-4 text-gray-300 text-lg">Loading... {Math.round(progress)}%</p>
     </div>
   );
 }

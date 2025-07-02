@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { getCookie, eraseCookie } from "../utils/cookie";
+import { Preferences } from "@capacitor/preferences";
 import Loading from "../components/loading"; // Loading component
 import Menu from "../components/topbar"; // Menu component
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
@@ -25,32 +25,43 @@ export default function ProfilePage() {
   const [isDemo, setIsDemo] = useState(false);
 
   useEffect(() => {
-    const sessionValue = getCookie("session");
-    console.log("Session value:", sessionValue);
-    if (!sessionValue) {
-      navigate("/auth/login");
-      return;
+    let didFinish = false;
+    async function fetchSessionAndUser() {
+      const sessionResult = await Preferences.get({ key: "session" });
+      const sessionValue = sessionResult.value;
+      console.log("Session value:", sessionValue);
+      if (!sessionValue) {
+        navigate("/auth/login");
+        return;
+      }
+      const emailFromSession = sessionValue.toLowerCase();
+      setEmail(emailFromSession);
+
+      // Fallback: ensure loading is cleared after 5 seconds
+      const timeout = setTimeout(() => {
+        if (!didFinish) setLoading(false);
+      }, 5000);
+
+      axios
+        .get(`${backendUrl}/user/${emailFromSession}`)
+        .then((res) => {
+          const rawUsername = res.data.username;
+          setUsername(rawUsername.charAt(0).toUpperCase() + rawUsername.slice(1));
+          setEmail(res.data.email); // update with returned email if provided
+          setIsDemo(res.data.demo || false);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch user data", err.response?.data || err);
+          setUsername(`Not found for ${emailFromSession}`);
+          setEmail(emailFromSession);
+        })
+        .finally(() => {
+          didFinish = true;
+          setLoading(false);
+          clearTimeout(timeout);
+        });
     }
-    const emailFromSession = sessionValue.toLowerCase();
-    setEmail(emailFromSession);
-    // Fetch user data from backend using the email.
-    axios
-      .get(`${backendUrl}/user/${emailFromSession}`)
-      .then((res) => {
-        console.log("Fetched user data:", res.data);
-        const rawUsername = res.data.username;
-        setUsername(rawUsername.charAt(0).toUpperCase() + rawUsername.slice(1));
-        setEmail(res.data.email); // update with returned email if provided
-        setIsDemo(res.data.demo || false);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch user data", err.response?.data || err);
-        setUsername(`Not found for ${emailFromSession}`);
-        setEmail(emailFromSession);
-      })
-      .finally(() => {
-        setTimeout(() => setLoading(false), 100);
-      });
+    fetchSessionAndUser();
   }, [navigate]);
 
   // Live check for matching new password fields.
@@ -62,8 +73,8 @@ export default function ProfilePage() {
     }
   }, [newPassword, confirmNewPassword]);
 
-  const handleLogout = () => {
-    eraseCookie("session");
+  const handleLogout = async () => {
+    await Preferences.remove({ key: "session" });
     window.location.href = "/welcome";
   };
 
@@ -99,17 +110,20 @@ export default function ProfilePage() {
       {!loading && (
         <>
           {isDemo ? (
-            <div className="bg-gray-900 rounded-lg shadow-lg p-6 w-80 text-center">
+            <div className="bg-gray-900 rounded-lg shadow-2xl p-6 w-full max-w-md mx-auto text-center">
               <h1 className="text-xl font-bold text-white">Cannot access profile page with demo account</h1>
-              <button onClick={handleLogout} className="w-full mt-6 bg-red-600 text-white py-2 rounded hover:bg-red-700 transition">
+              <button
+                onClick={handleLogout}
+                className="w-full mt-6 py-2 px-3 rounded-lg bg-gradient-to-r from-red-500 to-red-700 text-white font-semibold shadow-md hover:from-red-600 hover:to-red-800 transition-all"
+              >
                 Logout
               </button>
             </div>
           ) : (
             <>
               <Menu username={username} />
-              <div className="bg-gray-900 rounded-lg shadow-lg p-6 w-80 text-center">
-                <div className="w-24 h-24 mx-auto mb-4 flex items-center justify-center bg-gray-700 rounded-full text-3xl font-bold text-white">
+              <div className="bg-gray-900 rounded-lg shadow-2xl p-6 w-full max-w-md mx-auto text-center">
+                <div className="w-24 h-24 mx-auto mb-4 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-900 text-3xl font-bold text-white shadow-lg">
                   {username ? username.charAt(0).toUpperCase() : "U"}
                 </div>
                 <h1 className="text-xl font-bold text-white">{username}</h1>
@@ -170,7 +184,7 @@ export default function ProfilePage() {
                   {matchError && <div className="text-yellow-500">{matchError}</div>}
                   {error && !matchError && <div className="text-red-500">{error}</div>}
                   <button
-                    className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition"
+                    className="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold shadow-md hover:from-blue-600 hover:to-blue-800 transition-all"
                     type="submit"
                     disabled={newPassword !== confirmNewPassword || !newPassword}
                   >
@@ -178,7 +192,10 @@ export default function ProfilePage() {
                   </button>
                 </form>
                 {/* Logout Button */}
-                <button onClick={handleLogout} className="w-full mt-6 bg-red-600 text-white py-2 rounded hover:bg-red-700 transition">
+                <button
+                  onClick={handleLogout}
+                  className="w-full mt-6 py-2 px-3 rounded-lg bg-gradient-to-r from-red-500 to-red-700 text-white font-semibold shadow-md hover:from-red-600 hover:to-red-800 transition-all"
+                >
                   Logout
                 </button>
               </div>

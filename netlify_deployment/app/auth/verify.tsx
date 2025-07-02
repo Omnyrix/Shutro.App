@@ -26,7 +26,7 @@ export default function Verify() {
         code: enteredCode,
       });
       if (res.data.success) {
-        setCookie("session", verificationEmail.toLowerCase());
+        await setCookie("session", verificationEmail.toLowerCase());
         navigate("/home");
       } else {
         setError("Verification failed. Your account has been removed. Please try registering again.");

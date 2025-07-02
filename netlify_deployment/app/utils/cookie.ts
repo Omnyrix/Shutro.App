@@ -1,19 +1,17 @@
-export function setCookie(name: string, value: string, days = 7) {
-  if (typeof document === "undefined") return; // Prevent SSR errors
+import { Preferences } from '@capacitor/preferences';
 
-  const expires = new Date(Date.now() + days * 864e5).toUTCString();
-  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+// Set a value (no expiration, as Preferences is persistent)
+export async function setCookie(name: string, value: string, _days = 7) {
+  await Preferences.set({ key: name, value });
 }
 
-export function getCookie(name: string) {
-  if (typeof document === "undefined") return ""; // Prevent SSR errors
-
-  return document.cookie.split("; ").reduce((r, v) => {
-    const parts = v.split("=");
-    return parts[0] === name ? decodeURIComponent(parts[1]) : r;
-  }, "");
+// Get a value
+export async function getCookie(name: string): Promise<string> {
+  const { value } = await Preferences.get({ key: name });
+  return value ?? "";
 }
 
-export function eraseCookie(name: string) {
-  setCookie(name, "", -1);
+// Remove a value
+export async function eraseCookie(name: string) {
+  await Preferences.remove({ key: name });
 }

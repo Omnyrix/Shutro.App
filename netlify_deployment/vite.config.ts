@@ -9,6 +9,7 @@ export default defineConfig({
 
   server: {
     watch: { usePolling: true },
+    port: 3000, // Set dev server to run on port 3000
   },
 
   resolve: {

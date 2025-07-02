@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCookie, eraseCookie } from "../utils/cookie";
 
 // Array of alternative 404 pages
 const errorMessages = [
@@ -44,13 +43,6 @@ export default function NotFoundPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const session = getCookie("session");
-    if (!session) {
-      eraseCookie("session");
-      navigate("/auth/login");
-      return;
-    }
-
     const randomIndex = Math.floor(Math.random() * errorMessages.length);
     setErrorContent(errorMessages[randomIndex]);
   }, [navigate]);

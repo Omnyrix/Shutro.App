@@ -4,7 +4,7 @@ import { eraseCookie, setCookie } from "../utils/cookie";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Loading from "./auth_loading";
-import Turnstile from "../components/Turnstile";
+// import Turnstile from "../components/Turnstile";
 import { AnimatePresence } from "framer-motion";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -27,11 +27,11 @@ async function loginUser({ email, password }: { email: string; password: string 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [turnstileToken, setTurnstileToken] = useState("");
+  // const [turnstileToken, setTurnstileToken] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [tsKey, setTsKey] = useState(0);
+  // const [tsKey, setTsKey] = useState(0);
   const [loggingIn, setLoggingIn] = useState(false);
   const [redirectingToVerify, setRedirectingToVerify] = useState(false);
 
@@ -47,33 +47,16 @@ export default function Login() {
     e.preventDefault();
     setError("");
     setLoggingIn(true);
-    setTsKey(prev => prev + 1);
+    // setTsKey(prev => prev + 1);
 
-    if (!turnstileToken) {
-      setError("Please confirm you are not a robot.");
-      setLoggingIn(false);
-      return;
-    }
-
-    try {
-      const verRes = await axios.post(`${backendUrl}/verify-turnstile`, { turnstileToken });
-      if (!verRes.data.success) {
-        setError("Turnstile verification failed. Please try again.");
-        setLoggingIn(false);
-        return;
-      }
-    } catch {
-      setError("Human verification failed. Please reload the page");
-      setLoggingIn(false);
-      return;
-    }
+    // Removed Turnstile and human verification
 
     const sanitizedEmail = email.toLowerCase();
     const result = await loginUser({ email: sanitizedEmail, password });
 
     if (result.error === "Account not verified") {
       setRedirectingToVerify(true);
-      setCookie("verification", sanitizedEmail);
+      await setCookie("verification", sanitizedEmail);
       setTimeout(() => {
         navigate("/auth/verify");
       }, 1000); // slight delay for UX
@@ -86,7 +69,7 @@ export default function Login() {
       return;
     }
 
-    setCookie("session", sanitizedEmail);
+    await setCookie("session", result.session || sanitizedEmail); // Use backend session value if provided, fallback to email
     navigate("/home");
   }
 
@@ -95,7 +78,14 @@ export default function Login() {
       <AnimatePresence>{loading && <Loading />}</AnimatePresence>
 
       {!loading && (
-        <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80">
+        <div
+          className="bg-gray-900 rounded-lg shadow-lg p-6 sm:p-8 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg"
+          style={{
+            minWidth: 0,
+            width: "90vw",
+            maxWidth: 400,
+          }}
+        >
           <div className="mb-6 text-center">
             <h1 className="text-xl font-bold text-white">Login</h1>
           </div>
@@ -125,16 +115,7 @@ export default function Login() {
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
-            <div className="flex items-center">
-              <Turnstile
-                key={tsKey}
-                sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
-                onVerify={(token) => {
-                  setTurnstileToken(token);
-                }}
-                scale={0.8}
-              />
-            </div>
+            {/* Turnstile removed */}
 
             {error && <div className="text-red-500 text-center">{error}</div>}
 

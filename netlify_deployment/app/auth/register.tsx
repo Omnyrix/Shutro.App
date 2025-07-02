@@ -3,8 +3,8 @@ import { setCookie } from "../utils/cookie";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import Turnstile from "../components/Turnstile";
-import Loading from "./auth_reg_loading";
+// import Turnstile from "../components/Turnstile";
+import Loading from "./auth_loading";
 import { AnimatePresence } from "framer-motion";
 
 const backendUrl = import.meta.env.VITE_BACKSTAGE_URL || import.meta.env.VITE_BACKEND_URL;
@@ -17,8 +17,8 @@ export default function Register() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState("");
-  const [turnstileKey, setTurnstileKey] = useState(0);
+  // const [turnstileToken, setTurnstileToken] = useState("");
+  // const [turnstileKey, setTurnstileKey] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
@@ -34,7 +34,7 @@ export default function Register() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    setTurnstileKey((prev) => prev + 1);
+    // setTurnstileKey((prev) => prev + 1);
 
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
@@ -46,22 +46,18 @@ export default function Register() {
       setLoading(false);
       return;
     }
-    if (!turnstileToken) {
-      setError("Please confirm you are not a robot.");
-      setLoading(false);
-      return;
-    }
+    // Removed Turnstile and human verification
 
     try {
       const res = await axios.post(`${backendUrl}/register`, {
         username: username.replace(/\s/g, ""),
         password,
         email,
-        turnstileToken,
+        // turnstileToken removed
       });
       setLoading(false);
       if (res.data.success) {
-        setCookie("verification", email.toLowerCase());
+        await setCookie("verification", email.toLowerCase());
         navigate("/auth/verify");
       }
     } catch (err: any) {
@@ -79,7 +75,14 @@ export default function Register() {
       </AnimatePresence>
 
       {!pageLoading && (
-        <div className="bg-gray-900 rounded-lg shadow-lg p-8 w-80">
+        <div
+          className="bg-gray-900 rounded-lg shadow-lg p-8 w-80"
+          style={{
+            minWidth: 0,
+            width: "90vw",
+            maxWidth: 400,
+          }}
+        >
           <div className="mb-6 text-center">
             <h1 className="text-xl font-bold text-white">Register</h1>
           </div>
@@ -143,17 +146,7 @@ export default function Register() {
                 Passwords do not match.
               </div>
             )}
-            <div className="flex items-center">
-              <Turnstile
-                key={turnstileKey}
-                sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || ""}
-                onVerify={(token) => {
-                  console.log("Turnstile token received:", token);
-                  setTurnstileToken(token);
-                }}
-                scale={0.8}
-              />
-            </div>
+            {/* Turnstile removed */}
             <button
               className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition"
               type="submit"

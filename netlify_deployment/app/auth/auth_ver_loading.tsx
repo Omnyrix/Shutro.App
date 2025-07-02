@@ -12,29 +12,34 @@ export default function VerificationLoader({ onComplete }: VerificationLoaderPro
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // Check for the "verification" cookie.
-    const verification = getCookie("verification");
+    let interval: NodeJS.Timeout | undefined;
+    let timeout: NodeJS.Timeout | undefined;
 
-    // Simulated loading animation exactly like your provided Loading screen.
-    const interval = setInterval(() => {
-      setProgress((prev) => Math.min(prev + (100 / 10), 100));
-    }, 50);
+    (async () => {
+      // Check for the "verification" cookie.
+      const verification = await getCookie("verification");
 
-    const timeout = setTimeout(() => {
-      clearInterval(interval);
-      if (verification) {
-        // Erase the cookie immediately so it can't be reused.
-        eraseCookie("verification");
-        onComplete(verification);
-      } else {
-        // If no verification cookie found, redirect immediately.
-        navigate("/auth/register");
-      }
-    }, 500); // Ensures progress reaches 100% within 0.5s
+      // Simulated loading animation exactly like your provided Loading screen.
+      interval = setInterval(() => {
+        setProgress((prev) => Math.min(prev + (100 / 10), 100));
+      }, 50);
+
+      timeout = setTimeout(async () => {
+        if (interval) clearInterval(interval);
+        if (verification) {
+          // Erase the cookie immediately so it can't be reused.
+          await eraseCookie("verification");
+          onComplete(verification);
+        } else {
+          // If no verification cookie found, redirect immediately.
+          navigate("/auth/register");
+        }
+      }, 500); // Ensures progress reaches 100% within 0.5s
+    })();
 
     return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
+      if (interval) clearInterval(interval);
+      if (timeout) clearTimeout(timeout);
     };
   }, [navigate, onComplete]);
 

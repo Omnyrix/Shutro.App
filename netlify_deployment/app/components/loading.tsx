@@ -2,50 +2,34 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie, eraseCookie } from "../utils/cookie";
-import { lazyWithPreload } from "../utils/lazyWithPreload";
-
-// ✅ Preload the subject pages during loading
-const PhysicsPage = lazyWithPreload(() => import("../routes/subjects/physics"));
-const ChemistryPage = lazyWithPreload(() => import("../routes/subjects/chemistry"));
-const BiologyPage = lazyWithPreload(() => import("../routes/subjects/biology"));
-const MathPage = lazyWithPreload(() => import("../routes/subjects/higher_math"));
-const NotFoundPage = lazyWithPreload(() => import("../routes/404"));
-const HomePage = lazyWithPreload(() => import("../routes/home"));
 
 export default function Loading() {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // Preload all subject pages right away
-    PhysicsPage.preload();
-    ChemistryPage.preload();
-    BiologyPage.preload();
-    MathPage.preload();
-    NotFoundPage.preload();
-    HomePage.preload();
+    (async () => {
+      const session = await getCookie("session");
+      await eraseCookie("verification");
 
-    const session = getCookie("session");
-    eraseCookie("verification");
+      // Simulated loading progress
+      const interval = setInterval(() => {
+        setProgress((prev) => Math.min(prev + (100 / 10), 100));
+      }, 50);
 
-    if (!session) {
-      eraseCookie("session");
-      eraseCookie("verification");
-      navigate("/welcome");
-      return;
-    }
-
-    // Simulated loading progress
-    const interval = setInterval(() => {
-      setProgress((prev) => Math.min(prev + (100 / 10), 100));
-    }, 50);
-
-    setTimeout(() => {
-      clearInterval(interval);
-    }, 500);
+      setTimeout(() => {
+        clearInterval(interval);
+        // Only redirect if not logged in
+        if (!session) {
+          eraseCookie("session");
+          eraseCookie("verification");
+          navigate("/");
+        }
+      }, 500);
+    })();
 
     return () => {
-      clearInterval(interval);
+      // ...existing code...
     };
   }, [navigate]);
 

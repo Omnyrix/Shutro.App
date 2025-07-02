@@ -8,31 +8,37 @@ export default function Loading() {
 
   // Synchronous check: if a session exists, navigate immediately.
   useLayoutEffect(() => {
-    const session = getCookie("session");
-    if (session) {
-      navigate("/home", { replace: true });
-    }
+    (async () => {
+      const session = await getCookie("session");
+      if (session) {
+        navigate("/home", { replace: true });
+      }
+    })();
   }, [navigate]);
 
   // If no session, show a simulated loading animation and then redirect.
   useEffect(() => {
-    // Check again in case the session was not set.
-    const session = getCookie("session");
-    if (!session) {
-      const interval = setInterval(() => {
-        setProgress((prev) => Math.min(prev + 10, 100));
-      }, 50);
+    let interval: NodeJS.Timeout | undefined;
+    let timeout: NodeJS.Timeout | undefined;
 
-      const timeout = setTimeout(() => {
-        clearInterval(interval);
-        navigate("/auth/register", { replace: true });
-      }, 500);
+    (async () => {
+      const session = await getCookie("session");
+      if (!session) {
+        interval = setInterval(() => {
+          setProgress((prev) => Math.min(prev + 10, 100));
+        }, 50);
 
-      return () => {
-        clearInterval(interval);
-        clearTimeout(timeout);
-      };
-    }
+        timeout = setTimeout(() => {
+          if (interval) clearInterval(interval);
+          navigate("/auth/register", { replace: true });
+        }, 500);
+      }
+    })();
+
+    return () => {
+      if (interval) clearInterval(interval);
+      if (timeout) clearTimeout(timeout);
+    };
   }, [navigate]);
 
   return (

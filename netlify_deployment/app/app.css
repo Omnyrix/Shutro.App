@@ -63,3 +63,37 @@ body {
          transform -translate-y-1 
          shadow-xl shadow-black/30;
 }
+/* CSS for loading spinner */
+.loader {
+  border: 4px solid #f3f3f3; /* Light grey */
+  border-top: 4px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Smooth transition for the Turnstile container */
+div[ref="containerRef"] {
+  transition: opacity 0.3s ease-in-out;
+}
+
+div[ref="containerRef"]:not(:empty) {
+  opacity: 1;
+}
+
+.panel {
+  position: absolute;
+  top: 0;
+  right: -100%;
+  transition: right 1s linear;
+}
+
+.panel-open {
+  right: 0;
+}
