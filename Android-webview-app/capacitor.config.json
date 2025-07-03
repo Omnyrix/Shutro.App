@@ -1,6 +1,0 @@
-{
-  "appId": "com.shutro.app",
-  "appName": "Shutro.App",
-  "webDir": "../netlify_deployment/build",
-  "bundledWebRuntime": false
-}
