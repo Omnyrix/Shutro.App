@@ -22,19 +22,7 @@ export default function Physics() {
   return (
     <div className="relative min-h-screen bg-gray-900">
       <div className="absolute inset-0 bg-gray-800 text-white p-6 flex flex-col items-center overflow-hidden">
-        <motion.button
-          onClick={() => navigate("/home")}
-          className="self-start mb-4 text-blue-400 underline font-bold"
-          whileTap={{ scale: 0.95 }}
-          whileHover={{ scale: 1.05 }}
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          style={{ willChange: "transform, opacity" }}
-        >
-          Back
-        </motion.button>
-
+        {/* Removed back button */}
         <TopBar />
 
         <motion.h1
