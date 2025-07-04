@@ -2,3 +2,11 @@
 .netlify
 /node_modules/
 /android-build/
+/.tmp.driveupload/
+/.tmp.drivedownload/
+/.vscode/
+/.idea/
+.idea
+.vscode
+.package-lock.json
+.package.json
