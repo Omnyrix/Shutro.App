@@ -1,2 +1,11 @@
 # Shutro.app
-An app that will contain all your mathematical formulas for all the subjects; Physics , Chemistry, Higher Math and Biology
+
+[![Website](https://img.shields.io/badge/Website-Shutro.app-brightgreen)](https://shutro.netlify.app)
+[![Releases](https://img.shields.io/github/v/release/Omnyrix/Shutro.App.svg)](https://github.com/Omnyrix/Shutro.App/releases)
+[![Pre-Release](https://img.shields.io/badge/pre--release-v0.0.2--beta1-blue)](https://github.com/Omnyrix/Shutro.App/releases/tag/v0.0.2-beta-1)
+
+Shutro.app is a mobile application that provides an extensive collection of mathematical formulas for various subjects including **Physics**, **Chemistry**, **Higher Mathematics**, and **Biology**. It's your go-to source for formulas, making it easier to study and reference them on the go.
+
+## License
+
+Shutro.app is released under a custom license. See the [LICENSE](LICENSE) file for more details.
