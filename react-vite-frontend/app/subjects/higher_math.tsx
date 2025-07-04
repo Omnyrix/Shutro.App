@@ -1,6 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import TopBar from "../components/topbar";
 import { motion } from "framer-motion";
+import NoInternetWarning from "../components/noInternetWarning";
+import { useEffect, useState } from "react";
+import { getCookie } from "../utils/cookie";
 
 export default function HigherMath() {
   const navigate = useNavigate();
@@ -19,10 +22,22 @@ export default function HigherMath() {
     }, 150);
   };
 
+  const [isDemo, setIsDemo] = useState(false);
+
+  useEffect(() => {
+    async function checkSession() {
+      const email = await getCookie("session");
+      setIsDemo(!email);
+    }
+    checkSession();
+  }, []);
+
   return (
     <div className="relative min-h-screen bg-gray-900">
+      {isDemo && <NoInternetWarning />}
       <div className="absolute inset-0 bg-gray-800 text-white p-6 flex flex-col items-center overflow-hidden">
-        {/* Removed back button */}
+
+
         <TopBar />
 
         <motion.h1

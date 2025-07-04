@@ -7,6 +7,7 @@ import { FaCalculator, FaBars } from "react-icons/fa";
 import axios from "axios";
 import { motion } from "framer-motion";
 import SidePanel from "../components/sidepanel";
+import NoInternetWarning from "../components/noInternetWarning";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -16,7 +17,6 @@ export default function Home() {
   const [isPanelOpen, setPanelOpen] = useState(false);
   const [isDemo, setIsDemo] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showNoInternet, setShowNoInternet] = useState(false);
 
   useEffect(() => {
     async function checkSession() {
@@ -35,7 +35,6 @@ export default function Home() {
           setUsername(res.data.username.charAt(0).toUpperCase() + res.data.username.slice(1));
           setIsLoggedIn(true);
           setIsDemo(false);
-          setShowNoInternet(false);
         } else {
           // User not found: erase cookie, demo mode
           await eraseCookie("session");
@@ -52,24 +51,11 @@ export default function Home() {
           setUsername("");
         } else {
           // Network/server error: show no internet, keep previous state
-          setShowNoInternet(true);
         }
       }
     }
 
-    // Ping Google to check for internet connectivity (non-blocking)
-    async function checkInternet() {
-      try {
-        // Use a lightweight request, avoid CORS error by using a public endpoint that allows it
-        // Google's favicon is a small file and allows CORS
-        await fetch("https://www.google.com/favicon.ico", { method: "HEAD", mode: "no-cors" });
-        // If fetch does not throw, assume internet is available
-      } catch {
-        setShowNoInternet(true);
-      }
-    }
     checkSession();
-    checkInternet();
     // eslint-disable-next-line
   }, []);
 
@@ -88,8 +74,19 @@ export default function Home() {
 
   return (
     <div className="fixed inset-0 bg-gray-800 text-white overflow-hidden">
+      {/* Spacer for status bar/notch */}
+      <div
+        className="w-full"
+        style={{ height: "env(safe-area-inset-top, 0px)", background: "#111827" /* bg-gray-900 */ }}
+      />
       {/* HEADER */}
-      <header className="fixed top-0 left-0 right-0 bg-gray-900 shadow-md flex items-center justify-between px-4 py-2 z-50">
+      <header
+        className="fixed left-0 right-0 bg-gray-900 shadow-md flex items-center justify-between px-4 py-2 z-50"
+        style={{
+          top: "env(safe-area-inset-top, 0px)",
+          height: 56,
+        }}
+      >
         <div className="flex items-center gap-2">
           <img src="https://shutro.netlify.app/favicon.ico" alt="Logo" className="w-8 h-8" />
           <span className="font-bold text-xl text-blue-400">Shutro.App</span>
@@ -100,30 +97,13 @@ export default function Home() {
       </header>
 
       {/* NO INTERNET POPOUT */}
-      {isDemo && showNoInternet && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900 bg-opacity-90">
-          <div className="bg-gray-800 text-white rounded-lg shadow-lg px-4 sm:px-8 py-4 sm:py-6 flex flex-col items-center w-[90vw] max-w-xs sm:max-w-sm md:max-w-md border border-blue-400 scale-[0.95] sm:scale-100 transition-transform duration-200">
-            <span className="text-3xl mb-2">⚠️</span>
-            <h2 className="font-bold text-lg mb-2 text-blue-400">No Internet Connection</h2>
-            <p className="text-center text-sm mb-2">
-              We couldn't reach the server. Please check your connection.
-            </p>
-            <p className="text-center text-xs text-gray-400 mb-2">
-              <span className="font-semibold text-blue-300">Tip:</span> Log in to enable offline access to the app.
-            </p>
-            <p className="text-xs text-gray-400 mb-4">This message will disappear once connection is restored.</p>
-            <button
-              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded transition"
-              onClick={() => window.location.reload()}
-            >
-              Reload
-            </button>
-          </div>
-        </div>
-      )}
+      {isDemo && <NoInternetWarning />}
 
       {/* MAIN */}
-      <main className="pt-16 p-6 h-full overflow-hidden">
+      <main
+        className="pt-32 p-6 h-full overflow-hidden"
+        style={{ paddingTop: "calc(80px + env(safe-area-inset-top, 0px))" }}
+      >
         <h1 className="text-3xl font-bold text-center mb-6">
           <span className="text-white">Welcome</span>{" "}
           <span style={{ color: "#1D4ED8" }}>{isLoggedIn ? username : " "}</span>{" "}

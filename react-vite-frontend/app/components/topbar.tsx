@@ -6,8 +6,18 @@ export default function TopBarLayout({ children }: { children: React.ReactNode }
   
   return (
     <div>
+      {/* Spacer for status bar/notch */}
+      <div
+        className="w-full"
+        style={{ height: "env(safe-area-inset-top, 0px)", background: "#111827" /* bg-gray-900 */ }}
+      />
       {/* Top Bar */}
-      <header className="fixed top-0 left-0 right-0 bg-gray-900 shadow-md flex items-center px-4 py-2 z-50">
+      <header
+        className="fixed left-0 right-0 bg-gray-900 shadow-md flex items-center px-4 py-2 z-50"
+        style={{
+          top: "env(safe-area-inset-top, 0px)"
+        }}
+      >
         <button
           className="p-2 rounded-md hover:bg-gray-700"
           onClick={() => navigate(-1)}
@@ -19,9 +29,11 @@ export default function TopBarLayout({ children }: { children: React.ReactNode }
           <span className="font-bold text-xl text-blue-400">Shutro.App</span>
         </Link>
       </header>
-
-      {/* Main Content (offset by the header height) */}
-      <main className="pt-16">
+      {/* Main Content (offset by the header height + safe area inset) */}
+      <main
+        className="pt-20"
+        style={{ paddingTop: "calc(56px + env(safe-area-inset-top, 0px))" }}
+      >
         {children}
       </main>
     </div>

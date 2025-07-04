@@ -98,3 +98,8 @@ div[ref="containerRef"]:not(:empty) {
 .panel-open {
   right: 0;
 }
+
+#root, .app-content {
+  padding-top: env(safe-area-inset-top);
+  box-sizing: border-box;
+}

@@ -50,6 +50,61 @@ const SidePanel = ({
     };
   }, [isPanelOpen, setPanelOpen]);
 
+  // Dynamically change status bar color when panel is opened/closed
+  useEffect(() => {
+    // Only run if Capacitor is available
+    const isCapacitor = !!(window as any).Capacitor;
+    if (!isCapacitor) return;
+
+    const StatusBar = (window as any).Capacitor.Plugins.StatusBar;
+    // Panel background color (should match panel's bg)
+    const panelBgColor = "#1f2937"; // Tailwind bg-gray-800
+    const defaultBgColor = "#111827"; // Default app bg (same as panel for seamless look)
+    const openColor = panelBgColor;
+    const closedColor = defaultBgColor;
+
+    // Animate color transition for smooth effect
+    let animationFrame: number;
+    let start: number | null = null;
+    const duration = 150; // ms, should match panel transition
+
+    const fromColor = isPanelOpen ? closedColor : openColor;
+    const toColor = isPanelOpen ? openColor : closedColor;
+
+    // Helper to interpolate hex colors
+    function lerpColor(a: string, b: string, t: number) {
+      const ah = a.replace("#", "");
+      const bh = b.replace("#", "");
+      const ar = parseInt(ah.substring(0, 2), 16);
+      const ag = parseInt(ah.substring(2, 4), 16);
+      const ab = parseInt(ah.substring(4, 6), 16);
+      const br = parseInt(bh.substring(0, 2), 16);
+      const bg = parseInt(bh.substring(2, 4), 16);
+      const bb = parseInt(bh.substring(4, 6), 16);
+      const rr = Math.round(ar + (br - ar) * t);
+      const rg = Math.round(ag + (bg - ag) * t);
+      const rb = Math.round(ab + (bb - ab) * t);
+      return `#${rr.toString(16).padStart(2, "0")}${rg.toString(16).padStart(2, "0")}${rb.toString(16).padStart(2, "0")}`;
+    }
+
+    function animateColor(ts: number) {
+      if (start === null) start = ts;
+      const elapsed = ts - start;
+      const t = Math.min(elapsed / duration, 1);
+      const color = lerpColor(fromColor, toColor, t);
+      StatusBar.setBackgroundColor({ color });
+      if (t < 1) {
+        animationFrame = requestAnimationFrame(animateColor);
+      }
+    }
+
+    animationFrame = requestAnimationFrame(animateColor);
+
+    return () => {
+      if (animationFrame) cancelAnimationFrame(animationFrame);
+    };
+  }, [isPanelOpen]);
+
   async function handleLogout() {
     setLogoutLoading(true);
     eraseCookie("session");
@@ -61,11 +116,18 @@ const SidePanel = ({
 
   return (
     <motion.div
-      className={`absolute top-0 h-full z-50 bg-gray-800 shadow-2xl transition-all duration-150  md:w-1/3 w-full ${isPanelOpen ? 'panel-open' : 'panel-closed'}`}
+      className={`absolute z-50 bg-gray-800 shadow-2xl transition-all duration-150  md:w-1/3 w-full ${isPanelOpen ? 'panel-open' : 'panel-closed'}`}
       style={{
         right: isPanelOpen ? "0" : "-100%",
+        top: "env(safe-area-inset-top, 0px)",
+        height: "calc(100% - env(safe-area-inset-top, 0px))",
       }}
     >
+      {/* Spacer for status bar/notch */}
+      <div
+        className="w-full"
+        style={{ height: "env(safe-area-inset-top, 0px)", background: "#1f2937" }}
+      />
       <div className="p-4 flex flex-col h-full justify-between">
         <div>
           <button onClick={() => setPanelOpen(false)} className="rounded-md p-1 mb-4">
@@ -162,13 +224,15 @@ const SidePanel = ({
 
         {/* Logout Button */}
         {isLoggedIn && (
-          <button
-            onClick={handleLogout}
-            className="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-red-500 to-red-700 text-white font-semibold shadow-md hover:from-red-600 hover:to-red-800 transition-all"
-            disabled={logoutLoading}
-          >
-            {logoutLoading ? "Logging out..." : "Logout"}
-          </button>
+          <div className="mb-6">
+            <button
+              onClick={handleLogout}
+              className="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-red-500 to-red-700 text-white font-semibold shadow-md hover:from-red-600 hover:to-red-800 transition-all"
+              disabled={logoutLoading}
+            >
+              {logoutLoading ? "Logging out..." : "Logout"}
+            </button>
+          </div>
         )}
       </div>
     </motion.div>

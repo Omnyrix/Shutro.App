@@ -1,6 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import TopBar from "../components/topbar";
 import { motion } from "framer-motion";
+import NoInternetWarning from "../components/noInternetWarning";
+import { useEffect, useState } from "react";
+import { getCookie } from "../utils/cookie";
 
 export default function Physics() {
   const navigate = useNavigate();
@@ -19,10 +22,21 @@ export default function Physics() {
     }, 150);
   };
 
+  const [isDemo, setIsDemo] = useState(false);
+
+  useEffect(() => {
+    async function checkSession() {
+      const email = await getCookie("session");
+      setIsDemo(!email);
+    }
+    checkSession();
+  }, []);
+
   return (
     <div className="relative min-h-screen bg-gray-900">
+      {isDemo && <NoInternetWarning />}
       <div className="absolute inset-0 bg-gray-800 text-white p-6 flex flex-col items-center overflow-hidden">
-        {/* Removed back button */}
+
         <TopBar />
 
         <motion.h1
@@ -56,7 +70,11 @@ export default function Physics() {
               whileHover={{ scale: 1.01 }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 + index * 0.05, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              transition={{
+                delay: 0.2 + index * 0.05,
+                duration: 0.4,
+                ease: [0.22, 1, 0.36, 1],
+              }}
               style={{ willChange: "transform, opacity" }}
             >
               <hr className="mb-1 border-t-2 border-gray-400 opacity-60" />
@@ -73,3 +91,4 @@ export default function Physics() {
     </div>
   );
 }
+

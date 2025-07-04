@@ -33,13 +33,35 @@ export default function Loading() {
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-gray-800 text-white z-50 transition-opacity duration-500">
-      {/* Debug message */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-gray-900 px-4 py-2 rounded shadow text-sm text-yellow-300">
-        {hasSession === null
-          ? "Detecting session cookie..."
-          : hasSession
-          ? "Session cookie detected (logged in mode)"
-          : "No session cookie detected (demo mode)"}
+      {/* Extra space below the status bar, inside the loading screen */}
+      <div className="w-full" style={{ height: 24, background: "#1f2937", position: "absolute", top: 0, left: 0 }} />
+      {/* Debug message: one line, under the space, scaled dynamically, with extra margin */}
+      <div
+        className="w-full flex justify-center"
+        style={{
+          position: "absolute",
+          top: 36, // 24px (space) + 12px (gap)
+          left: 0,
+          zIndex: 10,
+        }}
+      >
+        <span
+          className="bg-gray-900 px-4 py-2 rounded shadow text-sm text-yellow-300 text-center"
+          style={{
+            maxWidth: "90vw",
+            width: "fit-content",
+            fontSize: "clamp(0.8rem, 2vw, 1.1rem)",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {hasSession === null
+            ? "Detecting session cookie..."
+            : hasSession
+            ? "Session cookie detected (logged in mode)"
+            : "No session cookie detected (demo mode)"}
+        </span>
       </div>
       {/* Flashing Math Symbols */}
       <div className="relative flex gap-4 mb-6">

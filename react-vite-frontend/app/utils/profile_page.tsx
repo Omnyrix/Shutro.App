@@ -105,7 +105,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-gray-800 text-white p-6 flex flex-col items-center">
+    <div className="fixed inset-0 bg-gray-800 text-white p-6 flex flex-col items-center overflow-hidden">
       {loading && <Loading />}
       {!loading && (
         <>
