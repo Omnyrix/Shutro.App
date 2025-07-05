@@ -19,7 +19,7 @@ export default function Chemistry() {
   const handlePaperClick = (route: string) => {
     setTimeout(() => {
       navigate(route);
-    }, 150);
+    }, 100);
   };
 
   const [isDemo, setIsDemo] = useState(false);
@@ -37,29 +37,16 @@ export default function Chemistry() {
       {isDemo && <NoInternetWarning />}
       <div className="absolute inset-0 bg-gray-800 text-white p-6 flex flex-col items-center overflow-hidden">
 
-
         <TopBar />
 
-        <motion.h1
-          className="text-3xl font-bold text-center mb-6"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
-          style={{ willChange: "transform, opacity" }}
-        >
+        <h1 className="text-3xl font-bold text-center mb-6">
           <span style={{ color: "#EA580C" }}>Chemistry</span>{" "}
           <span className="text-white">Formulas</span>
-        </motion.h1>
+        </h1>
 
-        <motion.p
-          className="text-lg mb-6 text-center"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
-          style={{ willChange: "transform, opacity" }}
-        >
+        <p className="text-lg mb-6 text-center">
           Choose a paper:
-        </motion.p>
+        </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
           {papers.map((paper, index) => (
@@ -71,7 +58,7 @@ export default function Chemistry() {
               whileHover={{ scale: 1.01 }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 + index * 0.05, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ delay: 0.1 + index * 0.03, duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
               style={{ willChange: "transform, opacity" }}
             >
               <hr className="mb-1 border-t-2 border-gray-400 opacity-60" />

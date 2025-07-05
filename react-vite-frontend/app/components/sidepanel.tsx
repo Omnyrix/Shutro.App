@@ -17,7 +17,7 @@ interface SidePanelProps {
 
 
 // Animation duration in milliseconds for About section
-const aboutAnimMs = 200; // <<<<<<<<<<<  Set animation duration here (ms)
+const aboutAnimMs = 100; // <<<<<<<<<<<  Set animation duration here (ms)
 
 const SidePanel = ({
   isPanelOpen,

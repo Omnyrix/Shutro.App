@@ -93,7 +93,7 @@ const MainApp = () => {
       color: isGray900 ? "#111827" : "#1f2937",
     });
     // white icons for our dark backgrounds
-    StatusBar.setStyle({ style: Style.Light });
+    StatusBar.setStyle({ style: Style.Dark });
   }, [location.pathname]);
 
   if (bootLoading) {
