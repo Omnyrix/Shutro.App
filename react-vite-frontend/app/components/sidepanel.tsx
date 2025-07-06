@@ -1,10 +1,10 @@
-// components/SidePanel.tsx
 import { useState, useEffect } from "react"; // Import useState and useEffect
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { eraseCookie } from "../utils/cookie"; // Import eraseCookie
 import { FaArrowLeft } from "react-icons/fa"; // Import FaArrowLeft
 import axios from "axios"; // Import axios
 import { motion } from "framer-motion"; // Import motion
+import guestAvatar from "../assets/guest-avatar.png"; // Guest avatar image
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -15,9 +15,8 @@ interface SidePanelProps {
   isDemo: boolean;
 }
 
-
 // Animation duration in milliseconds for About section
-const aboutAnimMs = 100; // <<<<<<<<<<<  Set animation duration here (ms)
+const aboutAnimMs = 150; // <<<<<<<<<<<  Set animation duration here (ms)
 
 const SidePanel = ({
   isPanelOpen,
@@ -33,7 +32,6 @@ const SidePanel = ({
   useEffect(() => {
     if (!isPanelOpen) return;
 
-    // Only add listener if running in Capacitor environment
     const isCapacitor = !!(window as any).Capacitor;
     if (!isCapacitor) return;
 
@@ -41,7 +39,6 @@ const SidePanel = ({
 
     const backHandler = CapacitorApp.addListener("backButton", (event: any) => {
       setPanelOpen(false);
-      // Prevent default navigation/back behavior
       event && event.preventDefault && event.preventDefault();
     });
 
@@ -52,26 +49,22 @@ const SidePanel = ({
 
   // Dynamically change status bar color when panel is opened/closed
   useEffect(() => {
-    // Only run if Capacitor is available
     const isCapacitor = !!(window as any).Capacitor;
     if (!isCapacitor) return;
 
     const StatusBar = (window as any).Capacitor.Plugins.StatusBar;
-    // Panel background color (should match panel's bg)
-    const panelBgColor = "#1f2937"; // Tailwind bg-gray-800
-    const defaultBgColor = "#111827"; // Default app bg (same as panel for seamless look)
+    const panelBgColor = "#1f2937";
+    const defaultBgColor = "#111827";
     const openColor = panelBgColor;
     const closedColor = defaultBgColor;
 
-    // Animate color transition for smooth effect
     let animationFrame: number;
     let start: number | null = null;
-    const duration = 150; // ms, should match panel transition
+    const duration = 150;
 
     const fromColor = isPanelOpen ? closedColor : openColor;
     const toColor = isPanelOpen ? openColor : closedColor;
 
-    // Helper to interpolate hex colors
     function lerpColor(a: string, b: string, t: number) {
       const ah = a.replace("#", "");
       const bh = b.replace("#", "");
@@ -109,14 +102,14 @@ const SidePanel = ({
     setLogoutLoading(true);
     eraseCookie("session");
     setLogoutLoading(false);
-    navigate("/auth/login");   // Go to home
+    navigate("/auth/login");
   }
 
-  const isLoggedIn = !isDemo; // Use isDemo prop to determine login state
+  const isLoggedIn = !isDemo;
 
   return (
     <motion.div
-      className={`absolute z-50 bg-gray-800 shadow-2xl transition-all duration-150  md:w-1/3 w-full ${isPanelOpen ? 'panel-open' : 'panel-closed'}`}
+      className={`absolute z-50 bg-gray-800 shadow-2xl transition-all duration-100 md:w-1/3 w-full ${isPanelOpen ? 'panel-open' : 'panel-closed'}`}
       style={{
         right: isPanelOpen ? "0" : "-100%",
         top: "env(safe-area-inset-top, 0px)",
@@ -135,8 +128,8 @@ const SidePanel = ({
           </button>
           {/* Profile Section */}
           <div className="flex flex-col items-center gap-2 mb-6">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-900 flex items-center justify-center text-3xl font-bold text-white shadow-lg">
-              {isLoggedIn ? username.charAt(0) : <span className="text-2xl">👤</span>}
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br  flex items-center justify-center text-3xl font-bold text-white shadow-lg">
+              {isLoggedIn ? username.charAt(0) : <img src={guestAvatar} alt="Guest avatar" className="w-full h-full object-cover rounded-full" />}
             </div>
             <span className="text-xl font-semibold text-white">
               {isLoggedIn ? username : "Guest"}
@@ -146,7 +139,7 @@ const SidePanel = ({
           {/* Buttons Section */}
           {isLoggedIn ? (
             <button
-              className="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold shadow-md hover:from-blue-600 hover:to-blue-800 mb-4 transition-all"
+              className="w-full py-2 px-3 rounded-lg bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 mb-4 transition-all"
               onClick={() => {
                 setPanelOpen(false);
                 navigate("/profile");
@@ -157,7 +150,7 @@ const SidePanel = ({
           ) : (
             <div className="flex flex-col gap-3 mb-4">
               <button
-                className="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold shadow-md hover:from-blue-600 hover:to-blue-800 transition-all"
+                className="w-full py-2 px-3 rounded-lg bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 transition-all"
                 onClick={() => {
                   setPanelOpen(false);
                   navigate("/auth/login");
@@ -166,7 +159,7 @@ const SidePanel = ({
                 Login
               </button>
               <button
-                className="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-purple-500 to-purple-700 text-white font-semibold shadow-md hover:from-purple-600 hover:to-purple-800 transition-all"
+                className="w-full py-2 px-3 rounded-lg bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 transition-all"
                 onClick={() => {
                   setPanelOpen(false);
                   navigate("/auth/register");
@@ -227,7 +220,7 @@ const SidePanel = ({
           <div className="mb-6">
             <button
               onClick={handleLogout}
-              className="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-red-500 to-red-700 text-white font-semibold shadow-md hover:from-red-600 hover:to-red-800 transition-all"
+              className="w-full py-2 px-3 rounded-lg bg-red-500 text-white font-semibold shadow-md hover:bg-red-600 transition-all"
               disabled={logoutLoading}
             >
               {logoutLoading ? "Logging out..." : "Logout"}
@@ -236,7 +229,6 @@ const SidePanel = ({
         )}
       </div>
     </motion.div>
-  );
-};
+)};
 
 export default SidePanel;

@@ -39,13 +39,13 @@ export default function Biology() {
 
         <TopBar />
 
-        <h1 className="text-3xl font-bold text-center mb-6">
+        <h1 className="text-2xl font-bold text-center mb-6">
           <span style={{ color: "#10B981" }}>Biology</span>{" "}
           <span className="text-white">Formulas</span>
         </h1>
 
-        <p className="text-lg mb-6 text-center">
-          Choose a paper:
+        <p className="text-sm text-gray-400 mb-5 text-center">
+          Pick a paper:
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">

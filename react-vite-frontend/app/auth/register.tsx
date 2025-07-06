@@ -3,8 +3,7 @@ import { setCookie } from "../utils/cookie";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-// import Turnstile from "../components/Turnstile";
-import Loading from "./auth_loading";
+import Loading from "./auth_reg_loading";
 import { AnimatePresence } from "framer-motion";
 
 const backendUrl = import.meta.env.VITE_BACKSTAGE_URL || import.meta.env.VITE_BACKEND_URL;
@@ -17,8 +16,6 @@ export default function Register() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  // const [turnstileToken, setTurnstileToken] = useState("");
-  // const [turnstileKey, setTurnstileKey] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
@@ -34,7 +31,6 @@ export default function Register() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    // setTurnstileKey((prev) => prev + 1);
 
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
@@ -46,14 +42,12 @@ export default function Register() {
       setLoading(false);
       return;
     }
-    // Removed Turnstile and human verification
 
     try {
       const res = await axios.post(`${backendUrl}/register`, {
         username: username.replace(/\s/g, ""),
         password,
         email,
-        // turnstileToken removed
       });
       setLoading(false);
       if (res.data.success) {
@@ -146,7 +140,6 @@ export default function Register() {
                 Passwords do not match.
               </div>
             )}
-            {/* Turnstile removed */}
             <button
               className="w-full bg-blue-800 text-white py-2 rounded hover:bg-blue-700 transition"
               type="submit"

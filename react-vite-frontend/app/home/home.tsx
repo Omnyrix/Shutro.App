@@ -1,4 +1,3 @@
-// Home.tsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { eraseCookie, getCookie } from "../utils/cookie";
@@ -8,6 +7,10 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import SidePanel from "../components/sidepanel";
 import NoInternetWarning from "../components/noInternetWarning";
+import AppIcon from "../assets/app-icon.png"; // <-- use local asset
+
+// Capacitor StatusBar imports
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -19,10 +22,13 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    // Set the native status bar background color & style
+    StatusBar.setBackgroundColor({ color: '#111827' });
+    StatusBar.setStyle({ style: Style.Dark });
+
     async function checkSession() {
       const email = await getCookie("session");
       if (!email) {
-        // No session cookie: demo mode
         setIsLoggedIn(false);
         setIsDemo(true);
         setUsername("");
@@ -31,12 +37,12 @@ export default function Home() {
       try {
         const res = await axios.get(`${backendUrl}/user/${email}`);
         if (res.data && res.data.username) {
-          // Valid user: logged in mode
-          setUsername(res.data.username.charAt(0).toUpperCase() + res.data.username.slice(1));
+          setUsername(
+            res.data.username.charAt(0).toUpperCase() + res.data.username.slice(1)
+          );
           setIsLoggedIn(true);
           setIsDemo(false);
         } else {
-          // User not found: erase cookie, demo mode
           await eraseCookie("session");
           setIsLoggedIn(false);
           setIsDemo(true);
@@ -44,7 +50,6 @@ export default function Home() {
         }
       } catch (err: any) {
         if (err?.response?.status === 404) {
-          // User not found: erase cookie, demo mode
           await eraseCookie("session");
           setIsLoggedIn(false);
           setIsDemo(true);
@@ -60,16 +65,30 @@ export default function Home() {
   }, []);
 
   const subjectList = [
-    { route: "#/physics", name: "Physics", icon: <GiAtom className="text-2xl" style={{ color: "#1D4ED8" }} /> },
-    { route: "#/chemistry", name: "Chemistry", icon: <GiChemicalDrop className="text-2xl" style={{ color: "#EA580C" }} /> },
-    { route: "#/highermath", name: "Higher Math", icon: <FaCalculator className="text-2xl" style={{ color: "#8B5CF6" }} /> },
-    { route: "#/biology", name: "Biology", icon: <GiFrog className="text-2xl" style={{ color: "#10B981" }} /> },
+    {
+      route: "/physics",
+      name: "Physics",
+      icon: <GiAtom className="text-2xl" style={{ color: "#1D4ED8" }} />,
+    },
+    {
+      route: "/chemistry",
+      name: "Chemistry",
+      icon: <GiChemicalDrop className="text-2xl" style={{ color: "#EA580C" }} />,
+    },
+    {
+      route: "/highermath",
+      name: "Higher Math",
+      icon: <FaCalculator className="text-2xl" style={{ color: "#8B5CF6" }} />,
+    },
+    {
+      route: "/biology",
+      name: "Biology",
+      icon: <GiFrog className="text-2xl" style={{ color: "#10B981" }} />,
+    },
   ];
 
   const handleSubjectClick = (route: string) => {
-    setTimeout(() => {
-      window.location.href = route;
-    }, 150);
+    navigate(route);
   };
 
   return (
@@ -77,7 +96,7 @@ export default function Home() {
       {/* Spacer for status bar/notch */}
       <div
         className="w-full"
-        style={{ height: "env(safe-area-inset-top, 0px)", background: "#111827" /* bg-gray-900 */ }}
+        style={{ height: "env(safe-area-inset-top, 0px)", background: "#111827" }}
       />
       {/* HEADER */}
       <header
@@ -88,7 +107,11 @@ export default function Home() {
         }}
       >
         <div className="flex items-center gap-2">
-          <img src="https://shutro.netlify.app/favicon.ico" alt="Logo" className="w-8 h-8" />
+          <img
+            src={AppIcon}
+            alt="Logo"
+            className="w-8 h-8"
+          />
           <span className="font-bold text-xl text-blue-400">Shutro.App</span>
         </div>
         <button onClick={() => setPanelOpen(true)} className="rounded-md p-1">
@@ -101,23 +124,24 @@ export default function Home() {
 
       {/* MAIN */}
       <main
-        className="pt-32 p-6 h-full overflow-hidden"
+        className="pt-24 p-6 h-full overflow-hidden"
         style={{ paddingTop: "calc(80px + env(safe-area-inset-top, 0px))" }}
       >
-        <h1 className="text-3xl font-bold text-center mb-6">
-          <span className="text-white">Welcome</span>{" "}
-          <span style={{ color: "#1D4ED8" }}>{isLoggedIn ? username : " "}</span>{" "}
-          <span className="text-white">to</span>{" "}
-          <span className="text-blue-400">Shutro.App</span>
+        <h1
+          className="font-bold text-center mb-2 leading-tight"
+          style={{ fontSize: "31px" }}
+        >
+          <span className="text-white">ELEV∆TE </span><span>YOUR </span>
+          <span className="text-blue-400">EQUATIΩNS</span>
         </h1>
 
-        <div className="flex flex-col items-center text-center w-full">
-          <p className="text-lg mb-4">Choose a subject:</p>
-          <div className="flex flex-col gap-4 w-full max-w-md mx-auto">
+        <div className="flex flex-col items-center text-left w-full">
+          <p className="text-sm text-gray-400 mb-5">Pick a subject :</p>
+          <div className="flex flex-col gap-3 w-full max-w-[350px] mx-auto">
             {subjectList.map((subject, index) => (
               <motion.div
                 key={index}
-                className="subject-button cursor-pointer"
+                className="subject-button cursor-pointer w-full"
                 onClick={() => handleSubjectClick(subject.route)}
                 whileTap={{ scale: 0.97 }}
                 whileHover={{ scale: 1.01 }}
@@ -127,7 +151,7 @@ export default function Home() {
                 style={{ willChange: "transform, opacity" }}
               >
                 <hr className="mb-1 border-t-2 border-gray-400 opacity-60" />
-                <div className="flex items-center gap-4 py-4 px-5">
+                <div className="flex items-center gap-4 py-4 px-6">
                   {subject.icon}
                   <p className="text-lg font-semibold text-left text-gray-400">
                     {subject.name}

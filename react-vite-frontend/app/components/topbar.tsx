@@ -1,5 +1,7 @@
+// components/TopBarLayout.tsx
 import { useNavigate, Link } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
+import AppIcon from "../assets/app-icon.png";  // <-- use local asset
 
 export default function TopBarLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
@@ -25,7 +27,7 @@ export default function TopBarLayout({ children }: { children: React.ReactNode }
           <FaArrowLeft className="text-2xl text-white" />
         </button>
         <Link to="/home" className="flex items-center gap-2 ml-4">
-          <img src="https://shutro.netlify.app/favicon.ico" alt="Logo" className="w-8 h-8" />
+          <img src={AppIcon} alt="Logo" className="w-8 h-8" />
           <span className="font-bold text-xl text-blue-400">Shutro.App</span>
         </Link>
       </header>
