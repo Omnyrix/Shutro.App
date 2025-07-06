@@ -5,14 +5,13 @@ const path = require("path");
 const yaml = require("js-yaml");
 const bcrypt = require("bcrypt");
 const cors = require("cors");
-const axios = require("axios");
 const nodemailer = require("nodemailer");
 
 const app = express();
 const USERS_DIR = path.join(__dirname, "users_info");
 
-// Ensure the users_info directory exists
-if (!fs.existsSync(USERS_DIR)) fs.mkdirSync(USERS_DIR);
+// Ensure the users_info directory exists (with recursive just in case)
+if (!fs.existsSync(USERS_DIR)) fs.mkdirSync(USERS_DIR, { recursive: true });
 
 app.use(cors());
 app.use(express.json());
@@ -33,53 +32,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-/**
- * Helper function to verify the Turnstile token.
- * Returns the response from Cloudflare.
- */
-async function verifyTurnstileToken(token, remoteip) {
-  const secret = process.env.TURNSTILE_SECRET;
-  if (!secret) {
-    throw new Error("TURNSTILE_SECRET environment variable is not set.");
-  }
-  const verificationData = new URLSearchParams();
-  verificationData.append("secret", secret);
-  verificationData.append("response", token);
-  verificationData.append("remoteip", remoteip);
-
-  const cfRes = await axios.post(
-    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-    verificationData.toString(),
-    { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-  );
-  return cfRes.data;
-}
-
-// New route for Turnstile verification, used independently
-app.post("/verify-turnstile", async (req, res) => {
-  const { turnstileToken } = req.body;
-  if (!turnstileToken) {
-    return res.status(400).json({ error: "Missing turnstile token" });
-  }
-  try {
-    const result = await verifyTurnstileToken(turnstileToken, req.ip);
-    if (!result.success) {
-      console.error("Turnstile verification failed:", result);
-      return res.status(400).json({ error: "Human varification failed. Please reload the page", details: result });
-    }
-    res.json({ success: true, details: result });
-  } catch (err) {
-    console.error(
-      "Turnstile verification error:",
-      err.response ? err.response.data : err.message
-    );
-    return res.status(500).json({
-      error: "Human varification failed. Please reload the page",
-      details: err.response ? err.response.data : err.message,
-    });
-  }
-});
-
 // GET user data (return username and email)
 app.get("/user/:identifier", (req, res) => {
   const identifier = req.params.identifier.toLowerCase();
@@ -94,20 +46,20 @@ app.get("/user/:identifier", (req, res) => {
       try {
         const filePath = path.join(USERS_DIR, file);
         const userData = yaml.load(fs.readFileSync(filePath, "utf8"));
-        // Compare usernames in lowercase for an exact match.
         if (userData.username && userData.username.toLowerCase() === identifier) {
           userFile = filePath;
           found = true;
           break;
         }
-      } catch (err) {
-        continue;
+      } catch {
+        // skip malformed files
       }
     }
     if (!found) {
       return res.status(404).json({ error: "User not found" });
     }
   }
+
   try {
     const userData = yaml.load(fs.readFileSync(userFile, "utf8"));
     return res.json({ 
@@ -115,54 +67,37 @@ app.get("/user/:identifier", (req, res) => {
       email: userData.email || identifier,
       demo: userData.demo || false
     });
-  } catch (e) {
+  } catch {
     return res.status(500).json({ error: "Failed to read user data" });
   }
 });
 
-
 // Register user endpoint
 app.post("/register", async (req, res) => {
-  const { email, username, password, turnstileToken } = req.body;
+  const { email, username, password } = req.body;
   if (!email || !username || !password) {
     return res.status(400).json({ error: "Missing fields" });
-  }
-  if (!turnstileToken) {
-    return res.status(400).json({ error: "Missing turnstile token" });
-  }
-  
-  // Verify Turnstile token using our helper function.
-  try {
-    const verificationResult = await verifyTurnstileToken(turnstileToken, req.ip);
-    if (!verificationResult.success) {
-      console.error("Turnstile verification failed:", verificationResult);
-      return res.status(400).json({ error: "Human varification failed. Please reload the page" });
-    }
-  } catch (err) {
-    console.error(
-      "Turnstile verification error:",
-      err.response ? err.response.data : err.message
-    );
-    return res.status(500).json({ error: "Human varification failed. Please reload the page" });
   }
 
   const lowerEmail = email.toLowerCase();
   const lowerUsername = username.toLowerCase();
   const userFile = path.join(USERS_DIR, `${lowerEmail}.yml`);
+
   if (fs.existsSync(userFile)) {
     return res.status(400).json({ error: "Email already exists" });
   }
 
   // Check for username uniqueness
-  const files = fs.readdirSync(USERS_DIR);
-  for (let file of files) {
+  for (const file of fs.readdirSync(USERS_DIR)) {
     if (!file.endsWith(".yml")) continue;
     try {
       const userData = yaml.load(fs.readFileSync(path.join(USERS_DIR, file), "utf8"));
       if (userData.username.toLowerCase() === lowerUsername) {
         return res.status(400).json({ error: "Username already taken" });
       }
-    } catch (e) {}
+    } catch {
+      // skip malformed files
+    }
   }
 
   // Generate verification code and store registration timestamp
@@ -188,8 +123,6 @@ app.post("/register", async (req, res) => {
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.error("Error sending verification email:", error);
-      // Optionally, delete the user file if required.
-      // fs.unlinkSync(userFile);
     } else {
       console.log("Verification email sent:", info.response);
     }
@@ -198,11 +131,12 @@ app.post("/register", async (req, res) => {
   res.json({ success: true, message: "Verification code sent", code });
 });
 
-// Verify user endpoint (removes time check)
-app.post("/verify", async (req, res) => {
+// Verify user endpoint
+app.post("/verify", (req, res) => {
   const { email, code } = req.body;
   const lowerEmail = email.toLowerCase();
   const userFile = path.join(USERS_DIR, `${lowerEmail}.yml`);
+
   if (!fs.existsSync(userFile)) {
     return res.status(400).json({ error: "User not found" });
   }
@@ -222,7 +156,7 @@ app.post("/verify", async (req, res) => {
     };
     fs.writeFileSync(userFile, yaml.dump(finalData), "utf8");
     res.json({ success: true });
-  } catch (e) {
+  } catch {
     res.status(500).json({ error: "Verification failed" });
   }
 });
@@ -232,6 +166,7 @@ app.post("/login", (req, res) => {
   const { email, password } = req.body;
   const lowerEmail = email.toLowerCase();
   const userFile = path.join(USERS_DIR, `${lowerEmail}.yml`);
+
   if (!fs.existsSync(userFile)) {
     return res.status(400).json({ error: "Incorrect email or password." });
   }
@@ -243,16 +178,17 @@ app.post("/login", (req, res) => {
     } else {
       return res.status(401).json({ error: "Incorrect email or password." });
     }
-  } catch (e) {
+  } catch {
     return res.status(500).json({ error: "Login failed" });
   }
 });
 
 // Re-register endpoint for changing password
-app.post("/re-register", async (req, res) => {
+app.post("/re-register", (req, res) => {
   const { email, currentPassword, newPassword } = req.body;
   const lowerEmail = email.toLowerCase();
   const userFile = path.join(USERS_DIR, `${lowerEmail}.yml`);
+
   if (!fs.existsSync(userFile)) {
     return res.status(404).json({ error: "User not found" });
   }
@@ -261,16 +197,15 @@ app.post("/re-register", async (req, res) => {
     if (!bcrypt.compareSync(currentPassword, userData.password)) {
       return res.status(401).json({ error: "Incorrect current password" });
     }
-    const newHash = bcrypt.hashSync(newPassword, 10);
-    userData.password = newHash;
+    userData.password = bcrypt.hashSync(newPassword, 10);
     fs.writeFileSync(userFile, yaml.dump(userData), "utf8");
     res.json({ success: true, message: "Password updated successfully" });
-  } catch (e) {
+  } catch {
     res.status(500).json({ error: "Failed to update password" });
   }
 });
 
-// New route for creating a demo account.
+// Create a demo account
 app.post("/demo", (req, res) => {
   const { username } = req.body;
   if (!username) {
@@ -278,9 +213,11 @@ app.post("/demo", (req, res) => {
   }
   const lowerUsername = username.toLowerCase();
   const userFile = path.join(USERS_DIR, `${lowerUsername}.yml`);
+
   if (fs.existsSync(userFile)) {
     return res.status(400).json({ error: "An account with that name already exists" });
   }
+
   const demoData = {
     username: lowerUsername,
     email: `${lowerUsername}@demo.com`,
@@ -291,15 +228,16 @@ app.post("/demo", (req, res) => {
   try {
     fs.writeFileSync(userFile, yaml.dump(demoData), "utf8");
     res.json({ success: true, message: "It's a demo account", account: demoData });
-  } catch (e) {
+  } catch {
     res.status(500).json({ error: "Failed to create demo account" });
   }
 });
 
-// New DELETE route for deleting a demo account.
+// Delete a demo account
 app.delete("/demo/:identifier", (req, res) => {
   const identifier = req.params.identifier.toLowerCase();
   const userFile = path.join(USERS_DIR, `${identifier}.yml`);
+
   if (!fs.existsSync(userFile)) {
     return res.status(404).json({ error: "Demo account not found" });
   }
@@ -309,9 +247,9 @@ app.delete("/demo/:identifier", (req, res) => {
       return res.status(400).json({ error: "Not a demo account" });
     }
     fs.unlinkSync(userFile);
-    return res.json({ success: true, message: "Demo account deleted" });
-  } catch (e) {
-    return res.status(500).json({ error: "Failed to delete demo account" });
+    res.json({ success: true, message: "Demo account deleted" });
+  } catch {
+    res.status(500).json({ error: "Failed to delete demo account" });
   }
 });
 
