@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react"; // Import useState and useEffect
-import { useNavigate } from "react-router-dom"; // Import useNavigate
-import { eraseCookie } from "../utils/cookie"; // Import eraseCookie
-import { FaArrowLeft } from "react-icons/fa"; // Import FaArrowLeft
-import axios from "axios"; // Import axios
-import { motion } from "framer-motion"; // Import motion
-import guestAvatar from "../assets/guest-avatar.png"; // Guest avatar image
+import React, { useState, useEffect, useRef } from "react"; 
+import { useNavigate } from "react-router-dom";              
+import { eraseCookie } from "../utils/cookie";                
+import { FaArrowLeft } from "react-icons/fa";                                              
+import guestAvatar from "../assets/guest-avatar.png";          
+import gsap from "gsap";                                       
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -15,8 +14,10 @@ interface SidePanelProps {
   isDemo: boolean;
 }
 
-// Animation duration in milliseconds for About section
-const aboutAnimMs = 150; // <<<<<<<<<<<  Set animation duration here (ms)
+// Animation timings in milliseconds
+const slideAnimMs = 100;     
+const aboutAnimMs = 200;     
+const statusBarAnimMs = 150; 
 
 const SidePanel = ({
   isPanelOpen,
@@ -27,75 +28,62 @@ const SidePanel = ({
   const navigate = useNavigate();
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [aboutExpanded, setAboutExpanded] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
 
-  // Add useEffect to override back button when panel is open
+  // GSAP slide animation instead of framer-motion
+  useEffect(() => {
+    const el = panelRef.current;
+    if (!el) return;
+    gsap.to(el, {
+      x: isPanelOpen ? 0 : "100%",
+      duration: slideAnimMs / 1000,
+      ease: "power2.out",
+      force3D: true,
+    });
+  }, [isPanelOpen]);
+
+  // Override back button when panel is open
   useEffect(() => {
     if (!isPanelOpen) return;
-
     const isCapacitor = !!(window as any).Capacitor;
     if (!isCapacitor) return;
-
     const { App: CapacitorApp } = (window as any).Capacitor.Plugins;
-
     const backHandler = CapacitorApp.addListener("backButton", (event: any) => {
       setPanelOpen(false);
-      event && event.preventDefault && event.preventDefault();
+      event.preventDefault?.();
     });
-
-    return () => {
-      backHandler && backHandler.remove && backHandler.remove();
-    };
+    return () => backHandler?.remove();
   }, [isPanelOpen, setPanelOpen]);
 
-  // Dynamically change status bar color when panel is opened/closed
+  // Status bar color animation
   useEffect(() => {
     const isCapacitor = !!(window as any).Capacitor;
     if (!isCapacitor) return;
-
     const StatusBar = (window as any).Capacitor.Plugins.StatusBar;
     const panelBgColor = "#1f2937";
     const defaultBgColor = "#111827";
-    const openColor = panelBgColor;
-    const closedColor = defaultBgColor;
-
-    let animationFrame: number;
+    const fromColor = isPanelOpen ? defaultBgColor : panelBgColor;
+    const toColor   = isPanelOpen ? panelBgColor : defaultBgColor;
     let start: number | null = null;
-    const duration = 150;
-
-    const fromColor = isPanelOpen ? closedColor : openColor;
-    const toColor = isPanelOpen ? openColor : closedColor;
+    let animationFrame: number;
 
     function lerpColor(a: string, b: string, t: number) {
-      const ah = a.replace("#", "");
-      const bh = b.replace("#", "");
-      const ar = parseInt(ah.substring(0, 2), 16);
-      const ag = parseInt(ah.substring(2, 4), 16);
-      const ab = parseInt(ah.substring(4, 6), 16);
-      const br = parseInt(bh.substring(0, 2), 16);
-      const bg = parseInt(bh.substring(2, 4), 16);
-      const bb = parseInt(bh.substring(4, 6), 16);
-      const rr = Math.round(ar + (br - ar) * t);
-      const rg = Math.round(ag + (bg - ag) * t);
-      const rb = Math.round(ab + (bb - ab) * t);
-      return `#${rr.toString(16).padStart(2, "0")}${rg.toString(16).padStart(2, "0")}${rb.toString(16).padStart(2, "0")}`;
+      const ah = a.slice(1), bh = b.slice(1);
+      const ar = parseInt(ah.substr(0,2),16), ag = parseInt(ah.substr(2,2),16), ab = parseInt(ah.substr(4,2),16);
+      const br = parseInt(bh.substr(0,2),16), bg = parseInt(bh.substr(2,2),16), bb = parseInt(bh.substr(4,2),16);
+      const rr = Math.round(ar + (br-ar)*t), rg = Math.round(ag + (bg-ag)*t), rb = Math.round(ab + (bb-ab)*t);
+      return `#${rr.toString(16).padStart(2,"0")}${rg.toString(16).padStart(2,"0")}${rb.toString(16).padStart(2,"0")}`;
     }
 
     function animateColor(ts: number) {
       if (start === null) start = ts;
-      const elapsed = ts - start;
-      const t = Math.min(elapsed / duration, 1);
-      const color = lerpColor(fromColor, toColor, t);
-      StatusBar.setBackgroundColor({ color });
-      if (t < 1) {
-        animationFrame = requestAnimationFrame(animateColor);
-      }
+      const t = Math.min((ts - start) / statusBarAnimMs, 1);
+      StatusBar.setBackgroundColor({ color: lerpColor(fromColor, toColor, t) });
+      if (t < 1) animationFrame = requestAnimationFrame(animateColor);
     }
 
     animationFrame = requestAnimationFrame(animateColor);
-
-    return () => {
-      if (animationFrame) cancelAnimationFrame(animationFrame);
-    };
+    return () => cancelAnimationFrame(animationFrame);
   }, [isPanelOpen]);
 
   async function handleLogout() {
@@ -108,12 +96,12 @@ const SidePanel = ({
   const isLoggedIn = !isDemo;
 
   return (
-    <motion.div
-      className={`absolute z-50 bg-gray-800 shadow-2xl transition-all duration-100 md:w-1/3 w-full ${isPanelOpen ? 'panel-open' : 'panel-closed'}`}
+    <div
+      ref={panelRef}
+      className="absolute inset-0 bg-gray-800 z-50 shadow-2xl"
       style={{
-        right: isPanelOpen ? "0" : "-100%",
-        top: "env(safe-area-inset-top, 0px)",
-        height: "calc(100% - env(safe-area-inset-top, 0px))",
+        transform: "translateX(100%)",
+        willChange: "transform",
       }}
     >
       {/* Spacer for status bar/notch */}
@@ -128,45 +116,32 @@ const SidePanel = ({
           </button>
           {/* Profile Section */}
           <div className="flex flex-col items-center gap-2 mb-6">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br  flex items-center justify-center text-3xl font-bold text-white shadow-lg">
-              {isLoggedIn ? username.charAt(0) : <img src={guestAvatar} alt="Guest avatar" className="w-full h-full object-cover rounded-full" />}
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br flex items-center justify-center text-3xl font-bold text-white">
+              {isLoggedIn
+                ? username.charAt(0)
+                : <img src={guestAvatar} alt="Guest avatar" className="w-full h-full object-cover rounded-full" />}
             </div>
-            <span className="text-xl font-semibold text-white">
-              {isLoggedIn ? username : "Guest"}
-            </span>
+            <span className="text-xl font-semibold text-white">{isLoggedIn ? username : "Guest"}</span>
           </div>
 
           {/* Buttons Section */}
           {isLoggedIn ? (
             <button
-              className="w-full py-2 px-3 rounded-lg bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 mb-4 transition-all"
-              onClick={() => {
-                setPanelOpen(false);
-                navigate("/profile");
-              }}
+              onClick={() => { setPanelOpen(false); navigate("/profile"); }}
+              className="w-full py-2 px-3 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 mb-4 transition-all"
             >
               Change Password
             </button>
           ) : (
             <div className="flex flex-col gap-3 mb-4">
               <button
-                className="w-full py-2 px-3 rounded-lg bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 transition-all"
-                onClick={() => {
-                  setPanelOpen(false);
-                  navigate("/auth/login");
-                }}
-              >
-                Login
-              </button>
+                onClick={() => { setPanelOpen(false); navigate("/auth/login"); }}
+                className="w-full py-2 px-3 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-all"
+              >Login</button>
               <button
-                className="w-full py-2 px-3 rounded-lg bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 transition-all"
-                onClick={() => {
-                  setPanelOpen(false);
-                  navigate("/auth/register");
-                }}
-              >
-                Register
-              </button>
+                onClick={() => { setPanelOpen(false); navigate("/auth/register"); }}
+                className="w-full py-2 px-3 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-all"
+              >Register</button>
             </div>
           )}
 
@@ -179,18 +154,10 @@ const SidePanel = ({
             >
               <span>About</span>
               <span style={{ display: 'inline-flex', alignItems: 'center', transition: `transform ${aboutAnimMs}ms cubic-bezier(0.4,0,0.2,1)` }}>
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
                   xmlns="http://www.w3.org/2000/svg"
-                  style={{
-                    transform: aboutExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                    transition: `transform ${aboutAnimMs}ms cubic-bezier(0.4,0,0.2,1)`
-                  }}
-                >
-                  <path d="M6 8l4 4 4-4" stroke="#60A5FA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  style={{ transform: aboutExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                  <path d="M6 8l4 4 4-4" stroke="#60A5FA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
             </button>
@@ -200,9 +167,8 @@ const SidePanel = ({
                 maxHeight: aboutExpanded ? 300 : 0,
                 opacity: aboutExpanded ? 1 : 0,
                 marginTop: aboutExpanded ? 8 : 0,
-                transition: `max-height ${aboutAnimMs}ms cubic-bezier(0.4,0,0.2,1), opacity ${aboutAnimMs}ms cubic-bezier(0.4,0,0.2,1), margin-top ${aboutAnimMs}ms cubic-bezier(0.4,0,0.2,1)`,
-                overflow: 'hidden',
-                willChange: 'max-height, opacity, margin-top'
+                transition: `max-height ${aboutAnimMs}ms, opacity ${aboutAnimMs}ms, margin-top ${aboutAnimMs}ms`,
+                overflow: 'hidden'
               }}
             >
               <p className="text-sm text-gray-400">
@@ -220,7 +186,7 @@ const SidePanel = ({
           <div className="mb-6">
             <button
               onClick={handleLogout}
-              className="w-full py-2 px-3 rounded-lg bg-red-500 text-white font-semibold shadow-md hover:bg-red-600 transition-all"
+              className="w-full py-2 px-3 rounded-lg bg-red-500 text-white font-semibold hover:bg-red-600 transition-all"
               disabled={logoutLoading}
             >
               {logoutLoading ? "Logging out..." : "Logout"}
@@ -228,7 +194,8 @@ const SidePanel = ({
           </div>
         )}
       </div>
-    </motion.div>
-)};
+    </div>
+  );
+};
 
 export default SidePanel;

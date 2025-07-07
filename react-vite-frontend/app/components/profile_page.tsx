@@ -47,7 +47,7 @@ export default function ProfilePage() {
           setEmail(res.data.email);
           setIsDemo(res.data.demo || false);
         })
-        .catch((err) => {
+        .catch(() => {
           setUsername(`Not found for ${emailFromSession}`);
           setEmail(emailFromSession);
         })
@@ -76,12 +76,19 @@ export default function ProfilePage() {
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    // Minimum length check
     if (newPassword.length < 6) {
       setError("New password must be at least 6 characters.");
       return;
     }
+    // Confirm match check
     if (newPassword !== confirmNewPassword) {
       setError("Passwords do not match.");
+      return;
+    }
+    // Ensure new password differs from current password
+    if (currentPassword && newPassword === currentPassword) {
+      setError("New password must be different.");
       return;
     }
     if (!email) {
@@ -118,11 +125,11 @@ export default function ProfilePage() {
             <>
               <Menu username={username} />
               <div className="bg-gray-900 rounded-lg shadow-2xl p-6 w-full max-w-md mx-auto text-center">
-                <div className="w-24 h-24 mx-auto mb-4 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-900 text-3xl font-bold text-white shadow-lg">
+                <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center rounded-full bg-blue-500 text-2xl font-bold text-white shadow-lg">
                   {username ? username.charAt(0).toUpperCase() : "U"}
                 </div>
                 <h1 className="text-xl font-bold text-white mb-1">{username}</h1>
-                <p className="text-gray-400 mb-4">Email: {email}</p>
+                <p className="text-gray-400 text-sm mb-4">Email: {email}</p>
                 <form onSubmit={handleChangePassword} className="mt-4 space-y-4">
                   <div className="relative">
                     <input

@@ -70,7 +70,7 @@ const MainApp = () => {
       () => {
         const hash = window.location.hash;
         if (hash === "#/" || hash === "#/home") {
-          CapacitorApp.exitApp();
+          navigate("/home");
         } else {
           navigate(-1);
         }

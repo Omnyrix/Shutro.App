@@ -103,3 +103,36 @@ div[ref="containerRef"]:not(:empty) {
   padding-top: env(safe-area-inset-top);
   box-sizing: border-box;
 }
+
+/* Force GPU compositing layers app-wide */
+html, body, #root, .app, .side-panel {
+  /* 1) Create a new compositing layer */
+  will-change: transform, opacity;
+  /* 2) Trigger hardware acceleration */
+  transform: translate3d(0, 0, 0);
+  /* 3) Hide any backface flicker */
+  backface-visibility: hidden;
+}
+
+/* src/styles/side-panel.css */
+.side-panel {
+  position: absolute;
+  top: env(safe-area-inset-top, 0);
+  right: 0;
+  width: 100%;
+  max-width: 33.333%;            /* matches md:w-1/3 */
+  height: calc(100% - env(safe-area-inset-top, 0));
+
+  /* Fully contain & isolate its own painting */
+  contain: layout paint;
+  /* Hint GPU-only transform animations */
+  will-change: transform;
+  backface-visibility: hidden;
+  /* Pure GPU transition on transform */
+  transition: transform 100ms ease-out;
+
+  /* Semi-transparent overlay so the app shows through */
+  background-color: rgba(31, 41, 55, 0.75) !important;
+  /* Remove heavy shadows/gradients */
+  box-shadow: none !important;
+}

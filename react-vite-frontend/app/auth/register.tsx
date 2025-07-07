@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { setCookie } from "../utils/cookie";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -19,6 +19,25 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
+
+  // Override hardware back button to go to home
+  useEffect(() => {
+    const cap = (window as any).Capacitor;
+    if (!cap) return;           // not running in Capacitor
+    const { App: CapacitorApp } = cap.Plugins;
+
+    const backHandler = CapacitorApp.addListener(
+      "backButton",
+      (event: any) => {
+        navigate("/home");
+        event.preventDefault?.(); // stop the default “exit app”
+      }
+    );
+
+    return () => {
+      backHandler.remove();
+    };
+  }, [navigate]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
