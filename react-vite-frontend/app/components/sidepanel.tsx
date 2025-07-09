@@ -174,7 +174,7 @@ const SidePanel = ({
               }}
             >
               <p className="text-sm text-gray-400">
-                Shutro.App is an app that will contain all your mathematical formulas for all the subjects; Physics , Chemistry, Higher Math and Biology.
+                Shutro.app is a mobile application that provides an extensive collection of mathematical formulas for various subjects including Physics, Chemistry, Higher Mathematics, and Biology. It's your go-to source for formulas, making it easier to study and reference them on the go.
               </p>
               <p className="text-sm text-gray-400 mt-2">
                 Developed by MRKAS05.
