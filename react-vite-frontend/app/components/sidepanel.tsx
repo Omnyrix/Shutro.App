@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react"; 
-import { useNavigate } from "react-router-dom";              
+import { useNavigate } from "react-router-dom";               
 import { eraseCookie } from "../utils/cookie";                
 import { FaArrowLeft } from "react-icons/fa";                                              
 import guestAvatar from "../assets/guest-avatar.png";          
@@ -14,7 +14,6 @@ interface SidePanelProps {
   isDemo: boolean;
 }
 
-// Animation timings in milliseconds
 const slideAnimMs = 100;     
 const aboutAnimMs = 200;     
 const statusBarAnimMs = 150; 
@@ -23,22 +22,23 @@ const SidePanel = ({
   isPanelOpen,
   setPanelOpen,
   username,
-  isDemo, // <-- receives isDemo from Home
+  isDemo,
 }: SidePanelProps) => {
   const navigate = useNavigate();
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [aboutExpanded, setAboutExpanded] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // GSAP slide animation instead of framer-motion
+  // Optimized GSAP slide animation
   useEffect(() => {
     const el = panelRef.current;
     if (!el) return;
     gsap.to(el, {
       x: isPanelOpen ? 0 : "100%",
       duration: slideAnimMs / 1000,
-      ease: "power2.out",
+      ease: "power3.inOut", // Use smoother easing
       force3D: true,
+      immediateRender: false, // Prevent initial render issues
     });
   }, [isPanelOpen]);
 
@@ -55,7 +55,7 @@ const SidePanel = ({
     return () => backHandler?.remove();
   }, [isPanelOpen, setPanelOpen]);
 
-  // Status bar color animation
+  // Optimized Status Bar color transition
   useEffect(() => {
     const isCapacitor = !!(window as any).Capacitor;
     if (!isCapacitor) return;
@@ -63,10 +63,11 @@ const SidePanel = ({
     const panelBgColor = "#1f2937";
     const defaultBgColor = "#111827";
     const fromColor = isPanelOpen ? defaultBgColor : panelBgColor;
-    const toColor   = isPanelOpen ? panelBgColor : defaultBgColor;
+    const toColor = isPanelOpen ? panelBgColor : defaultBgColor;
     let start: number | null = null;
     let animationFrame: number;
 
+    // Optimized color interpolation
     function lerpColor(a: string, b: string, t: number) {
       const ah = a.slice(1), bh = b.slice(1);
       const ar = parseInt(ah.substr(0,2),16), ag = parseInt(ah.substr(2,2),16), ab = parseInt(ah.substr(4,2),16);
@@ -86,6 +87,7 @@ const SidePanel = ({
     return () => cancelAnimationFrame(animationFrame);
   }, [isPanelOpen]);
 
+  // Handle logout
   async function handleLogout() {
     setLogoutLoading(true);
     eraseCookie("session");
