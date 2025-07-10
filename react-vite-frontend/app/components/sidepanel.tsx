@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { eraseCookie } from "../utils/cookie";
-import { FaArrowLeft } from "react-icons/fa";
-import guestAvatar from "../assets/guest-avatar.png";
-import { motion, AnimatePresence } from "framer-motion";
-import { StatusBar, Style } from "@capacitor/status-bar";
+import React, { useState, useEffect, useRef } from "react"; 
+import { useNavigate } from "react-router-dom";               
+import { eraseCookie } from "../utils/cookie";                
+import { FaArrowLeft } from "react-icons/fa";                                              
+import guestAvatar from "../assets/guest-avatar.png";          
+import gsap from "gsap";                                       
 
-const SLIDE_DURATION = 0.1;  // seconds (100ms)
-const ABOUT_DURATION = 0.1;  // seconds
-const STATUSBAR_MS = 100;    // ms
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 interface SidePanelProps {
   isPanelOpen: boolean;
@@ -17,65 +14,80 @@ interface SidePanelProps {
   isDemo: boolean;
 }
 
-export default function SidePanel({
+const slideAnimMs = 100;     
+const aboutAnimMs = 200;     
+const statusBarAnimMs = 150; 
+
+const SidePanel = ({
   isPanelOpen,
   setPanelOpen,
   username,
   isDemo,
-}: SidePanelProps) {
+}: SidePanelProps) => {
   const navigate = useNavigate();
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [aboutExpanded, setAboutExpanded] = useState(false);
-  const isLoggedIn = !isDemo;
+  const panelRef = useRef<HTMLDivElement>(null);
 
-  // Initial StatusBar setup
+  // Optimized GSAP slide animation
   useEffect(() => {
-    StatusBar.setBackgroundColor({ color: "#111827" });
-    StatusBar.setStyle({ style: Style.Dark });
-  }, []);
-
-  // Animate StatusBar color on open/close
-  useEffect(() => {
-    const cap = (window as any).Capacitor;
-    if (!cap) return;
-    const sb = cap.Plugins.StatusBar;
-    const from = isPanelOpen ? "#111827" : "#1f2937";
-    const to   = isPanelOpen ? "#1f2937" : "#111827";
-    let start: number | null = null;
-    let raf: number;
-
-    const lerp = (a: string, b: string, t: number) => {
-      const p = (s: string) => [0,2,4].map(i => parseInt(s.slice(1).substr(i,2),16));
-      const [ar,ag,ab] = p(a), [br,bg,bb] = p(b);
-      const rr = Math.round(ar + (br-ar)*t).toString(16).padStart(2,'0');
-      const rg = Math.round(ag + (bg-ag)*t).toString(16).padStart(2,'0');
-      const rb = Math.round(ab + (bb-ab)*t).toString(16).padStart(2,'0');
-      return `#${rr}${rg}${rb}`;
-    };
-
-    const step = (ts: number) => {
-      if (start === null) start = ts;
-      const t = Math.min((ts - start) / STATUSBAR_MS, 1);
-      sb.setBackgroundColor({ color: lerp(from, to, t) });
-      if (t < 1) raf = requestAnimationFrame(step);
-    };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
+    const el = panelRef.current;
+    if (!el) return;
+    gsap.to(el, {
+      x: isPanelOpen ? 0 : "100%",
+      duration: slideAnimMs / 1000,
+      ease: "power3.inOut", // Use smoother easing
+      force3D: true,
+      immediateRender: false, // Prevent initial render issues
+    });
   }, [isPanelOpen]);
 
-  // Hardware back button closes panel
+  // Override back button when panel is open
   useEffect(() => {
     if (!isPanelOpen) return;
-    const cap = (window as any).Capacitor;
-    if (!cap) return;
-    const { App } = cap.Plugins;
-    const h = App.addListener("backButton", (e: any) => {
+    const isCapacitor = !!(window as any).Capacitor;
+    if (!isCapacitor) return;
+    const { App: CapacitorApp } = (window as any).Capacitor.Plugins;
+    const backHandler = CapacitorApp.addListener("backButton", (event: any) => {
       setPanelOpen(false);
-      e.preventDefault?.();
+      event.preventDefault?.();
     });
-    return () => h.remove();
+    return () => backHandler?.remove();
+  }, [isPanelOpen, setPanelOpen]);
+
+  // Optimized Status Bar color transition
+  useEffect(() => {
+    const isCapacitor = !!(window as any).Capacitor;
+    if (!isCapacitor) return;
+    const StatusBar = (window as any).Capacitor.Plugins.StatusBar;
+    const panelBgColor = "#1f2937";
+    const defaultBgColor = "#111827";
+    const fromColor = isPanelOpen ? defaultBgColor : panelBgColor;
+    const toColor = isPanelOpen ? panelBgColor : defaultBgColor;
+    let start: number | null = null;
+    let animationFrame: number;
+
+    // Optimized color interpolation
+    function lerpColor(a: string, b: string, t: number) {
+      const ah = a.slice(1), bh = b.slice(1);
+      const ar = parseInt(ah.substr(0,2),16), ag = parseInt(ah.substr(2,2),16), ab = parseInt(ah.substr(4,2),16);
+      const br = parseInt(bh.substr(0,2),16), bg = parseInt(bh.substr(2,2),16), bb = parseInt(bh.substr(4,2),16);
+      const rr = Math.round(ar + (br-ar)*t), rg = Math.round(ag + (bg-ag)*t), rb = Math.round(ab + (bb-ab)*t);
+      return `#${rr.toString(16).padStart(2,"0")}${rg.toString(16).padStart(2,"0")}${rb.toString(16).padStart(2,"0")}`;
+    }
+
+    function animateColor(ts: number) {
+      if (start === null) start = ts;
+      const t = Math.min((ts - start) / statusBarAnimMs, 1);
+      StatusBar.setBackgroundColor({ color: lerpColor(fromColor, toColor, t) });
+      if (t < 1) animationFrame = requestAnimationFrame(animateColor);
+    }
+
+    animationFrame = requestAnimationFrame(animateColor);
+    return () => cancelAnimationFrame(animationFrame);
   }, [isPanelOpen]);
 
+  // Handle logout
   async function handleLogout() {
     setLogoutLoading(true);
     eraseCookie("session");
@@ -83,254 +95,109 @@ export default function SidePanel({
     navigate("/auth/login");
   }
 
+  const isLoggedIn = !isDemo;
+
   return (
-    <AnimatePresence>
-      {isPanelOpen && (
-        <motion.div
-          key="sidepanel"
-          initial={{ x: "75%" }}
-          animate={{ x: "0%" }}
-          exit={{ x: "75%" }}
-          transition={{ x: { duration: SLIDE_DURATION, ease: "linear" } }}
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "#1F2937",
-            zIndex: 50,
-            willChange: "transform",
-          }}
-        >
-          {/* Spacer for notch */}
-          <div
-            style={{
-              height: "env(safe-area-inset-top,0px)",
-              background: "#111827",
-            }}
-          />
-
-          <div
-            style={{
-              padding: 16,
-              display: "flex",
-              flexDirection: "column",
-              height: "calc(100% - env(safe-area-inset-top,0px))",
-              justifyContent: "space-between",
-            }}
-          >
-            <div>
-              <button
-                onClick={() => setPanelOpen(false)}
-                style={{ marginBottom: 16 }}
-              >
-                <FaArrowLeft className="text-2xl text-white" />
-              </button>
-
-              {/* Profile */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 8,
-                  marginBottom: 24,
-                }}
-              >
-                <div
-                  style={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: 32,
-                    overflow: "hidden",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  {isLoggedIn ? (
-                    <span
-                      style={{
-                        color: "#fff",
-                        fontSize: 24,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {username.charAt(0)}
-                    </span>
-                  ) : (
-                    <img
-                      src={guestAvatar}
-                      alt="Guest"
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  )}
-                </div>
-                <span
-                  style={{ color: "#fff", fontSize: 18, fontWeight: 600 }}
-                >
-                  {isLoggedIn ? username : "Guest"}
-                </span>
-              </div>
-
-              {/* Actions */}
-              {isLoggedIn ? (
-                <button
-                  onClick={() => {
-                    setPanelOpen(false);
-                    navigate("/profile");
-                  }}
-                  style={{
-                    width: "100%",
-                    padding: "8px 0",
-                    background: "#3B82F6",
-                    color: "#fff",
-                    fontWeight: 600,
-                    borderRadius: 8,
-                    marginBottom: 24,
-                  }}
-                >
-                  Change Password
-                </button>
-              ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 12,
-                    marginBottom: 24,
-                  }}
-                >
-                  <button
-                    onClick={() => {
-                      setPanelOpen(false);
-                      navigate("/auth/login");
-                    }}
-                    style={{
-                      width: "100%",
-                      padding: "8px 0",
-                      background: "#3B82F6",
-                      color: "#fff",
-                      fontWeight: 600,
-                      borderRadius: 8,
-                    }}
-                  >
-                    Login
-                  </button>
-                  <button
-                    onClick={() => {
-                      setPanelOpen(false);
-                      navigate("/auth/register");
-                    }}
-                    style={{
-                      width: "100%",
-                      padding: "8px 0",
-                      background: "#3B82F6",
-                      color: "#fff",
-                      fontWeight: 600,
-                      borderRadius: 8,
-                    }}
-                  >
-                    Register
-                  </button>
-                </div>
-              )}
-
-              {/* About (just under actions) */}
-              <button
-                onClick={() => setAboutExpanded((v) => !v)}
-                className="w-full flex items-center justify-between py-3 px-4 rounded-md transition-colors duration-200 ease-in-out"
-                style={{
-                  backgroundColor: aboutExpanded ? "#374151" : "#2d3748",
-                  color: "#D1D5DB",
-                  marginBottom: 8,
-                }}
-              >
-                <span>About</span>
-                <motion.svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  initial={false}
-                  animate={{ rotate: aboutExpanded ? 180 : 0 }}
-                  transition={{ duration: ABOUT_DURATION, ease: "easeInOut" }}
-                >
-                  <path
-                    d="M6 8l4 4 4-4"
-                    stroke="#60A5FA"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </motion.svg>
-              </button>
-              <AnimatePresence initial={false}>
-                {aboutExpanded && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0, y: -10 }}
-                    animate={{ height: "auto", opacity: 1, y: 0 }}
-                    exit={{ height: 0, opacity: 0, y: -10 }}
-                    transition={{ duration: ABOUT_DURATION, ease: "easeInOut" }}
-                    style={{
-                      overflow: "hidden",
-                      background: "#2d3748",
-                      padding: "12px",
-                      borderRadius: 8,
-                      marginBottom: 24,
-                    }}
-                  >
-                    <p
-                      style={{
-                        color: "#9CA3AF",
-                        fontSize: 14,
-                        lineHeight: 1.5,
-                        margin: 0,
-                      }}
-                    >
-                      Shutro.app is a mobile application that provides an
-                      extensive collection of mathematical formulas for various
-                      subjects including Physics, Chemistry, Higher Mathematics,
-                      and Biology. It's your go-to source for formulas, making
-                      it easier to study and reference them on the go.
-                    </p>
-                    <p
-                      style={{
-                        color: "#9CA3AF",
-                        fontSize: 14,
-                        lineHeight: 1.5,
-                        marginTop: 8,
-                      }}
-                    >
-                      Developed by MRKAS05.
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+    <div
+      ref={panelRef}
+      className="absolute inset-0 bg-gray-800 z-50 shadow-2xl"
+      style={{
+        transform: "translateX(100%)",
+        willChange: "transform",
+      }}
+    >
+      {/* Spacer for status bar/notch */}
+      <div
+        className="w-full"
+        style={{ height: "env(safe-area-inset-top, 0px)", background: "#1f2937" }}
+      />
+      <div className="p-4 flex flex-col h-full justify-between">
+        <div>
+          <button onClick={() => setPanelOpen(false)} className="rounded-md p-1 mb-4">
+            <FaArrowLeft className="text-2xl cursor-pointer" />
+          </button>
+          {/* Profile Section */}
+          <div className="flex flex-col items-center gap-2 mb-6">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br flex items-center justify-center text-3xl font-bold text-white">
+              {isLoggedIn
+                ? username.charAt(0)
+                : <img src={guestAvatar} alt="Guest avatar" className="w-full h-full object-cover rounded-full" />}
             </div>
-
-            {/* Logout */}
-            {isLoggedIn && (
-              <button
-                onClick={handleLogout}
-                style={{
-                  width: "100%",
-                  padding: "8px 0",
-                  background: "#DC2626",
-                  color: "#fff",
-                  fontWeight: 600,
-                  borderRadius: 8,
-                }}
-                disabled={logoutLoading}
-              >
-                {logoutLoading ? "Logging out..." : "Logout"}
-              </button>
-            )}
+            <span className="text-xl font-semibold text-white">{isLoggedIn ? username : "Guest"}</span>
           </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+
+          {/* Buttons Section */}
+          {isLoggedIn ? (
+            <button
+              onClick={() => { setPanelOpen(false); navigate("/profile"); }}
+              className="w-full py-2 px-3 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 mb-4 transition-all"
+            >
+              Change Password
+            </button>
+          ) : (
+            <div className="flex flex-col gap-3 mb-4">
+              <button
+                onClick={() => { setPanelOpen(false); navigate("/auth/login"); }}
+                className="w-full py-2 px-3 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-all"
+              >Login</button>
+              <button
+                onClick={() => { setPanelOpen(false); navigate("/auth/register"); }}
+                className="w-full py-2 px-3 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-all"
+              >Register</button>
+            </div>
+          )}
+
+          {/* ABOUT */}
+          <div>
+            <hr className="border-t border-gray-600 opacity-40 mb-2" />
+            <button
+              onClick={() => setAboutExpanded(!aboutExpanded)}
+              className="w-full flex items-center justify-between py-2 px-3 bg-gray-800 text-gray-300"
+            >
+              <span>About</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', transition: `transform ${aboutAnimMs}ms cubic-bezier(0.4,0,0.2,1)` }}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  style={{ transform: aboutExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                  <path d="M6 8l4 4 4-4" stroke="#60A5FA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </button>
+            <hr className="border-t border-gray-600 opacity-40 mt-2" />
+            <div
+              style={{
+                maxHeight: aboutExpanded ? 300 : 0,
+                opacity: aboutExpanded ? 1 : 0,
+                marginTop: aboutExpanded ? 8 : 0,
+                transition: `max-height ${aboutAnimMs}ms, opacity ${aboutAnimMs}ms, margin-top ${aboutAnimMs}ms`,
+                overflow: 'hidden'
+              }}
+            >
+              <p className="text-sm text-gray-400">
+                Shutro.app is a mobile application that provides an extensive collection of mathematical formulas for various subjects including Physics, Chemistry, Higher Mathematics, and Biology. It's your go-to source for formulas, making it easier to study and reference them on the go.
+              </p>
+              <p className="text-sm text-gray-400 mt-2">
+                Developed by MRKAS05.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Logout Button */}
+        {isLoggedIn && (
+          <div className="mb-6">
+            <button
+              onClick={handleLogout}
+              className="w-full py-2 px-3 rounded-lg bg-red-500 text-white font-semibold hover:bg-red-600 transition-all"
+              disabled={logoutLoading}
+            >
+              {logoutLoading ? "Logging out..." : "Logout"}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   );
-}
+};
+
+export default SidePanel;
