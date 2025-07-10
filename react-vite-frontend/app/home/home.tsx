@@ -28,34 +28,71 @@ export default function Home() {
 
     async function checkSession() {
       const email = await getCookie("session");
+
+      // no session → demo mode
       if (!email) {
         setIsLoggedIn(false);
         setIsDemo(true);
         setUsername("");
         return;
       }
+
+      // read last validation timestamp and cached user-info
+      const cachedName = await getCookie("user info");
+      const lastVal = localStorage.getItem("lastValidated");
+      const now = Date.now();
+      const VALID_INTERVAL = 1000 * 60 * 60; // 1 hours
+
+      // if we’ve validated recently, use cached value
+      if (cachedName && lastVal && now - parseInt(lastVal, 10) < VALID_INTERVAL) {
+        setUsername(cachedName);
+        setIsLoggedIn(true);
+        setIsDemo(false);
+        return;
+      }
+
+      // otherwise fetch once and validate
       try {
         const res = await axios.get(`${backendUrl}/user/${email}`);
         if (res.data && res.data.username) {
-          setUsername(
-            res.data.username.charAt(0).toUpperCase() + res.data.username.slice(1)
-          );
-          setIsLoggedIn(true);
-          setIsDemo(false);
+          const formatted =
+            res.data.username.charAt(0).toUpperCase() +
+            res.data.username.slice(1);
+          if (cachedName === formatted) {
+            // still matches → update timestamp only
+            localStorage.setItem("lastValidated", now.toString());
+            setUsername(formatted);
+            setIsLoggedIn(true);
+            setIsDemo(false);
+          } else {
+            // mismatch → clear all session data → fallback to demo
+            await eraseCookie("session");
+            await eraseCookie("user info");
+            localStorage.removeItem("lastValidated");
+            setUsername("");
+            setIsLoggedIn(false);
+            setIsDemo(true);
+          }
         } else {
+          // no username in response → invalidate
           await eraseCookie("session");
+          await eraseCookie("user info");
+          localStorage.removeItem("lastValidated");
+          setUsername("");
           setIsLoggedIn(false);
           setIsDemo(true);
-          setUsername("");
         }
       } catch (err: any) {
         if (err?.response?.status === 404) {
+          // user not found → clear
           await eraseCookie("session");
+          await eraseCookie("user info");
+          localStorage.removeItem("lastValidated");
+          setUsername("");
           setIsLoggedIn(false);
           setIsDemo(true);
-          setUsername("");
         } else {
-          // Network/server error: show no internet, keep previous state
+          // network/server error → keep demo state (or previous)
         }
       }
     }
@@ -107,11 +144,7 @@ export default function Home() {
         }}
       >
         <div className="flex items-center gap-2">
-          <img
-            src={AppIcon}
-            alt="Logo"
-            className="w-8 h-8"
-          />
+          <img src={AppIcon} alt="Logo" className="w-8 h-8" />
           <span className="font-bold text-xl text-blue-400">Shutro.App</span>
         </div>
         <button onClick={() => setPanelOpen(true)} className="rounded-md p-1">
