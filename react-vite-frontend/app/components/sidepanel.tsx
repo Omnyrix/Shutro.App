@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { eraseCookie } from "../utils/cookie";                
 import { FaArrowLeft } from "react-icons/fa";                                              
 import guestAvatar from "../assets/guest-avatar.png";          
-import gsap from "gsap";                                       
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -14,7 +13,6 @@ interface SidePanelProps {
   isDemo: boolean;
 }
 
-const slideAnimMs = 100;     
 const aboutAnimMs = 200;     
 const statusBarAnimMs = 150; 
 
@@ -29,18 +27,6 @@ const SidePanel = ({
   const [aboutExpanded, setAboutExpanded] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // Optimized GSAP slide animation
-  useEffect(() => {
-    const el = panelRef.current;
-    if (!el) return;
-    gsap.to(el, {
-      x: isPanelOpen ? 0 : "100%",
-      duration: slideAnimMs / 1000,
-      ease: "power3.inOut", // Use smoother easing
-      force3D: true,
-      immediateRender: false, // Prevent initial render issues
-    });
-  }, [isPanelOpen]);
 
   // Override back button when panel is open
   useEffect(() => {
@@ -102,8 +88,9 @@ const SidePanel = ({
       ref={panelRef}
       className="absolute inset-0 bg-gray-800 z-50 shadow-2xl"
       style={{
-        transform: "translateX(100%)",
-        willChange: "transform",
+        transform: isPanelOpen ? 'translateX(0)' : 'translateX(100%)',
+        transition: 'transform 100ms cubic-bezier(0.4,0,0.2,1)',
+        willChange: 'transform',
       }}
     >
       {/* Spacer for status bar/notch */}

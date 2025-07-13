@@ -107,7 +107,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-800 text-white p-6 flex flex-col items-center overflow-hidden">
+<div className="fixed inset-0 bg-gray-800 text-white p-6 flex flex-col items-center overflow-hidden" style={{ willChange: "transform", transform: "translateZ(0)", backfaceVisibility: "hidden" }}>
       {loading && <Loading />}
       {!loading && (
         <>
