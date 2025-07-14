@@ -22,8 +22,9 @@ import Chemistry from "./app/routes/subjects/chemistry";
 import HigherMath from "./app/routes/subjects/higher_math";
 import Biology from "./app/routes/subjects/biology";
 import Profile from "./app/routes/profile";
+import ChapterSelectionPhysics1st from "./app/subjects/papers/physics_1st/chapter-selection-page";
 import NotFound from "./app/routes/404";
-import Loading from "./app/components/loading_screen"; // Import your Loading component
+import Loading from "./app/components/loading_screen";
 
 // List of routes that should use gray-900
 const GRAY_900_ROUTES = [
@@ -110,6 +111,7 @@ const MainApp = () => {
       </Route>
       <Route path="home" element={<Home />} />
       <Route path="physics" element={<Physics />} />
+      <Route path="physics/1st-paper" element={<ChapterSelectionPhysics1st />} />
       <Route path="chemistry" element={<Chemistry />} />
       <Route path="highermath" element={<HigherMath />} />
       <Route path="biology" element={<Biology />} />

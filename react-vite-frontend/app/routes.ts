@@ -8,6 +8,7 @@ export default [
   route("auth/verify", "routes/auth/verify.tsx"),
   route("home", "routes/home.tsx"),
   route("physics", "routes/subjects/physics.tsx"),
+  route("physics/1st-paper", "routes/subjects/papers/physics_1st/1st-paper-chapter-selection-page.tsx"),
   route("chemistry", "routes/subjects/chemistry.tsx"),
   route("highermath", "routes/subjects/higher_math.tsx"),
   route("biology", "routes/subjects/biology.tsx"),

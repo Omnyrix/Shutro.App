@@ -5,20 +5,19 @@ import AppIcon from "../assets/app-icon.png";  // <-- use local asset
 
 export default function TopBarLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
-  
+
   return (
-    <div>
-      {/* Spacer for status bar/notch */}
+    <div className="relative">
+      {/* Spacer for the status bar / notch */}
       <div
-        className="w-full"
-        style={{ height: "env(safe-area-inset-top, 0px)", background: "#111827" /* bg-gray-900 */ }}
+        className="w-full bg-gray-900"
+        style={{ height: "env(safe-area-inset-top, 0px)" }}
       />
-      {/* Top Bar */}
+
+      {/* Top Bar stays exactly the same */}
       <header
         className="fixed left-0 right-0 bg-gray-900 shadow-md flex items-center px-4 py-2 z-50"
-        style={{
-          top: "env(safe-area-inset-top, 0px)"
-        }}
+        style={{ top: "env(safe-area-inset-top, 0px)" }}
       >
         <button
           className="p-2 rounded-md hover:bg-gray-700"
@@ -31,10 +30,11 @@ export default function TopBarLayout({ children }: { children: React.ReactNode }
           <span className="font-bold text-xl text-blue-400">Shutro.App</span>
         </Link>
       </header>
-      {/* Main Content (offset by the header height + safe area inset) */}
+
+      {/* Main content padded below both the safe-area inset and the bar height (56px) */}
       <main
-        className="pt-20"
-        style={{ paddingTop: "calc(56px + env(safe-area-inset-top, 0px))" }}
+        className="w-full"
+        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 56px)" }}
       >
         {children}
       </main>
