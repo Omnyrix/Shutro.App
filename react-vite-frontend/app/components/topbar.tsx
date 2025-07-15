@@ -1,7 +1,7 @@
 // components/TopBarLayout.tsx
 import { useNavigate, Link } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
-import AppIcon from "../assets/app-icon.png";  // <-- use local asset
+import AppIcon from "../assets/app-icon.webp";  // <-- use local asset
 
 export default function TopBarLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();

@@ -7,7 +7,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import SidePanel from "../components/sidepanel";
 import NoInternetWarning from "../components/noInternetWarning";
-import AppIcon from "../assets/app-icon.png"; // <-- use local asset
+import AppIcon from "../assets/app-icon.webp"; // <-- use local asset
 
 // Capacitor StatusBar imports
 import { StatusBar, Style } from '@capacitor/status-bar';

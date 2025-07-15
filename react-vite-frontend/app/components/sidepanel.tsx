@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";               
 import { eraseCookie } from "../utils/cookie";                
 import { FaArrowLeft } from "react-icons/fa";                                              
-import guestAvatar from "../assets/guest-avatar.png";          
+import guestAvatar from "../assets/guest-avatar.webp";          
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 

@@ -34,18 +34,28 @@ export default defineConfig({
   plugins: [
     react(),
     tsconfigPaths(),
+
     viteImagemin({
-      // disable other optimizers
-      gifsicle: false,
+      // only match .png files
+      filter: /\.(webp)$/i,
+
+      // disable all other optimizers
       optipng: false,
-      pngquant: false,
+      gifsicle: false,
       mozjpeg: false,
       svgo: false,
-      // enable WebP conversion
+
+      // PNG compression
+      pngquant: {
+        quality: [0.7, 0.9],
+        speed: 4,
+      },
+
+      // then convert those optimized PNGs to WebP
       webp: {
-        quality: 75,       // adjust between 0–100
-        method: 4,         // 0 (fastest) to 6 (slowest/best)
-        alphaQuality: 80,  // quality for alpha channel if present
+        quality: 75,       // 0–100
+        method: 4,         // 0 (fast) to 6 (best)
+        alphaQuality: 80,  // for transparency
       },
     }),
   ],
