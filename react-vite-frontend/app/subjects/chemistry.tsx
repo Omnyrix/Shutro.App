@@ -1,3 +1,4 @@
+// app/routes/chemistry.tsx
 import { useNavigate } from "react-router-dom";
 import TopBar from "../components/topbar";
 import { motion } from "framer-motion";
@@ -35,10 +36,13 @@ export default function Chemistry() {
   return (
     <div className="relative min-h-screen bg-gray-900">
       {isDemo && <NoInternetWarning />}
-      <div className="absolute inset-0 bg-gray-800 text-white p-6 flex flex-col items-center overflow-hidden">
 
+      {/* Fixed TopBar at the top */}
+      <div className="fixed top-0 left-0 right-0 z-20 bg-transparent">
         <TopBar />
+      </div>
 
+      <div className="absolute inset-0 bg-gray-800 text-white p-6 pt-20 flex flex-col items-center overflow-hidden">
         <h1 className="text-2xl font-bold text-center mb-6">
           <span style={{ color: "#EA580C" }}>Chemistry</span>{" "}
           <span className="text-white">Formulas</span>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCookie } from "../utils/cookie";
+import { getCookie , eraseCookie } from "../utils/cookie";
 
 export default function Loading() {
   const [progress, setProgress] = useState(0);
@@ -8,6 +8,9 @@ export default function Loading() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // remove the stored scroll-position map on load
+    eraseCookie("scrollpos");
+
     async function checkSession() {
       const session = await getCookie("session");
       setHasSession(!!session);

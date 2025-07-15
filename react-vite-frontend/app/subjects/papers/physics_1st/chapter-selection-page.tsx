@@ -15,10 +15,7 @@ export default function ChapterSelectionPhysics1st() {
   const mapKey = "physicschap1scrollpos";
 
   // gap (px) between bottom of scroll section and bottom of screen
-  const scrollSectionBottomOffset = 0;
-
-  const [showTopFade, setShowTopFade] = useState(false);
-  const [showBottomFade, setShowBottomFade] = useState(false);
+  const scrollSectionBottomOffset = 1;
 
   useEffect(() => {
     async function checkSession() {
@@ -37,16 +34,11 @@ export default function ChapterSelectionPhysics1st() {
       const savedPos = map[mapKey];
       if (typeof savedPos === "number") {
         el.scrollTop = savedPos;
-        setShowTopFade(savedPos > 0);
-        setShowBottomFade(savedPos + el.clientHeight < el.scrollHeight);
       }
     });
 
     const onScroll = async () => {
-      const { scrollTop, scrollHeight, clientHeight } = el;
-      setShowTopFade(scrollTop > 0);
-      setShowBottomFade(scrollTop + clientHeight < scrollHeight);
-
+      const { scrollTop } = el;
       const map = await readScrollMap();
       map[mapKey] = scrollTop;
       await writeScrollMap(map);
@@ -101,11 +93,14 @@ export default function ChapterSelectionPhysics1st() {
         </p>
 
         <div className="flex-1 relative w-full mx-4 sm:mx-auto mt-1 max-w-md">
-          {/* scrollable region with bottom gap */}
+          {/* scrollable region with bottom gap + safe-area inset */}
           <div
             ref={containerRef}
             className="absolute inset-x-0 overflow-y-auto hide-scrollbar px-2 pt-4 pb-4"
-            style={{ top: 0, bottom: `${scrollSectionBottomOffset}px` }}
+            style={{
+              top: 0,
+              bottom: `calc(${scrollSectionBottomOffset}px + env(safe-area-inset-bottom, 0px))`
+            }}
           >
             {chapters.map((chapter, idx) => (
               <motion.div
@@ -118,8 +113,8 @@ export default function ChapterSelectionPhysics1st() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
                   delay: idx * 0.02,
-                  duration: 0.2,
-                  ease: "easeOut",
+                  duration: 0.4,
+                  ease: "easeInOut",
                 }}
               >
                 <hr className="mb-1 border-t border-gray-400 opacity-60" />
@@ -136,17 +131,9 @@ export default function ChapterSelectionPhysics1st() {
             ))}
           </div>
 
-          {showTopFade && (
-            <div
-              className="pointer-events-none absolute top-0 left-2 right-2 h-0 bg-gradient-to-b from-gray-800 via-gray-800/50 to-transparent"
-            />
-          )}
-          {showBottomFade && (
-            <div
-              className="pointer-events-none absolute left-2 right-2 h-0 bg-gradient-to-t from-gray-800 via-gray-800/50 to-transparent"
-              style={{ bottom: `${scrollSectionBottomOffset}px` }}
-            />
-          )}
+          {/* Static fades at top and bottom */}
+          <div className="pointer-events-none absolute top-0 left-2 right-2 h-0 bg-gradient-to-b from-gray-800 via-gray-800/50 to-transparent" />
+          <div className="pointer-events-none absolute bottom-0 left-2 right-2 h-8 bg-gradient-to-t from-gray-800 via-gray-800/70 to-transparent" />
         </div>
       </div>
     </div>
