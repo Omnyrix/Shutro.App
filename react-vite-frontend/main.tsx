@@ -23,20 +23,26 @@ import HigherMath from "./app/routes/subjects/higher_math";
 import Biology from "./app/routes/subjects/biology";
 import Profile from "./app/routes/profile";
 import ChapterSelectionPhysics1st from "./app/subjects/papers/physics_1st/chapter-selection-page";
+import ChapterSelectionPhysics2nd from "./app/subjects/papers/physics_2nd/chapter-selection-page";
+import ChapterSelectionHigherMath1st from "./app/subjects/papers/higher_math_1st/chapter-selection-page";
+import ChapterSelectionHigherMath2nd from "./app/subjects/papers/higher_math_2nd/chapter-selection-page";
+import ChapterSelectionChemistry1st from "./app/subjects/papers/chemistry_1st/chapter-selection-page";
+import ChapterSelectionChemistry2nd from "./app/subjects/papers/chemistry_2nd/chapter-selection-page";
 import NotFound from "./app/routes/404";
 import Loading from "./app/components/loading_screen";
 
 // List of routes that should use gray-900
 const GRAY_900_ROUTES = [
   "/physics",
-  "/physics/",
   "/physics/1st-paper",
+  "/physics/2nd-paper",
   "/chemistry",
-  "/chemistry/",
+  "/chemistry/1st-paper",
+  "/chemistry/2nd-paper",
   "/highermath",
-  "/highermath/",
-  "/biology",
-  "/biology/"
+  "/highermath/1st-paper",
+  "/highermath/2nd-paper",
+  "/biology"
 ];
 
 // MainApp Component
@@ -117,8 +123,13 @@ const MainApp = () => {
       <Route path="home" element={<Home />} />
       <Route path="physics" element={<Physics />} />
       <Route path="physics/1st-paper" element={<ChapterSelectionPhysics1st />} />
+      <Route path="physics/2nd-paper" element={<ChapterSelectionPhysics2nd />} />
       <Route path="chemistry" element={<Chemistry />} />
+      <Route path="chemistry/1st-paper" element={<ChapterSelectionChemistry1st />} />
+      <Route path="chemistry/2nd-paper" element={<ChapterSelectionChemistry2nd />} />
       <Route path="highermath" element={<HigherMath />} />
+      <Route path="highermath/1st-paper" element={<ChapterSelectionHigherMath1st />} />
+      <Route path="highermath/2nd-paper" element={<ChapterSelectionHigherMath2nd />} />
       <Route path="biology" element={<Biology />} />
       <Route path="profile" element={<Profile />} />
       <Route path="*" element={<NotFound />} />

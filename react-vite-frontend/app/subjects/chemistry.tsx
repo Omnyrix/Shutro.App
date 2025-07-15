@@ -13,8 +13,8 @@ export default function Chemistry() {
   const isLoggedIn = false; // Set to true if user is logged in, false otherwise
 
   const papers = [
-    { route: "/Chemistry/1st-paper", name: "1st Paper" },
-    { route: "/Chemistry/2nd-paper", name: "2nd Paper" },
+    { route: "/chemistry/1st-paper", name: "1st Paper" },
+    { route: "/chemistry/2nd-paper", name: "2nd Paper" },
   ];
 
   const handlePaperClick = (route: string) => {

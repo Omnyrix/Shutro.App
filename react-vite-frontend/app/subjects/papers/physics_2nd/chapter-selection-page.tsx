@@ -1,17 +1,21 @@
+// app/routes/subjects/physics_2nd/chapter-selection-page.tsx
 import React, { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TopBar from "../../../components/topbar";
 import NoInternetWarning from "../../../components/noInternetWarning";
 import { motion } from "framer-motion";
-import { getCookie } from "../../../utils/cookie";
+import { getCookie, readScrollMap, writeScrollMap } from "../../../utils/cookie";
 
 export default function ChapterSelectionPhysics2nd() {
   const navigate = useNavigate();
   const [isDemo, setIsDemo] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [showTopFade, setShowTopFade] = useState(false);
-  const [showBottomFade, setShowBottomFade] = useState(false);
+  // unique identifier for this page’s scroll position
+  const mapKey = "physicsp2scrollpos";
+
+  // gap (px) between bottom of scroll section and bottom of screen
+  const scrollSectionBottomOffset = 1;
 
   useEffect(() => {
     async function checkSession() {
@@ -24,15 +28,21 @@ export default function ChapterSelectionPhysics2nd() {
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const onScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = el;
-      setShowTopFade(scrollTop > 0);
-      setShowBottomFade(scrollTop + clientHeight < scrollHeight);
-      localStorage.setItem("phychapter2ScrollPos", scrollTop.toString());
-    };
 
-    const saved = localStorage.getItem("phychapter2ScrollPos");
-    if (saved) el.scrollTop = parseInt(saved, 10);
+    // restore saved scroll position
+    readScrollMap().then(map => {
+      const savedPos = map[mapKey];
+      if (typeof savedPos === "number") {
+        el.scrollTop = savedPos;
+      }
+    });
+
+    const onScroll = async () => {
+      const { scrollTop } = el;
+      const map = await readScrollMap();
+      map[mapKey] = scrollTop;
+      await writeScrollMap(map);
+    };
 
     el.addEventListener("scroll", onScroll);
     window.addEventListener("resize", onScroll);
@@ -40,19 +50,19 @@ export default function ChapterSelectionPhysics2nd() {
       el.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
-  }, []);
+  }, [mapKey]);
 
   const chapters = [
-    { route: "/physics/1st-paper/chapter-1", name: "Chapter 1", subtitle: "Kinematics" },
-    { route: "/physics/1st-paper/chapter-2", name: "Chapter 2", subtitle: "Dynamics" },
-    { route: "/physics/1st-paper/chapter-3", name: "Chapter 3", subtitle: "Work & Energy" },
-    { route: "/physics/1st-paper/chapter-4", name: "Chapter 4", subtitle: "Momentum" },
-    { route: "/physics/1st-paper/chapter-5", name: "Chapter 5", subtitle: "Rotational Motion" },
-    { route: "/physics/1st-paper/chapter-6", name: "Chapter 6", subtitle: "Gravitation" },
-    { route: "/physics/1st-paper/chapter-7", name: "Chapter 7", subtitle: "Properties of Matter" },
-    { route: "/physics/1st-paper/chapter-8", name: "Chapter 8", subtitle: "Thermodynamics" },
-    { route: "/physics/1st-paper/chapter-9", name: "Chapter 9", subtitle: "Oscillations" },
-    { route: "/physics/1st-paper/chapter-10", name: "Chapter 10", subtitle: "Waves" },
+    { route: "/physics/2nd-paper/ch-1", title: "Chapter 1", subtitle: "Kinematics" },
+    { route: "/physics/2nd-paper/ch-2", title: "Chapter 2", subtitle: "Dynamics" },
+    { route: "/physics/2nd-paper/ch-3", title: "Chapter 3", subtitle: "Work & Energy" },
+    { route: "/physics/2nd-paper/ch-4", title: "Chapter 4", subtitle: "Momentum" },
+    { route: "/physics/2nd-paper/ch-5", title: "Chapter 5", subtitle: "Rotational Motion" },
+    { route: "/physics/2nd-paper/ch-6", title: "Chapter 6", subtitle: "Gravitation" },
+    { route: "/physics/2nd-paper/ch-7", title: "Chapter 7", subtitle: "Properties of Matter" },
+    { route: "/physics/2nd-paper/ch-8", title: "Chapter 8", subtitle: "Thermodynamics" },
+    { route: "/physics/2nd-paper/ch-9", title: "Chapter 9", subtitle: "Oscillations" },
+    { route: "/physics/2nd-paper/ch-10", title: "Chapter 10", subtitle: "Waves" },
   ];
 
   const handleChapterClick = (route: string) => {
@@ -60,25 +70,37 @@ export default function ChapterSelectionPhysics2nd() {
   };
 
   return (
-    <div className="relative min-h-screen bg-gray-900">
+    <div className="relative min-h-screen font-bengali">
       {isDemo && <NoInternetWarning />}
-      <div className="absolute inset-0 bg-gray-800 text-white p-6 flex flex-col items-center">
-        <TopBar />
 
-        <h1 className="text-2xl font-bold text-center mb-6">
+      {/* Fixed TopBar at top, no background behind it */}
+      <div className="fixed top-0 left-0 right-0 z-20 bg-transparent">
+        <TopBar />
+      </div>
+
+      {/* Content background covers full screen (including behind TopBar) */}
+      <div
+        className="absolute inset-0 bg-gray-800 text-white p-6 pt-20 flex flex-col items-center overflow-hidden"
+        style={{ fontFamily: '"Noto Sans Bengali", sans-serif' }}
+      >
+        <h1 className="text-2xl font-bold text-center mb-4">
           <span style={{ color: "#1D4ED8" }}>Physics</span>{" "}
           <span className="text-white">Chapters</span>
         </h1>
 
-        <p className="text-sm mb-4 text-gray-400 text-center">
+        <p className="text-sm mb-2 text-gray-400 text-center">
           Pick a chapter:
         </p>
 
-        <div className="relative w-full mx-4 sm:mx-auto mt-1 max-w-md">
+        <div className="flex-1 relative w-full mx-4 sm:mx-auto mt-1 max-w-md">
+          {/* scrollable region with bottom gap + safe-area inset */}
           <div
             ref={containerRef}
-            className="overflow-y-auto hide-scrollbar px-2 pt-4"
-            style={{ maxHeight: "27rem", minHeight: "27rem" }}
+            className="absolute inset-x-0 overflow-y-auto hide-scrollbar px-2 pt-4 pb-4"
+            style={{
+              top: 0,
+              bottom: `calc(${scrollSectionBottomOffset}px + env(safe-area-inset-bottom, 0px))`
+            }}
           >
             {chapters.map((chapter, idx) => (
               <motion.div
@@ -90,31 +112,30 @@ export default function ChapterSelectionPhysics2nd() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
-                  delay: 0.1 + idx * 0.03,
-                  duration: 0.2,
-                  ease: [0.22, 1, 0.36, 1],
+                  delay: idx * 0.02,
+                  duration: 0.4,
+                  ease: "easeInOut",
                 }}
               >
-                <hr className="mb-1 border-t-2 border-gray-400 opacity-60" />
-                <div className="py-4 px-5">
+                <hr className="mb-1 border-t border-gray-400 opacity-60" />
+                <div className="py-3 px-4">
                   <p className="text-lg font-semibold text-left text-gray-400">
-                    {chapter.name}
+                    {chapter.title}
                   </p>
                   <p className="text-sm text-left text-gray-500 mt-1">
                     {chapter.subtitle}
                   </p>
                 </div>
-                <hr className="mt-1 border-t-2 border-gray-400 opacity-60" />
+                <hr className="mt-1 border-t border-gray-400 opacity-60" />
               </motion.div>
             ))}
           </div>
 
-          {showTopFade && (
-            <div className="pointer-events-none absolute top-0 left-2 right-2 h-8 bg-gradient-to-b from-gray-800 to-transparent" />
-          )}
-          {showBottomFade && (
-            <div className="pointer-events-none absolute bottom-0 left-2 right-2 h-8 bg-gradient-to-t from-gray-800 to-transparent" />
-          )}
+          {/* Static fades at top and bottom */}
+          <div className="pointer-events-none absolute top-0 left-2 right-2 h-0 bg-gradient-to-b from-gray-800 via-gray-800/50 to-transparent" />
+          <div className="pointer-events-none absolute bottom-0 left-2 right-2 h-0 bg-gradient-to-t from-gray-800 via-gray-800/70 to-transparent"
+          style={{ bottom: `calc(${scrollSectionBottomOffset}px + env(safe-area-inset-bottom, 0px))` }}
+          />
         </div>
       </div>
     </div>

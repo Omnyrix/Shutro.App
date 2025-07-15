@@ -1,4 +1,4 @@
-// app/routes/subjects/physics_1st/chapter-selection-page.tsx
+// app/routes/subjects/higher_math_2nd/chapter-selection-page.tsx
 import React, { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TopBar from "../../../components/topbar";
@@ -6,13 +6,13 @@ import NoInternetWarning from "../../../components/noInternetWarning";
 import { motion } from "framer-motion";
 import { getCookie, readScrollMap, writeScrollMap } from "../../../utils/cookie";
 
-export default function ChapterSelectionPhysics1st() {
+export default function ChapterSelectionHigherMath2nd() {
   const navigate = useNavigate();
   const [isDemo, setIsDemo] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // unique identifier for this page’s scroll position
-  const mapKey = "physicsp1scrollpos";
+  const mapKey = "highermathp2scrollpos";
 
   // gap (px) between bottom of scroll section and bottom of screen
   const scrollSectionBottomOffset = 1;
@@ -53,16 +53,16 @@ export default function ChapterSelectionPhysics1st() {
   }, [mapKey]);
 
   const chapters = [
-    { route: "/physics/1st-paper/ch-1", title: "Chapter 1", subtitle: "Kinematics" },
-    { route: "/physics/1st-paper/ch-2", title: "Chapter 2", subtitle: "Dynamics" },
-    { route: "/physics/1st-paper/ch-3", title: "Chapter 3", subtitle: "Work & Energy" },
-    { route: "/physics/1st-paper/ch-4", title: "Chapter 4", subtitle: "Momentum" },
-    { route: "/physics/1st-paper/ch-5", title: "Chapter 5", subtitle: "Rotational Motion" },
-    { route: "/physics/1st-paper/ch-6", title: "Chapter 6", subtitle: "Gravitation" },
-    { route: "/physics/1st-paper/ch-7", title: "Chapter 7", subtitle: "Properties of Matter" },
-    { route: "/physics/1st-paper/ch-8", title: "Chapter 8", subtitle: "Thermodynamics" },
-    { route: "/physics/1st-paper/ch-9", title: "Chapter 9", subtitle: "Oscillations" },
-    { route: "/physics/1st-paper/ch-10", title: "Chapter 10", subtitle: "Waves" },
+    { route: "/highermath/2nd-paper/ch-1", title: "Chapter 1", subtitle: "Kinematics" },
+    { route: "/highermath/2nd-paper/ch-2", title: "Chapter 2", subtitle: "Dynamics" },
+    { route: "/highermath/2nd-paper/ch-3", title: "Chapter 3", subtitle: "Work & Energy" },
+    { route: "/highermath/2nd-paper/ch-4", title: "Chapter 4", subtitle: "Momentum" },
+    { route: "/highermath/2nd-paper/ch-5", title: "Chapter 5", subtitle: "Rotational Motion" },
+    { route: "/highermath/2nd-paper/ch-6", title: "Chapter 6", subtitle: "Gravitation" },
+    { route: "/highermath/2nd-paper/ch-7", title: "Chapter 7", subtitle: "Properties of Matter" },
+    { route: "/highermath/2nd-paper/ch-8", title: "Chapter 8", subtitle: "Thermodynamics" },
+    { route: "/highermath/2nd-paper/ch-9", title: "Chapter 9", subtitle: "Oscillations" },
+    { route: "/highermath/2nd-paper/ch-10", title: "Chapter 10", subtitle: "Waves" },
   ];
 
   const handleChapterClick = (route: string) => {
@@ -84,7 +84,7 @@ export default function ChapterSelectionPhysics1st() {
         style={{ fontFamily: '"Noto Sans Bengali", sans-serif' }}
       >
         <h1 className="text-2xl font-bold text-center mb-4">
-          <span style={{ color: "#1D4ED8" }}>Physics</span>{" "}
+          <span style={{ color: "#8B5CF6" }}>Higher Math</span>{" "}
           <span className="text-white">Chapters</span>
         </h1>
 

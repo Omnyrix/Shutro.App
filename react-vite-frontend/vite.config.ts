@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
+import viteImagemin from "vite-plugin-imagemin";
 
 export default defineConfig({
   root: ".",
@@ -9,7 +10,7 @@ export default defineConfig({
 
   server: {
     watch: { usePolling: true },
-    port: 3000, // Set dev server to run on port 3000
+    port: 3000,
   },
 
   resolve: {
@@ -19,27 +20,33 @@ export default defineConfig({
   build: {
     outDir: "build",
     emptyOutDir: true,
-    // Raise warning limit to 1MB if you want
-    chunkSizeWarningLimit: 500, // in kB
-
+    chunkSizeWarningLimit: 500,
     rollupOptions: {
       output: {
         manualChunks: {
-          // Bundle React/X libs into one chunk
           "react-vendor": ["react", "react-dom", "react-router-dom"],
-          // Bundle utility libraries
           "utils-vendor": ["lodash", "axios", "gsap"],
-          // You can add per‐page chunks too, e.g.:
-          // "settings-page": ["./src/pages/SettingsPage.tsx"]
-        }
-      }
-    }
+        },
+      },
+    },
   },
 
   plugins: [
-    // Official Vite React plugin
     react(),
-    // TSConfig path alias support (@ → app/)
     tsconfigPaths(),
+    viteImagemin({
+      // disable other optimizers
+      gifsicle: false,
+      optipng: false,
+      pngquant: false,
+      mozjpeg: false,
+      svgo: false,
+      // enable WebP conversion
+      webp: {
+        quality: 75,       // adjust between 0–100
+        method: 4,         // 0 (fastest) to 6 (slowest/best)
+        alphaQuality: 80,  // quality for alpha channel if present
+      },
+    }),
   ],
 });

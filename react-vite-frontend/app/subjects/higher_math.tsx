@@ -13,8 +13,8 @@ export default function HigherMath() {
   const isLoggedIn = false; // Set to true if user is logged in, false otherwise
 
   const papers = [
-    { route: "/HigherMath/1st-paper", name: "1st Paper" },
-    { route: "/HigherMath/2nd-paper", name: "2nd Paper" },
+    { route: "/highermath/1st-paper", name: "1st Paper" },
+    { route: "/highermath/2nd-paper", name: "2nd Paper" },
   ];
 
   const handlePaperClick = (route: string) => {
