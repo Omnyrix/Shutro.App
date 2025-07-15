@@ -58,11 +58,6 @@ export default function ChapterSelectionChemistry2nd() {
     { route: "/chemistry/2nd-paper/ch-3", title: "Chapter 3", subtitle: "Work & Energy" },
     { route: "/chemistry/2nd-paper/ch-4", title: "Chapter 4", subtitle: "Momentum" },
     { route: "/chemistry/2nd-paper/ch-5", title: "Chapter 5", subtitle: "Rotational Motion" },
-    { route: "/chemistry/2nd-paper/ch-6", title: "Chapter 6", subtitle: "Gravitation" },
-    { route: "/chemistry/2nd-paper/ch-7", title: "Chapter 7", subtitle: "Properties of Matter" },
-    { route: "/chemistry/2nd-paper/ch-8", title: "Chapter 8", subtitle: "Thermodynamics" },
-    { route: "/chemistry/2nd-paper/ch-9", title: "Chapter 9", subtitle: "Oscillations" },
-    { route: "/chemistry/2nd-paper/ch-10", title: "Chapter 10", subtitle: "Waves" },
   ];
 
   const handleChapterClick = (route: string) => {

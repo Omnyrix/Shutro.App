@@ -63,6 +63,7 @@ export default function ChapterSelectionPhysics2nd() {
     { route: "/physics/2nd-paper/ch-8", title: "Chapter 8", subtitle: "Thermodynamics" },
     { route: "/physics/2nd-paper/ch-9", title: "Chapter 9", subtitle: "Oscillations" },
     { route: "/physics/2nd-paper/ch-10", title: "Chapter 10", subtitle: "Waves" },
+    { route: "/physics/2nd-paper/ch-11", title: "Chapter 11", subtitle: "Waves" },
   ];
 
   const handleChapterClick = (route: string) => {
