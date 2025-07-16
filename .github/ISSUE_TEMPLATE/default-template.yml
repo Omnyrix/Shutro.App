@@ -1,36 +1,51 @@
-name: 🐞 Bug report
-description: Please fill out all fields to help us investigate your issue.
+name: 🐞 Bug Report
+description: Please fill out each field so we can triage your issue quickly.
 labels: [needs-triage]
 
 body:
-  - type: tags
+  # Tags → use a dropdown with multiple selection
+  - type: dropdown
     id: tags
     attributes:
       label: 📑 Tags
-      description: Select or type tags (e.g., bug, enhancement, docs).
+      description: Select one or more tags relevant to your issue.
+      options:
+        - bug
+        - enhancement
+        - documentation
+        - performance
+        - question
+      multiple: true  # allows picking several :contentReference[oaicite:0]{index=0}
 
+  # Title → required single-line input
   - type: input
     id: title
     attributes:
-      label: ✍️ Short title
-      description: A concise title for the issue.
-      placeholder: “App crashes on login”
-      validations:
-        required: true
+      label: ✍️ Title
+      description: Give your issue a short, descriptive title.
+      placeholder: e.g. "App crashes on login"
+    validations:
+      required: true  # must fill this in :contentReference[oaicite:1]{index=1}
 
+  # Description → required multiline textarea
   - type: textarea
     id: description
     attributes:
       label: 📝 Description
-      description: Steps to reproduce, expected vs. actual behavior.
-      validations:
-        required: true
+      description: Describe the issue in detail, including steps to reproduce.
+      placeholder: |
+        1. Step one…
+        2. Step two…
+        3. Step three…
+    validations:
+      required: true  # must fill this in :contentReference[oaicite:2]{index=2}
 
+  # Location → single-choice dropdown
   - type: dropdown
     id: location
     attributes:
       label: 📍 Where is this happening?
-      description: Component or area.
+      description: Select the component or area.
       options:
         - Frontend
         - Backend
@@ -39,6 +54,7 @@ body:
         - Mobile
         - Other
 
+  # Priority → single-choice dropdown
   - type: dropdown
     id: priority
     attributes:
@@ -49,8 +65,10 @@ body:
         - Medium
         - Low
 
-  - type: attachments
-    id: screenshots
+  # Screenshots / Logs → a textarea prompt for drag-and-drop
+  - type: textarea
+    id: attachments
     attributes:
-      label: 📸 Screenshots
-      description: Upload any relevant images or logs.
+      label: 📸 Screenshots or Logs
+      description: Drag and drop any relevant images or log files here.  
+        (Files dropped into this box will attach to the issue.) :contentReference[oaicite:3]{index=3}
