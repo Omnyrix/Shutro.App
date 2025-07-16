@@ -1,6 +1,5 @@
-# .github/ISSUE_TEMPLATE/bug_report.yml
 name: 🐞 Bug report
-description: Please fill out this form so we can triage your issue as quickly as possible.
+description: Please fill out all fields to help us investigate your issue.
 labels: [needs-triage]
 
 body:
@@ -9,14 +8,13 @@ body:
     attributes:
       label: 📑 Tags
       description: Select or type tags (e.g., bug, enhancement, docs).
-      # no options here means you can type any tag
 
   - type: input
     id: title
     attributes:
       label: ✍️ Short title
-      description: Give your issue a concise title.
-      placeholder: “E.g. App crashes on login”
+      description: A concise title for the issue.
+      placeholder: “App crashes on login”
       validations:
         required: true
 
@@ -24,7 +22,7 @@ body:
     id: description
     attributes:
       label: 📝 Description
-      description: Describe what happened, steps to reproduce, expected & actual behavior.
+      description: Steps to reproduce, expected vs. actual behavior.
       validations:
         required: true
 
@@ -32,7 +30,7 @@ body:
     id: location
     attributes:
       label: 📍 Where is this happening?
-      description: Choose the component or area.
+      description: Component or area.
       options:
         - Frontend
         - Backend
@@ -55,4 +53,4 @@ body:
     id: screenshots
     attributes:
       label: 📸 Screenshots
-      description: Attach any relevant screenshots or logs.
+      description: Upload any relevant images or logs.
