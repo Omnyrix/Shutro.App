@@ -64,9 +64,9 @@ body:
         - Low
 
   # 6) Screenshots / Logs → textarea for drag-and-drop attachments
-  - type: markdown
+  - type: textarea
+    id: attachments
     attributes:
-      value: |
-        📸 **Attachments**  
-        Once you submit this form, use the comment editor’s drag-and-drop or “attach files” button to upload screenshots or logs.  
-        *(Maximum file size: 25 MB; image limit: 10 MB)* 
+      label: 📸 Screenshots or Logs
+      description: Drag and drop any relevant images or log files here.  
+        (Dropped files will attach to the issue.)
