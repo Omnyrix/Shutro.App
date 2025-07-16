@@ -1,0 +1,55 @@
+name: 🐞 Bug report
+description: Please fill out all fields so we can triage your bug quickly.
+labels: [Bug]
+
+body:
+  # 1) Title → required single-line input
+  - type: input
+    id: title
+    attributes:
+      label: ✍️ Title
+      description: Give your bug a concise, descriptive title.
+      placeholder: e.g. "App crashes on login"
+    validations:
+      required: true
+
+  # 2) Description → required multiline textarea
+  - type: textarea
+    id: description
+    attributes:
+      label: 📝 Description
+      placeholder: |
+        " Describe the bug in detail, including steps to reproduce and expected vs. actual behavior"
+    validations:
+      required: true
+
+  # 3) Location → single-choice dropdown
+  - type: dropdown
+    id: location
+    attributes:
+      label: 📍 Where is this happening?
+      description: Select the component or area.
+      options:
+        - Home Page
+        - Login Page
+        - register page
+        - Subjects pages
+        - Chapter selection pages
+
+  # 4) Priority → single-choice dropdown
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 🚦 Priority
+      description: Set a priority based on how much it bothers the user, Wrong priority may result in ignored issues.
+      options:
+        - High
+        - Medium
+        - Low
+
+  # 5) Screenshots / Logs → textarea for attachments
+  - type: textarea
+    id: attachments
+    attributes:
+      label: 📸 Screenshots or Logs
+      description: Drag and drop any relevant images or log files here. (Files dropped into this box will attach to the issue.)
