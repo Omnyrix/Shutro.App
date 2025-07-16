@@ -1,3 +1,4 @@
+# .github/ISSUE_TEMPLATE/bug_report.yml
 name: 🐞 Bug report
 description: Please fill out all fields so we can triage your bug quickly.
 labels: [Bug]
@@ -19,11 +20,12 @@ body:
     attributes:
       label: 📝 Description
       placeholder: |
-        " Describe the bug in detail, including steps to reproduce and expected vs. actual behavior"
+        Describe the bug in detail, including steps to reproduce
+        and expected vs. actual behavior.
     validations:
       required: true
 
-  # 3) Location → single-choice dropdown
+  # 3) Location → single-choice dropdown with “Other”
   - type: dropdown
     id: location
     attributes:
@@ -32,24 +34,39 @@ body:
       options:
         - Home Page
         - Login Page
-        - register page
-        - Subjects pages
-        - Chapter selection pages
+        - Register Page
+        - Subjects Pages
+        - Chapter Selection Pages
+        - Slide panel
+        - Profile page
+        - Other
+    validations:
+      required: true
 
-  # 4) Priority → single-choice dropdown
+  # 4) Custom location → only shown if “Other” chosen
+  - type: input
+    if: ${{ inputs.location == 'Other' }}
+    id: custom_location
+    attributes:
+      label: ✏️ Custom location
+      description: Please specify your custom location here.
+      placeholder: e.g. "Settings Page"
+
+  # 5) Priority → single-choice dropdown
   - type: dropdown
     id: priority
     attributes:
       label: 🚦 Priority
-      description: Set a priority based on how much it bothers the user, Wrong priority may result in ignored issues.
+      description: Set a priority based on how much it bothers the user. Wrong priority may result in ignored issues.
       options:
         - High
         - Medium
         - Low
 
-  # 5) Screenshots / Logs → textarea for attachments
-  - type: textarea
-    id: attachments
+  # 6) Screenshots / Logs → textarea for drag-and-drop attachments
+  - type: markdown
     attributes:
-      label: 📸 Screenshots or Logs
-      description: Drag and drop any relevant images or log files here. (Files dropped into this box will attach to the issue.)
+      value: |
+        📸 **Attachments**  
+        Once you submit this form, use the comment editor’s drag-and-drop or “attach files” button to upload screenshots or logs.  
+        *(Maximum file size: 25 MB; image limit: 10 MB)* 
