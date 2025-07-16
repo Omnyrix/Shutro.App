@@ -1,19 +1,11 @@
 # .github/ISSUE_TEMPLATE/bug_report.yml
 name: 🐞 Bug report
-description: Please fill out all fields so we can triage your bug quickly.
+description: >
+  **Use the “Title” box at the top** for a concise summary of your bug.
+  Then fill out the fields below to help us triage it quickly.
 labels: [Bug]
 
 body:
-  # 1) Title → required single-line input
-  - type: input
-    id: title
-    attributes:
-      label: ✍️ Title
-      description: Give your bug a concise, descriptive title.
-      placeholder: "App crashes on login"
-    validations:
-      required: true
-
   # 2) Description → required multiline textarea
   - type: textarea
     id: description
