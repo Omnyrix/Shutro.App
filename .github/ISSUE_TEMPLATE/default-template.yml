@@ -1,52 +1,36 @@
 name: 🐞 Bug report
-description: Please fill out all fields so we can triage your issue as quickly as possible.
+description: Please fill out all fields to help us investigate your issue.
 labels: [needs-triage]
 
 body:
-  # 1) Tags → use a multiselect dropdown (type: dropdown + multiple: true)
-  - type: dropdown
+  - type: tags
     id: tags
     attributes:
       label: 📑 Tags
-      description: Select one or more tags (e.g. bug, enhancement, docs).
-      options:
-        - bug
-        - enhancement
-        - documentation
-        - performance
-        - question
-      multiple: true
+      description: Select or type tags (e.g., bug, enhancement, docs).
 
-  # 2) Title → single-line input, required
   - type: input
     id: title
     attributes:
       label: ✍️ Short title
-      description: A concise summary of the issue.
-      placeholder: e.g. App crashes on login
-    validations:
-      required: true  # only here, not inside attributes :contentReference[oaicite:0]{index=0}
+      description: A concise title for the issue.
+      placeholder: “App crashes on login”
+      validations:
+        required: true
 
-  # 3) Description → multiline textarea, required
   - type: textarea
     id: description
     attributes:
       label: 📝 Description
-      description: Steps to reproduce, and expected vs. actual behavior.
-      placeholder: |
-        1. …
-        2. …
-        3. …
-      render: bash
-    validations:
-      required: true  # allowed at this level :contentReference[oaicite:1]{index=1}
+      description: Steps to reproduce, expected vs. actual behavior.
+      validations:
+        required: true
 
-  # 4) Location → single-choice dropdown
   - type: dropdown
     id: location
     attributes:
       label: 📍 Where is this happening?
-      description: Component or area.
+      description: Select the component or area.
       options:
         - Frontend
         - Backend
@@ -56,7 +40,6 @@ body:
         - Other
       default: 0
 
-  # 5) Priority → single-choice dropdown
   - type: dropdown
     id: priority
     attributes:
@@ -68,10 +51,8 @@ body:
         - Low
       default: 1
 
-  # 6) Screenshots → markdown block with instructions (no 'attachments' type)
-  - type: markdown
-    id: screenshots_note
+  - type: attachments
+    id: screenshots
     attributes:
-      value: |
-        📸 **Screenshots or logs**  
-        Please drag and drop any relevant images or log files below this line.
+      label: 📸 Screenshots
+      description: Upload any relevant images or logs.
