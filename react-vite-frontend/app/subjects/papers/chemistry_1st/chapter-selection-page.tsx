@@ -108,7 +108,7 @@ export default function ChapterSelectionChemistry1st() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
                   delay: idx * 0.02,
-                  duration: 0.4,
+                  duration: 0.2,
                   ease: "easeInOut",
                 }}
               >
