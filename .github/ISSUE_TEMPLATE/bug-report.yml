@@ -1,11 +1,10 @@
 # .github/ISSUE_TEMPLATE/bug_report.yml
 name: 🐞 Bug report
-description: >
-  **Use the “Title” box at the top** for a concise summary of your bug.
-  Then fill out the fields below to help us triage it quickly.
+description: Please fill out all fields so we can triage your bug quickly.
 labels: [Bug]
 
 body:
+
   # 2) Description → required multiline textarea
   - type: textarea
     id: description
