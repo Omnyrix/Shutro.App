@@ -20,9 +20,7 @@ body:
     attributes:
       label: 📝 Description
       placeholder: |
-        Describe the bug in detail, including:
-        1. Steps to reproduce
-        2. Expected vs. actual behavior
+        Describe the bug in detail, including steps to reproduse it
     validations:
       required: true
 
@@ -31,8 +29,7 @@ body:
     id: location
     attributes:
       label: 📍 Where is this happening?
-      description: Select the component or area.  
-        If you choose “Other,” please also fill in the next field.
+      description: Select the component or area.
       options:
         - Home Page
         - Login Page
@@ -47,7 +44,7 @@ body:
     attributes:
       label: ✏️ Custom location
       description: Fill this only if you selected “Other” above.
-      placeholder: e.g. "Payment Gateway"
+      placeholder: e.g. "Settings Page"
 
   # 5) Priority → single-choice dropdown
   - type: dropdown
@@ -65,5 +62,5 @@ body:
     id: attachments
     attributes:
       label: 📸 Screenshots or Logs
-      description: Drag and drop any relevant images or log files here.  
-        (Dropped files will attach to the issue.)
+      placeholder: |
+        Drag and drop any relevant images or log files here.
