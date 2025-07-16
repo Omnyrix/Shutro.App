@@ -1,35 +1,22 @@
----
-name: Default Template
-about: For all issue reporting
-title: Describe Your Issue With Shutro.App
-labels: ''
-assignees: MRAKS05
-
----
-
+# .github/ISSUE_TEMPLATE/bug_report.yml
 name: 🐞 Bug report
-description: Use this template to report a bug or unexpected behavior.
+description: Please fill out this form so we can triage your issue as quickly as possible.
 labels: [needs-triage]
 
 body:
-  - type: dropdown
+  - type: tags
     id: tags
     attributes:
       label: 📑 Tags
-      description: Select existing tags or type new ones.
-      options:
-        - bug
-        - enhancement
-        - documentation
-        - performance
-        - question
+      description: Select or type tags (e.g., bug, enhancement, docs).
+      # no options here means you can type any tag
 
   - type: input
     id: title
     attributes:
-      label: ✍️ Title
-      description: Give your issue a short, descriptive title.
-      placeholder: e.g. “App crashes on login”
+      label: ✍️ Short title
+      description: Give your issue a concise title.
+      placeholder: “E.g. App crashes on login”
       validations:
         required: true
 
@@ -37,7 +24,7 @@ body:
     id: description
     attributes:
       label: 📝 Description
-      description: Describe the bug, including steps to reproduce, expected vs. actual behavior.
+      description: Describe what happened, steps to reproduce, expected & actual behavior.
       validations:
         required: true
 
@@ -58,7 +45,7 @@ body:
     id: priority
     attributes:
       label: 🚦 Priority
-      description: Wrong priority might result in ignored issue.
+      description: Wrong priority may result in ignored issues.
       options:
         - High
         - Medium
@@ -68,4 +55,4 @@ body:
     id: screenshots
     attributes:
       label: 📸 Screenshots
-      description: Attach screenshots or logs if available.
+      description: Attach any relevant screenshots or logs.
