@@ -37,29 +37,25 @@ export default function Login() {
   const [loading, setLoading] = useState(true);
   const [loggingIn, setLoggingIn] = useState(false);
   const [redirectingToVerify, setRedirectingToVerify] = useState(false);
-  const [username, setUsername] = useState("");
 
   const navigate = useNavigate();
 
   // Override hardware back button to go to home
   useEffect(() => {
     const cap = (window as any).Capacitor;
-    if (!cap) return; // not running in Capacitor
+    if (!cap) return;
     const { App: CapacitorApp } = cap.Plugins;
-
     const backHandler = CapacitorApp.addListener(
       "backButton",
       (event: any) => {
         navigate("/home");
-        event.preventDefault?.(); // stop the default “exit app”
+        event.preventDefault?.();
       }
     );
-
-    return () => {
-      backHandler.remove();
-    };
+    return () => backHandler.remove();
   }, [navigate]);
 
+  // initial loading spinner
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(t);
@@ -86,18 +82,26 @@ export default function Login() {
       return;
     }
 
-    // FETCH USER NAME AND SAVE TO COOKIE
-    const res = await axios.get(`${backendUrl}/user/${sanitizedEmail}`);
-    if (res.data && res.data.username) {
-      const formatted = 
-        res.data.username.charAt(0).toUpperCase() + 
-        res.data.username.slice(1);
-      setUsername(formatted);
-      await setCookie("user info", formatted);
+    // fetch the username
+    let formattedUsername = "";
+    try {
+      const res = await axios.get(`${backendUrl}/user/${sanitizedEmail}`);
+      if (res.data?.username) {
+        formattedUsername =
+          res.data.username.charAt(0).toUpperCase() +
+          res.data.username.slice(1);
+      }
+    } catch {
+      // ignore fetch failure
     }
 
-    // SET SESSION COOKIE AND NAVIGATE
-    await setCookie("session", result.session || sanitizedEmail);
+    // store both email & username in one "session" cookie, no date/options
+    const sessionValue = JSON.stringify({
+      email: sanitizedEmail,
+      username: formattedUsername,
+    });
+    await setCookie("session", sessionValue);
+
     navigate("/home");
   }
 

@@ -1,49 +1,106 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCookie , eraseCookie } from "../utils/cookie";
+import { getCookie, eraseCookie } from "../utils/cookie";
+import axios from "axios";
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+// Toggle this to enable/disable the online session‐validation step
+const enableSessionValidation = true;
 
 export default function Loading() {
   const [progress, setProgress] = useState(0);
+  const [progressDuration, setProgressDuration] = useState(0);
   const [hasSession, setHasSession] = useState<null | boolean>(null);
+  const [debugMessage, setDebugMessage] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // remove the stored scroll-position map on load
+    // clear any stored scroll position
     eraseCookie("scrollpos");
 
-    async function checkSession() {
-      const session = await getCookie("session");
-      setHasSession(!!session);
-    }
-    checkSession();
+    const startTime = Date.now();
 
-    // Animate the loading bar to 100% over 500ms
-    const steps = 10;
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
+    async function performSessionCheck() {
+      const raw = await getCookie("session");
+
+      // no cookie → demo
+      if (!raw) {
+        setHasSession(false);
+        return;
+      }
+
+      // try parse JSON { email, username }
+      let email: string;
+      try {
+        const sessionData = JSON.parse(raw);
+        email = sessionData.email;
+        if (!email) throw new Error("no email");
+      } catch {
+        // legacy: treat raw as email if it looks like one
+        email = raw;
+      }
+
+      // cookie present but validation disabled or offline → trust cookie
+      if (!enableSessionValidation || !navigator.onLine) {
+        setHasSession(true);
+        return;
+      }
+
+      // online + validation enabled → hit backend
+      try {
+        const res = await axios.get(`${backendUrl}/user/${email}`);
+        if (res.data?.username) {
+          setHasSession(true);
+        } else {
+          // mismatch → clear and demo
+          await eraseCookie("session");
+          setHasSession(false);
+          setDebugMessage("Session mismatch—cleared. (demo mode)");
         }
-        return Math.min(prev + 100 / steps, 100);
-      });
-    }, 50);
+      } catch {
+        // error → clear and demo
+        await eraseCookie("session");
+        setHasSession(false);
+        setDebugMessage("Session validation error—cleared. (demo mode)");
+      }
+    }
 
-    return () => {
-      clearInterval(interval);
-    };
+    performSessionCheck().then(() => {
+      // when check done, drive the bar to 100% over elapsed ms (or 500 ms if feature off)
+      const elapsed = Date.now() - startTime;
+      setProgressDuration(enableSessionValidation ? elapsed : 500);
+      setProgress(100);
+    });
   }, []);
 
+  const renderDebugText = () => {
+    if (hasSession === null) return "Detecting session cookie...";
+    if (hasSession) return "Session cookie detected (logged in mode)";
+    if (debugMessage) return debugMessage;
+    return "No session cookie detected (demo mode)";
+  };
+
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center bg-gray-800 text-white z-50 transition-opacity duration-500">
-      {/* Extra space below the status bar, inside the loading screen */}
-      <div className="w-full" style={{ height: 24, background: "#1f2937", position: "absolute", top: 0, left: 0 }} />
-      {/* Debug message: one line, under the space, scaled dynamically, with extra margin */}
+    <div className="fixed inset-0 flex flex-col items-center justify-center bg-gray-800 text-white z-50">
+      {/* Status‐bar spacer */}
+      <div
+        className="w-full"
+        style={{
+          height: 24,
+          background: "#1f2937",
+          position: "absolute",
+          top: 0,
+          left: 0,
+        }}
+      />
+
+      {/* Debug message */}
       <div
         className="w-full flex justify-center"
         style={{
           position: "absolute",
-          top: 36, // 24px (space) + 12px (gap)
+          top: 36,
           left: 0,
           zIndex: 10,
         }}
@@ -59,14 +116,11 @@ export default function Loading() {
             textOverflow: "ellipsis",
           }}
         >
-          {hasSession === null
-            ? "Detecting session cookie..."
-            : hasSession
-            ? "Session cookie detected (logged in mode)"
-            : "No session cookie detected (demo mode)"}
+          {renderDebugText()}
         </span>
       </div>
-      {/* Flashing Math Symbols */}
+
+      {/* Flashing math symbols */}
       <div className="relative flex gap-4 mb-6">
         <p className="text-6xl font-bold text-gray-300 animate-fade-in-out1">Σ</p>
         <p className="text-5xl font-bold text-gray-400 animate-fade-in-out2">π</p>
@@ -74,15 +128,22 @@ export default function Loading() {
         <p className="text-6xl font-bold text-gray-300 animate-fade-in-out4">√</p>
         <p className="text-5xl font-bold text-gray-400 animate-fade-in-out5">∫</p>
       </div>
-      {/* Dynamic Loading Bar */}
-      <div className="w-64 bg-gray-700 rounded-full h-3 relative overflow-hidden">
+
+      {/* Dynamic loading bar */}
+      <div className="w-64 bg-gray-700 rounded-full h-3 overflow-hidden">
         <div
-          className="bg-blue-500 h-full transition-all duration-100"
-          style={{ width: `${progress}%` }}
-        ></div>
+          className="bg-blue-500 h-full"
+          style={{
+            width: `${progress}%`,
+            transition: `width ${progressDuration}ms linear`,
+          }}
+        />
       </div>
-      {/* Loading Progress */}
-      <p className="mt-4 text-gray-300 text-lg">Loading... {Math.round(progress)}%</p>
+
+      {/* Percentage */}
+      <p className="mt-4 text-gray-300 text-lg">
+        Loading... {Math.round(progress)}%
+      </p>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react"; 
 import { useNavigate } from "react-router-dom";               
-import { eraseCookie } from "../utils/cookie";                
+import { eraseCookie, getCookie } from "../utils/cookie";                
 import { FaArrowLeft } from "react-icons/fa";                                              
 import guestAvatar from "../assets/guest-avatar.webp";          
 
@@ -9,7 +9,7 @@ const backendUrl = import.meta.env.VITE_BACKEND_URL;
 interface SidePanelProps {
   isPanelOpen: boolean;
   setPanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  username: string;
+  username: string;           // fallback if cookie missing
   isDemo: boolean;
 }
 
@@ -19,14 +19,31 @@ const statusBarAnimMs = 150;
 const SidePanel = ({
   isPanelOpen,
   setPanelOpen,
-  username,
+  username: fallbackUsername,
   isDemo,
 }: SidePanelProps) => {
   const navigate = useNavigate();
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [aboutExpanded, setAboutExpanded] = useState(false);
+  const [cookieUsername, setCookieUsername] = useState<string | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
+  // load username from JSON in "session" cookie once
+  useEffect(() => {
+    getCookie("session").then(raw => {
+      if (!raw) return;
+      try {
+        const { username } = JSON.parse(raw);
+        if (username) setCookieUsername(username);
+      } catch {
+        // invalid JSON → ignore
+      }
+    });
+  }, []);
+
+  // decide final display name and initial
+  const displayName = cookieUsername || fallbackUsername;
+  const initial = displayName ? displayName.charAt(0) : "";
 
   // Override back button when panel is open
   useEffect(() => {
@@ -53,7 +70,6 @@ const SidePanel = ({
     let start: number | null = null;
     let animationFrame: number;
 
-    // Optimized color interpolation
     function lerpColor(a: string, b: string, t: number) {
       const ah = a.slice(1), bh = b.slice(1);
       const ar = parseInt(ah.substr(0,2),16), ag = parseInt(ah.substr(2,2),16), ab = parseInt(ah.substr(4,2),16);
@@ -106,11 +122,13 @@ const SidePanel = ({
           {/* Profile Section */}
           <div className="flex flex-col items-center gap-2 mb-6">
             <div className="w-16 h-16 rounded-full bg-gradient-to-br flex items-center justify-center text-3xl font-bold text-white">
-              {isLoggedIn
-                ? username.charAt(0)
+              {isLoggedIn && initial
+                ? initial
                 : <img src={guestAvatar} alt="Guest avatar" className="w-full h-full object-cover rounded-full" />}
             </div>
-            <span className="text-xl font-semibold text-white">{isLoggedIn ? username : "Guest"}</span>
+            <span className="text-xl font-semibold text-white">
+              {isLoggedIn && displayName ? displayName : "Guest"}
+            </span>
           </div>
 
           {/* Buttons Section */}

@@ -6,9 +6,23 @@ import NoInternetWarning from "../../../components/noInternetWarning";
 import { motion } from "framer-motion";
 import { getCookie, readScrollMap, writeScrollMap } from "../../../utils/cookie";
 
+// actual Chapter-1 component
+import Phy1stCh1 from "./ch-1";
+// placeholders for future chapters—replace with real imports when ready
+//import Phy1stCh2 from "./ch-2";
+//import Phy1stCh3 from "./ch-3";
+//import Phy1stCh4 from "./ch-4";
+//import Phy1stCh5 from "./ch-5";
+//import Phy1stCh6 from "./ch-6";
+//import Phy1stCh7 from "./ch-7";
+//import Phy1stCh8 from "./ch-8";
+//import Phy1stCh9 from "./ch-9";
+//import Phy1stCh10 from "./ch-10";
+
 export default function ChapterSelectionPhysics1st() {
   const navigate = useNavigate();
   const [isDemo, setIsDemo] = useState(false);
+  const [showCh1, setShowCh1] = useState(false);           // ← new state
   const containerRef = useRef<HTMLDivElement>(null);
 
   // unique identifier for this page’s scroll position
@@ -53,21 +67,22 @@ export default function ChapterSelectionPhysics1st() {
   }, [mapKey]);
 
   const chapters = [
-    { route: "/physics/1st-paper/ch-1", title: "Chapter 1", subtitle: "Kinematics" },
-    { route: "/physics/1st-paper/ch-2", title: "Chapter 2", subtitle: "Dynamics" },
-    { route: "/physics/1st-paper/ch-3", title: "Chapter 3", subtitle: "Work & Energy" },
-    { route: "/physics/1st-paper/ch-4", title: "Chapter 4", subtitle: "Momentum" },
-    { route: "/physics/1st-paper/ch-5", title: "Chapter 5", subtitle: "Rotational Motion" },
-    { route: "/physics/1st-paper/ch-6", title: "Chapter 6", subtitle: "Gravitation" },
-    { route: "/physics/1st-paper/ch-7", title: "Chapter 7", subtitle: "Properties of Matter" },
-    { route: "/physics/1st-paper/ch-8", title: "Chapter 8", subtitle: "Thermodynamics" },
-    { route: "/physics/1st-paper/ch-9", title: "Chapter 9", subtitle: "Oscillations" },
-    { route: "/physics/1st-paper/ch-10", title: "Chapter 10", subtitle: "Waves" },
+    { id: 1, route: "/physics/1st-paper/ch-1", title: "Chapter 1", subtitle: "Kinematics" },
+    { id: 2, route: "/physics/1st-paper/ch-2", title: "Chapter 2", subtitle: "Dynamics" },
+    { id: 3, route: "/physics/1st-paper/ch-3", title: "Chapter 3", subtitle: "Work & Energy" },
+    { id: 4, route: "/physics/1st-paper/ch-4", title: "Chapter 4", subtitle: "Momentum" },
+    { id: 5, route: "/physics/1st-paper/ch-5", title: "Chapter 5", subtitle: "Rotational Motion" },
+    { id: 6, route: "/physics/1st-paper/ch-6", title: "Chapter 6", subtitle: "Gravitation" },
+    { id: 7, route: "/physics/1st-paper/ch-7", title: "Chapter 7", subtitle: "Properties of Matter" },
+    { id: 8, route: "/physics/1st-paper/ch-8", title: "Chapter 8", subtitle: "Thermodynamics" },
+    { id: 9, route: "/physics/1st-paper/ch-9", title: "Chapter 9", subtitle: "Oscillations" },
+    { id: 10, route: "/physics/1st-paper/ch-10", title: "Chapter 10", subtitle: "Waves" },
   ];
 
-  const handleChapterClick = (route: string) => {
-    setTimeout(() => navigate(route), 100);
-  };
+  // early return: render Chapter-1 component inline
+  if (showCh1) {
+    return <Phy1stCh1 onBack={() => setShowCh1(false)} />;
+  }
 
   return (
     <div className="relative min-h-screen font-bengali">
@@ -78,7 +93,7 @@ export default function ChapterSelectionPhysics1st() {
         <TopBar />
       </div>
 
-      {/* Content background covers full screen (including behind TopBar) */}
+      {/* Content background covers full screen */}
       <div
         className="absolute inset-0 bg-gray-800 text-white p-6 pt-20 flex flex-col items-center overflow-hidden"
         style={{ fontFamily: '"Noto Sans Bengali", sans-serif' }}
@@ -93,7 +108,7 @@ export default function ChapterSelectionPhysics1st() {
         </p>
 
         <div className="flex-1 relative w-full mx-4 sm:mx-auto mt-1 max-w-md">
-          {/* scrollable region with bottom gap + safe-area inset */}
+          {/* scrollable region */}
           <div
             ref={containerRef}
             className="absolute inset-x-0 overflow-y-auto hide-scrollbar px-2 pt-4 pb-4"
@@ -104,9 +119,13 @@ export default function ChapterSelectionPhysics1st() {
           >
             {chapters.map((chapter, idx) => (
               <motion.div
-                key={chapter.route}
+                key={chapter.id}
                 className="subject-button cursor-pointer mb-2"
-                onClick={() => handleChapterClick(chapter.route)}
+                onClick={() =>
+                  idx === 0
+                    ? setShowCh1(true)          // load Ch1 inline
+                    : navigate("/404")          // lead other buttons to 404
+                }
                 whileTap={{ scale: 0.97 }}
                 whileHover={{ scale: 1.01 }}
                 initial={{ opacity: 0, y: 10 }}
@@ -131,10 +150,11 @@ export default function ChapterSelectionPhysics1st() {
             ))}
           </div>
 
-          {/* Static fades at top and bottom */}
+          {/* Static fades */}
           <div className="pointer-events-none absolute top-0 left-2 right-2 h-0 bg-gradient-to-b from-gray-800 via-gray-800/50 to-transparent" />
-          <div className="pointer-events-none absolute bottom-0 left-2 right-2 h-0 bg-gradient-to-t from-gray-800 via-gray-800/70 to-transparent"
-          style={{ bottom: `calc(${scrollSectionBottomOffset}px + env(safe-area-inset-bottom, 0px))` }}
+          <div
+            className="pointer-events-none absolute bottom-0 left-2 right-2 h-0 bg-gradient-to-t from-gray-800 via-gray-800/70 to-transparent"
+            style={{ bottom: `calc(${scrollSectionBottomOffset}px + env(safe-area-inset-bottom, 0px))` }}
           />
         </div>
       </div>
