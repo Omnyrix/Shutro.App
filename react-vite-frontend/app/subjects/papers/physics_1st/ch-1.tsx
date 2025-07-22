@@ -23,7 +23,7 @@ const FORMULAS: Formula[] = [
   { id: "s_avg_t", formula: "s = \\tfrac{u + v}{2}t", description: "Distance using avg. velocity.", derivation: "..." },
   { id: "f_ma", formula: "F = ma", description: "Newton's second law.", derivation: "..." },
   { id: "p_mv", formula: "p = mv", description: "Linear momentum.", derivation: "..." },
-  { id: "e_12mv2", formula: "E_k = \\tfrac{1}{2}mv^2", description: "Kinetic energy.", derivation: "..." },
+  { id: "e_12mv2", formula: "E_k = \\tfrac{1}{2}mv^2", description: "Kinetic energy.", derivation: "Wow Nice Looks" },
 ];
 
 const chapterName = "Kinematics";
