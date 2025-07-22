@@ -17,7 +17,7 @@ interface Formula {
 }
 
 const FORMULAS: Formula[] = [
-  { id: "v_u_at", formula: "v = u + at", description: "Final velocity under constant acceleration.", derivation: "..." },
+  { id: "v_u_at", formula: "v = u + at", description: "Final velocity under constant acceleration.", derivation: "Holy Moly" },
   { id: "s_ut_12at2", formula: "s = ut + \\tfrac{1}{2}at^2", description: "Displacement with time.", derivation: "..." },
   { id: "v2_u2_2as", formula: "v^2 = u^2 + 2as", description: "Velocity-displacement relation.", derivation: "..." },
   { id: "s_avg_t", formula: "s = \\tfrac{u + v}{2}t", description: "Distance using avg. velocity.", derivation: "..." },
