@@ -6,29 +6,12 @@ import NoInternetWarning from "../../../components/noInternetWarning";
 import { motion } from "framer-motion";
 import { getCookie, readScrollMap, writeScrollMap } from "../../../utils/cookie";
 
-// actual Chapter-1 component
-import Phy1stCh1 from "./ch-1";
-// placeholders for future chapters—replace with real imports when ready
-//import Phy1stCh2 from "./ch-2";
-//import Phy1stCh3 from "./ch-3";
-//import Phy1stCh4 from "./ch-4";
-//import Phy1stCh5 from "./ch-5";
-//import Phy1stCh6 from "./ch-6";
-//import Phy1stCh7 from "./ch-7";
-//import Phy1stCh8 from "./ch-8";
-//import Phy1stCh9 from "./ch-9";
-//import Phy1stCh10 from "./ch-10";
-
 export default function ChapterSelectionPhysics1st() {
   const navigate = useNavigate();
   const [isDemo, setIsDemo] = useState(false);
-  const [showCh1, setShowCh1] = useState(false);           // ← new state
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // unique identifier for this page’s scroll position
   const mapKey = "physicsp1scrollpos";
-
-  // gap (px) between bottom of scroll section and bottom of screen
   const scrollSectionBottomOffset = 1;
 
   useEffect(() => {
@@ -43,7 +26,6 @@ export default function ChapterSelectionPhysics1st() {
     const el = containerRef.current;
     if (!el) return;
 
-    // restore saved scroll position
     readScrollMap().then(map => {
       const savedPos = map[mapKey];
       if (typeof savedPos === "number") {
@@ -79,21 +61,14 @@ export default function ChapterSelectionPhysics1st() {
     { id: 10, route: "/physics/1st-paper/ch-10", title: "Chapter 10", subtitle: "Waves" },
   ];
 
-  // early return: render Chapter-1 component inline
-  if (showCh1) {
-    return <Phy1stCh1 onBack={() => setShowCh1(false)} />;
-  }
-
   return (
     <div className="relative min-h-screen font-bengali">
       {isDemo && <NoInternetWarning />}
 
-      {/* Fixed TopBar at top, no background behind it */}
       <div className="fixed top-0 left-0 right-0 z-20 bg-transparent">
         <TopBar />
       </div>
 
-      {/* Content background covers full screen */}
       <div
         className="absolute inset-0 bg-gray-800 text-white p-6 pt-20 flex flex-col items-center overflow-hidden"
         style={{ fontFamily: '"Noto Sans Bengali", sans-serif' }}
@@ -108,7 +83,6 @@ export default function ChapterSelectionPhysics1st() {
         </p>
 
         <div className="flex-1 relative w-full mx-4 sm:mx-auto mt-1 max-w-md">
-          {/* scrollable region */}
           <div
             ref={containerRef}
             className="absolute inset-x-0 overflow-y-auto hide-scrollbar px-2 pt-4 pb-4"
@@ -121,11 +95,7 @@ export default function ChapterSelectionPhysics1st() {
               <motion.div
                 key={chapter.id}
                 className="subject-button cursor-pointer mb-2"
-                onClick={() =>
-                  idx === 0
-                    ? setShowCh1(true)          // load Ch1 inline
-                    : navigate("/404")          // lead other buttons to 404
-                }
+                onClick={() => navigate(chapter.route)} // ✅ route navigation here
                 whileTap={{ scale: 0.97 }}
                 whileHover={{ scale: 1.01 }}
                 initial={{ opacity: 0, y: 10 }}
@@ -150,7 +120,6 @@ export default function ChapterSelectionPhysics1st() {
             ))}
           </div>
 
-          {/* Static fades */}
           <div className="pointer-events-none absolute top-0 left-2 right-2 h-0 bg-gradient-to-b from-gray-800 via-gray-800/50 to-transparent" />
           <div
             className="pointer-events-none absolute bottom-0 left-2 right-2 h-0 bg-gradient-to-t from-gray-800 via-gray-800/70 to-transparent"

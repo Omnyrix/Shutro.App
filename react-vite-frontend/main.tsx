@@ -24,6 +24,17 @@ import Biology from "./app/routes/subjects/biology";
 import Profile from "./app/routes/profile";
 import ChapterSelectionPhysics1st from "./app/subjects/papers/physics_1st/chapter-selection-page";
 import ChapterSelectionPhysics2nd from "./app/subjects/papers/physics_2nd/chapter-selection-page";
+import PHY1STCH1 from "./app/subjects/papers/physics_1st/ch-1";
+//import PHY1STCH2 from "./app/subjects/papers/physics_1st/ch-2";
+//import PHY1STCH3 from "./app/subjects/papers/physics_1st/ch-3";
+//import PHY1STCH4 from "./app/subjects/papers/physics_1st/ch-4";
+//import PHY1STCH5 from "./app/subjects/papers/physics_1st/ch-5";
+//import PHY1STCH6 from "./app/subjects/papers/physics_1st/ch-6";
+//import PHY1STCH7 from "./app/subjects/papers/physics_1st/ch-7";
+//import PHY1STCH8 from "./app/subjects/papers/physics_1st/ch-8";
+//import PHY1STCH9 from "./app/subjects/papers/physics_1st/ch-9";
+//import PHY1STCH10 from "./app/subjects/papers/physics_1st/ch-10";
+//import PHY1STCH11 from "./app/subjects/papers/physics_2nd/chapter-selection-page";
 import ChapterSelectionHigherMath1st from "./app/subjects/papers/higher_math_1st/chapter-selection-page";
 import ChapterSelectionHigherMath2nd from "./app/subjects/papers/higher_math_2nd/chapter-selection-page";
 import ChapterSelectionChemistry1st from "./app/subjects/papers/chemistry_1st/chapter-selection-page";
@@ -35,13 +46,63 @@ import Loading from "./app/components/loading_screen";
 const GRAY_900_ROUTES = [
   "/physics",
   "/physics/1st-paper",
+  "/physics/1st-paper/ch-1",
+  "/physics/1st-paper/ch-2",
+  "/physics/1st-paper/ch-3",
+  "/physics/1st-paper/ch-4",
+  "/physics/1st-paper/ch-5",
+  "/physics/1st-paper/ch-6",
+  "/physics/1st-paper/ch-7",
+  "/physics/1st-paper/ch-8",
+  "/physics/1st-paper/ch-9",
+  "/physics/1st-paper/ch-10",
   "/physics/2nd-paper",
+  "/physics/2nd-paper/ch-1",
+  "/physics/2nd-paper/ch-2",
+  "/physics/2nd-paper/ch-3",
+  "/physics/2nd-paper/ch-4",
+  "/physics/2nd-paper/ch-5",
+  "/physics/2nd-paper/ch-6",
+  "/physics/2nd-paper/ch-7",
+  "/physics/2nd-paper/ch-8",
+  "/physics/2nd-paper/ch-9",
+  "/physics/2nd-paper/ch-10",
   "/chemistry",
   "/chemistry/1st-paper",
+  "/chemistry/1st-paper/ch-1",
+  "/chemistry/1st-paper/ch-2",
+  "/chemistry/1st-paper/ch-3",  
+  "/chemistry/1st-paper/ch-4",
+  "/chemistry/1st-paper/ch-5",
   "/chemistry/2nd-paper",
+  "/chemistry/2nd-paper/ch-1",
+  "/chemistry/2nd-paper/ch-2",
+  "/chemistry/2nd-paper/ch-3",
+  "/chemistry/2nd-paper/ch-4",
+  "/chemistry/2nd-paper/ch-5",
   "/highermath",
   "/highermath/1st-paper",
+  "/highermath/1st-paper/ch-1",
+  "/highermath/1st-paper/ch-2",
+  "/highermath/1st-paper/ch-3",
+  "/highermath/1st-paper/ch-4",
+  "/highermath/1st-paper/ch-5",
+  "/highermath/1st-paper/ch-6",
+  "/highermath/1st-paper/ch-7",
+  "/highermath/1st-paper/ch-8",
+  "/highermath/1st-paper/ch-9",
+  "/highermath/1st-paper/ch-10",
   "/highermath/2nd-paper",
+  "/highermath/2nd-paper/ch-1",
+  "/highermath/2nd-paper/ch-2",
+  "/highermath/2nd-paper/ch-3",
+  "/highermath/2nd-paper/ch-4",
+  "/highermath/2nd-paper/ch-5",
+  "/highermath/2nd-paper/ch-6",
+  "/highermath/2nd-paper/ch-7",
+  "/highermath/2nd-paper/ch-8",
+  "/highermath/2nd-paper/ch-9",
+  "/highermath/2nd-paper/ch-10",
   "/biology"
 ];
 
@@ -123,6 +184,7 @@ const MainApp = () => {
       <Route path="home" element={<Home />} />
       <Route path="physics" element={<Physics />} />
       <Route path="physics/1st-paper" element={<ChapterSelectionPhysics1st />} />
+      <Route path="physics/1st-paper/ch-1" element={<PHY1STCH1 />} />
       <Route path="physics/2nd-paper" element={<ChapterSelectionPhysics2nd />} />
       <Route path="chemistry" element={<Chemistry />} />
       <Route path="chemistry/1st-paper" element={<ChapterSelectionChemistry1st />} />

@@ -1,9 +1,10 @@
-// app/routes/subjects/physics_1st/ch-1-formulas-page.tsx
+// app/routes/subjects/physics_1st/ch-1.tsx
 
 import React, { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import TopBar from "../../../components/topbar-phy-1st";
 import NoInternetWarning from "../../../components/noInternetWarning";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { App } from "@capacitor/app";
 import { getCookie, readScrollMap, writeScrollMap } from "../../../utils/cookie";
 import katex from "katex";
@@ -35,7 +36,6 @@ export default function Phy1stCh1FormulasPage() {
   const [selectedFormulaId, setSelectedFormulaId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapKey = "phy1ch1formulasscroll";
-  const scrollOffset = 1;
 
   useEffect(() => {
     getCookie("session").then(email => setIsDemo(!email));
@@ -76,59 +76,89 @@ export default function Phy1stCh1FormulasPage() {
   const renderLatex = (tex: string) =>
     katex.renderToString(tex, { throwOnError: false, output: "html" });
 
-  if (selectedFormulaId) {
-    const detail = FORMULAS.find(f => f.id === selectedFormulaId)!;
-    return (
-      <div className="relative min-h-screen font-bengali bg-gray-800 text-white">
-        {isDemo && <NoInternetWarning />}
-        <div className="fixed top-0 left-0 p-4 z-20">
-          <button onClick={() => setSelectedFormulaId(null)} className="text-2xl">
-            ←
-          </button>
-        </div>
-        <div className="p-6 pt-20">
-          <motion.h1 className="text-2xl font-bold mb-4">{detail.description}</motion.h1>
-          <motion.div
-            className="text-xl font-mono mb-4"
-            dangerouslySetInnerHTML={{ __html: renderLatex(detail.formula) }}
-          />
-          <motion.pre className="bg-gray-900 p-4 rounded-lg overflow-x-auto text-sm whitespace-pre-wrap">
-            {detail.derivation.trim()}
-          </motion.pre>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="relative min-h-screen font-bengali bg-gray-800 text-white">
       {isDemo && <NoInternetWarning />}
-      <div className="fixed top-0 left-0 p-4 z-20">
-        <button onClick={() => navigate(backRoute)} className="text-2xl">
-          ←
-        </button>
-      </div>
-      <div className="pt-20 text-center">
-        <h1 className="text-2xl font-bold">{chapterName} Formulas</h1>
-      </div>
-      <div ref={containerRef} className="px-4 pt-4 pb-10 overflow-y-auto">
-        <div className="flex flex-wrap gap-3 justify-center">
-          {FORMULAS.map((f, i) => (
-            <motion.button
-              key={f.id}
-              className="px-4 py-3 bg-gray-800 text-white shadow-md rounded-xl border border-gray-600"
-              style={{ whiteSpace: "nowrap" }}
-              onClick={() => setSelectedFormulaId(f.id)}
-              whileTap={{ scale: 0.97 }}
-              whileHover={{ scale: 1.02 }}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.02, duration: 0.2 }}
-              dangerouslySetInnerHTML={{ __html: renderLatex(f.formula) }}
-            />
-          ))}
+
+      {/* ✅ TopBar is now outside of animation and always visible */}
+      {!selectedFormulaId && (
+        <div className="fixed top-0 left-0 right-0 z-20 bg-transparent">
+          <TopBar />
         </div>
-      </div>
+      )}
+
+      <AnimatePresence mode="wait">
+        {selectedFormulaId ? (
+          (() => {
+            const detail = FORMULAS.find(f => f.id === selectedFormulaId)!;
+            return (
+              <motion.div
+                key="detail"
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 40 }}
+                transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                className="absolute inset-0 z-30 bg-gray-800"
+              >
+                <div className="fixed top-0 left-0 z-40 p-4">
+                  <button
+                    onClick={() => setSelectedFormulaId(null)}
+                    className="text-white text-xl bg-gray-700 px-3 py-1 rounded hover:bg-gray-600"
+                  >
+                    ←
+                  </button>
+                </div>
+                <div className="p-6 pt-20">
+                  <motion.h1 className="text-2xl font-bold mb-4">{detail.description}</motion.h1>
+                  <motion.div
+                    className="text-xl font-mono mb-4"
+                    dangerouslySetInnerHTML={{ __html: renderLatex(detail.formula) }}
+                  />
+                  <motion.pre className="bg-gray-900 p-4 rounded-lg overflow-x-auto text-sm whitespace-pre-wrap">
+                    {detail.derivation.trim()}
+                  </motion.pre>
+                </div>
+              </motion.div>
+            );
+          })()
+        ) : (
+          <motion.div
+            key="list"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
+          >
+            <div className="pt-20 text-center">
+              <h1 className="text-2xl font-bold">{chapterName} Formulas</h1>
+            </div>
+            <div ref={containerRef} className="px-4 pt-4 pb-10 overflow-y-auto">
+              <div className="space-y-3 px-2 max-w-md mx-auto">
+                {FORMULAS.map((f, i) => (
+                  <motion.button
+                    key={f.id}
+                    onClick={() => setSelectedFormulaId(f.id)}
+                    className="w-full text-left bg-gray-700 rounded-lg border border-gray-600 px-4 py-4 shadow-md hover:bg-gray-600 transition-all duration-150"
+                    whileTap={{ scale: 0.97 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      delay: 0.1 + i * 0.03,
+                      duration: 0.2,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
+                  >
+                    <div
+                      className="text-white text-base font-mono leading-snug whitespace-pre-wrap break-words"
+                      dangerouslySetInnerHTML={{ __html: renderLatex(f.formula) }}
+                    />
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
