@@ -18,13 +18,13 @@ interface Formula {
 }
 
 const FORMULAS: Formula[] = [
-  { id: "v_u_at", formula: "v = u + at", description: "Final velocity under constant acceleration.", derivation: "Holy Moly" },
+  { id: "v_u_at", formula: "v = u + at", description: "Final velocity under constant acceleration.", derivation: "This is a example description, This is a example formula v^2 = u^2 + 2as" },
   { id: "s_ut_12at2", formula: "s = ut + \\tfrac{1}{2}at^2", description: "Displacement with time.", derivation: "..." },
   { id: "v2_u2_2as", formula: "v^2 = u^2 + 2as", description: "Velocity-displacement relation.", derivation: "..." },
   { id: "s_avg_t", formula: "s = \\tfrac{u + v}{2}t", description: "Distance using avg. velocity.", derivation: "..." },
   { id: "f_ma", formula: "F = ma", description: "Newton's second law.", derivation: "..." },
   { id: "p_mv", formula: "p = mv", description: "Linear momentum.", derivation: "..." },
-  { id: "e_12mv2", formula: "E_k = \\tfrac{1}{2}mv^2", description: "Kinetic energy.", derivation: "Wow Nice Looks" },
+  { id: "e_12mv2", formula: "E_k = \\tfrac{1}{2}mv^2", description: "Kinetic energy.", derivation: "..." },
 ];
 
 const chapterName = "Kinematics";
