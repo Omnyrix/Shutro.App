@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import TopBar from "../../../components/topbar-phy-1st";
+import TopBar from "../../../components/topbar";
 import NoInternetWarning from "../../../components/noInternetWarning";
 import { motion, AnimatePresence } from "framer-motion";
 import { App } from "@capacitor/app";
