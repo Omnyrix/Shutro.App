@@ -71,7 +71,7 @@ const GRAY_900_ROUTES = [
   "/chemistry/1st-paper",
   "/chemistry/1st-paper/ch-1",
   "/chemistry/1st-paper/ch-2",
-  "/chemistry/1st-paper/ch-3",  
+  "/chemistry/1st-paper/ch-3",
   "/chemistry/1st-paper/ch-4",
   "/chemistry/1st-paper/ch-5",
   "/chemistry/2nd-paper",
@@ -106,6 +106,12 @@ const GRAY_900_ROUTES = [
   "/biology"
 ];
 
+// List of hash routes to exclude from Android back-button handling
+const EXCLUDED_BACK_BUTTON_ROUTES: string[] = [
+  "#/physics/1st-paper/ch-1",
+  "/physics/1st-paper/ch-1"
+];
+
 // MainApp Component
 const MainApp = () => {
   const navigate = useNavigate();
@@ -137,11 +143,15 @@ const MainApp = () => {
       root.style.background = "#1f2937";
     }
 
-    // Android back button: exit on Home, otherwise go back
+    // Android back button: exit on Home, otherwise go back (unless excluded)
     const backButtonListener = CapacitorApp.addListener(
       "backButton",
       () => {
         const hash = window.location.hash;
+        if (EXCLUDED_BACK_BUTTON_ROUTES.includes(hash)) {
+          // ignore back button for these hash routes
+          return;
+        }
         if (hash === "#/" || hash === "#/home") {
           navigate("/home");
         } else {

@@ -29,7 +29,6 @@ export default function Loading() {
     })();
 
     return () => {
-      // ...existing code...
     };
   }, [navigate]);
 
