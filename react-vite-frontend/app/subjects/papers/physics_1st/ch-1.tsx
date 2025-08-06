@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { Capacitor } from "@capacitor/core"
 import TopBar from "../../../components/topbar"
 import NoInternetWarning from "../../../components/noInternetWarning"
 import { motion, AnimatePresence } from "framer-motion"
@@ -104,12 +105,12 @@ export default function Phy1stCh1FormulasPage() {
   const [selectedFormulaId, setSelectedFormulaId] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Remove any existing back-button listeners on mount
+  // Clear any old back-button listeners
   useEffect(() => {
     CapacitorApp.removeAllListeners()
   }, [])
 
-  // Set native status bar to gray-900 and disable webview overlay
+  // Configure native status bar
   useEffect(() => {
     StatusBar.setOverlaysWebView({ overlay: false })
     StatusBar.setBackgroundColor({ color: "#111827" })
@@ -144,14 +145,10 @@ export default function Phy1stCh1FormulasPage() {
     }
   }, [])
 
-  const openDetail = (id: string) => {
-    setSelectedFormulaId(id)
-  }
-  const closeDetail = () => {
-    setSelectedFormulaId(null)
-  }
+  const openDetail = (id: string) => setSelectedFormulaId(id)
+  const closeDetail = () => setSelectedFormulaId(null)
 
-  // 🎯 Full back-button logic: if detail open, close it; otherwise navigate back
+  // Back-button logic: close detail if open, else navigate back
   useEffect(() => {
     const backSub = CapacitorApp.addListener("backButton", () => {
       if (selectedFormulaId) {
@@ -169,21 +166,32 @@ export default function Phy1stCh1FormulasPage() {
     katex.renderToString(tex, { throwOnError: false, output: "html" })
 
   return (
-    <div className="relative min-h-screen font-bengali bg-gray-800 text-white">
+    <div
+      className="relative min-h-screen font-bengali bg-gray-800 text-white"
+      style={{
+        paddingTop: "env(safe-area-inset-top)",
+        paddingBottom: "env(safe-area-inset-bottom)",
+        paddingLeft: "env(safe-area-inset-left)",
+        paddingRight: "env(safe-area-inset-right)",
+        boxSizing: "border-box",
+      }}
+    >
       {isDemo && <NoInternetWarning />}
 
-      {/* TopBar wrapped with safe-area and gray-900 background */}
+      {/* TopBar now sits just under the notch/status bar */}
       <div
-        className="fixed inset-x-0 top-0 z-20 bg-gray-900"
-        style={{ paddingTop: "env(safe-area-inset-top)" }}
+        className="fixed inset-x-0 z-20 bg-gray-900"
+        style={{ top: "env(safe-area-inset-top)" }}
       >
         <TopBar />
       </div>
 
-      <div className="pt-[calc(env(safe-area-inset-top)+5rem)] pb-2 text-center z-10">
+      {/* Page title */}
+      <div className="pt-[5rem] pb-2 text-center z-10">
         <h1 className="text-2xl font-bold">{chapterName} Formulas</h1>
       </div>
 
+      {/* Formula list */}
       <div
         ref={containerRef}
         className="px-4 sm:px-6 md:px-8 pt-4 pb-10 overflow-y-auto z-10"
@@ -212,19 +220,21 @@ export default function Phy1stCh1FormulasPage() {
         </div>
       </div>
 
+      {/* Detail overlay */}
       <AnimatePresence>
-        {selectedFormulaId && (() => {
-          const formula = FORMULAS.find(f => f.id === selectedFormulaId)!
-          return (
-            <FormulaInfo
-              key="detail"
-              formula={formula.formula}
-              description={formula.description}
-              derivation={formula.derivation}
-              onClose={closeDetail}
-            />
-          )
-        })()}
+        {selectedFormulaId &&
+          (() => {
+            const formula = FORMULAS.find(f => f.id === selectedFormulaId)!
+            return (
+              <FormulaInfo
+                key="detail"
+                formula={formula.formula}
+                description={formula.description}
+                derivation={formula.derivation}
+                onClose={closeDetail}
+              />
+            )
+          })()}
       </AnimatePresence>
     </div>
   )
