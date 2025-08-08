@@ -44,6 +44,7 @@ import Loading from "./app/components/loading_screen";
 
 // List of routes that should use gray-900
 const GRAY_900_ROUTES = [
+  "/profile",
   "/physics",
   "/physics/1st-paper",
   "/physics/1st-paper/ch-1",

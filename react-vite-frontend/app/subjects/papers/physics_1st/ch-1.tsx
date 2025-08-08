@@ -11,7 +11,7 @@ import FormulaInfo from "../../../components/formula_info"
 import katex from "katex"
 import "katex/dist/katex.min.css"
 import { App as CapacitorApp } from "@capacitor/app"
-import { StatusBar } from "@capacitor/status-bar"
+import { StatusBar, Style } from "@capacitor/status-bar"  // added Style import
 
 interface Formula {
   id: string
@@ -110,10 +110,12 @@ export default function Phy1stCh1FormulasPage() {
     CapacitorApp.removeAllListeners()
   }, [])
 
-  // Configure native status bar
+  // Configure native status bar (match MainApp logic) :contentReference[oaicite:0]{index=0}
   useEffect(() => {
     StatusBar.setOverlaysWebView({ overlay: false })
+    StatusBar.show()
     StatusBar.setBackgroundColor({ color: "#111827" })
+    StatusBar.setStyle({ style: Style.Dark })
     const meta = document.querySelector('meta[name="theme-color"]')
     meta?.setAttribute("content", "#111827")
   }, [])
@@ -166,76 +168,84 @@ export default function Phy1stCh1FormulasPage() {
     katex.renderToString(tex, { throwOnError: false, output: "html" })
 
   return (
-    <div
-      className="relative min-h-screen font-bengali bg-gray-800 text-white"
-      style={{
-        paddingTop: "env(safe-area-inset-top)",
-        paddingBottom: "env(safe-area-inset-bottom)",
-        paddingLeft: "env(safe-area-inset-left)",
-        paddingRight: "env(safe-area-inset-right)",
-        boxSizing: "border-box",
-      }}
-    >
-      {isDemo && <NoInternetWarning />}
-
-      {/* TopBar now sits just under the notch/status bar */}
+    <>
+      {/* Safe-area top filler (only the notch part) */}
       <div
-        className="fixed inset-x-0 z-20 bg-gray-900"
-        style={{ top: "env(safe-area-inset-top)" }}
-      >
-        <TopBar />
-      </div>
+        className="fixed inset-x-0 top-0 bg-gray-900"
+        style={{ height: "env(safe-area-inset-top)" }}
+      />
 
-      {/* Page title */}
-      <div className="pt-[5rem] pb-2 text-center z-10">
-        <h1 className="text-2xl font-bold">{chapterName} Formulas</h1>
-      </div>
-
-      {/* Formula list */}
       <div
-        ref={containerRef}
-        className="px-4 sm:px-6 md:px-8 pt-4 pb-10 overflow-y-auto z-10"
+        className="relative min-h-screen font-bengali bg-gray-800 text-white"
+        style={{
+          paddingTop: "env(safe-area-inset-top)",
+          paddingBottom: "env(safe-area-inset-bottom)",
+          paddingLeft: "env(safe-area-inset-left)",
+          paddingRight: "env(safe-area-inset-right)",
+          boxSizing: "border-box",
+        }}
       >
-        <div className="space-y-3 max-w-full sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto">
-          {FORMULAS.map((f, i) => (
-            <motion.button
-              key={f.id}
-              onClick={() => openDetail(f.id)}
-              className="w-full text-left bg-gray-700 rounded-lg border border-gray-600 px-4 py-4 shadow-md hover:bg-gray-600 transition-all duration-100"
-              whileTap={{ scale: 0.97 }}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                delay: 0.05 + i * 0.03,
-                duration: 0.1,
-                ease: [0.68, -0.55, 0.27, 1.55],
-              }}
-            >
-              <div
-                className="text-white text-base sm:text-lg font-mono break-words"
-                dangerouslySetInnerHTML={{ __html: renderLatex(f.formula) }}
-              />
-            </motion.button>
-          ))}
+        {isDemo && <NoInternetWarning />}
+
+        {/* TopBar now sits just under the notch/status bar */}
+        <div
+          className="fixed inset-x-0 z-20 bg-gray-900"
+          style={{ top: "env(safe-area-inset-top)" }}
+        >
+          <TopBar />
         </div>
-      </div>
 
-      {/* Detail overlay */}
-      <AnimatePresence>
-        {selectedFormulaId &&
-          (() => {
-            const formula = FORMULAS.find(f => f.id === selectedFormulaId)!
-            return (
-              <FormulaInfo
-                key="detail"
-                formula={formula.formula}
-                description={formula.description}
-                derivation={formula.derivation}
-                onClose={closeDetail}
-              />
-            )
-          })()}
-      </AnimatePresence>
-    </div>
+        {/* Page title */}
+        <div className="pt-[5rem] pb-2 text-center z-10">
+          <h1 className="text-2xl font-bold">{chapterName} Formulas</h1>
+        </div>
+
+        {/* Formula list */}
+        <div
+          ref={containerRef}
+          className="px-4 sm:px-6 md:px-8 pt-4 pb-10 overflow-y-auto z-10"
+        >
+          <div className="space-y-3 max-w-full sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto">
+            {FORMULAS.map((f, i) => (
+              <motion.button
+                key={f.id}
+                onClick={() => openDetail(f.id)}
+                className="w-full text-left bg-gray-700 rounded-lg border border-gray-600 px-4 py-4 shadow-md hover:bg-gray-600 transition-all duration-100"
+                whileTap={{ scale: 0.97 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  delay: 0.05 + i * 0.03,
+                  duration: 0.1,
+                  ease: [0.68, -0.55, 0.27, 1.55],
+                }}
+              >
+                <div
+                  className="text-white text-base sm:text-lg font-mono break-words"
+                  dangerouslySetInnerHTML={{ __html: renderLatex(f.formula) }}
+                />
+              </motion.button>
+            ))}
+          </div>
+        </div>
+
+        {/* Detail overlay */}
+        <AnimatePresence>
+          {selectedFormulaId &&
+            (() => {
+              const formula = FORMULAS.find(f => f.id === selectedFormulaId)!
+              return (
+                <FormulaInfo
+                  key="detail"
+                  formula={formula.formula}
+                  description={formula.description}
+                  derivation={formula.derivation}
+                  onClose={closeDetail}
+                />
+              )
+            })()}
+        </AnimatePresence>
+      </div>
+    </>
   )
 }
